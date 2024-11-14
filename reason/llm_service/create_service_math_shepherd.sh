@@ -4,13 +4,14 @@ HOST_ADDR=0.0.0.0
 CONTROLER_PORT=28777
 WORKER_BASE_PORT=30010
 
-echo PYTHON_EXECUTABLE=$(which python3)
-PYTHON_EXECUTABLE=$(which python3)
+echo PYTHON_EXECUTABLE=$(which python)
+PYTHON_EXECUTABLE=$(which python)
 
-MODEL_BASE=/hpc2ssd/JH_DATA/spooler/qxiao183/workspace/hf_models/
-CUDA_DEVICE_BASE=0
-POLICY_MODEL_NAME=peiyi9979/mistral-7b-sft
-VALUE_MODEL_NAME=peiyi9979/math-shepherd-mistral-7b-prm
+MODEL_BASE=/data/cuiluyi/openr/models/peiyi9979
+
+CUDA_DEVICE_BASE=3
+POLICY_MODEL_NAME=mistral-7b-sft
+VALUE_MODEL_NAME=math-shepherd-mistral-7b-prm
 MODEL_PATH=$MODEL_BASE/$POLICY_MODEL_NAME
 VALUE_MODEL_PATH=$MODEL_BASE/$VALUE_MODEL_NAME
 
@@ -21,8 +22,8 @@ tmux new-session -s FastChat1 -n controller -d
 tmux send-keys "export LOGDIR=${LOGDIR}" Enter
 tmux send-keys "$PYTHON_EXECUTABLE -m fastchat.serve.controller --port ${CONTROLER_PORT} --host $HOST_ADDR" Enter
 
-NUM_LM_WORKER=2
-NUM_RM_WORKER=2
+NUM_LM_WORKER=1
+NUM_RM_WORKER=1
 
 echo "Wait 10 seconds ..."
 sleep 5

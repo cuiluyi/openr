@@ -266,6 +266,7 @@ if __name__ == "__main__":
         args.tensor_parallel_size = args.num_gpus
 
     engine_args = AsyncEngineArgs.from_cli_args(args)
+    print(engine_args)
     engine = AsyncLLMEngine.from_engine_args(engine_args)
     worker = VLLMWorker(
         args.controller_address,
