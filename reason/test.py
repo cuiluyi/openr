@@ -10,7 +10,6 @@ x = _value_inference_fastchat(
 print(x)
 
 
-
 sample = """This is is <|im_start|>assistant\n### Counting Squares of Each Size
 
 1. **1x1 Squares:**
