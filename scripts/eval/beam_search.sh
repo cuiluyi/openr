@@ -12,5 +12,4 @@ python reason/evaluation/evaluate.py \
     --num_worker 32 \
     --controller_addr http://0.0.0.0:28777
 
-# math-shepherd-mistral-7b-prm
-
+# Tips: Make sure the input (--LM, --RM) in the script aligns with variable ($POLICY_MODEL_NAME, $VALUE_MODEL_NAME) in the pending worker!
