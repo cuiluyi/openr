@@ -7,7 +7,8 @@ WORKER_BASE_PORT=30010
 echo PYTHON_EXECUTABLE=$(which python)
 PYTHON_EXECUTABLE=$(which python)
 
-MODEL_BASE=/data/cuiluyi/openr/models/peiyi9979
+MODEL_BASE=/data/cuiluyi/resources/models/peiyi9979
+
 
 CUDA_DEVICE_BASE=3
 POLICY_MODEL_NAME=mistral-7b-sft
@@ -18,7 +19,7 @@ VALUE_MODEL_PATH=$MODEL_BASE/$VALUE_MODEL_NAME
 LOGDIR=logs_fastchat
 
 tmux start-server
-tmux new-session -s FastChat1 -n controller -d
+tmux new-session -s FastChat -n controller -d
 tmux send-keys "export LOGDIR=${LOGDIR}" Enter
 tmux send-keys "$PYTHON_EXECUTABLE -m fastchat.serve.controller --port ${CONTROLER_PORT} --host $HOST_ADDR" Enter
 

@@ -7,7 +7,7 @@ python reason/evaluation/evaluate.py \
     --num_sequence 1 \
     --tree_max_width 4 \
     --tree_max_depth 50 \
-    --save_dir debug \
+    --save_dir results \
     --method beam_search \
     --num_worker 32 \
     --controller_addr http://0.0.0.0:28777
