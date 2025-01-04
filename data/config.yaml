@@ -1,9 +1,9 @@
 input:
-  json_file_path: 'extracted_problems_and_answers.json'
+  json_file_path: 'data/extracted_problems_and_answers.json'
 
 output:
   file_prefix: 'math'
-  log_file_path: 'processing_log.log'
+  log_file_path: 'data/processing_log.log'
 
 processing:
   initial_rollouts: 20
@@ -13,7 +13,7 @@ processing:
 model:
   # supported model_types: "hf", "openai", "anthropic"
   model_type: "hf"
-  model_name: "Qwen/Qwen2.5-Math-7B-Instruct"
+  model_name: "/data/cuiluyi/resources/models/Qwen/Qwen2.5-Math-7B-Instruct"
   model_args:
-    max_tokens: 200
+    max_tokens: 2048
     temperature_range: [0.7, 1.0]

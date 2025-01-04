@@ -62,7 +62,7 @@ if __name__ == "__main__":
     # g = "\\left( 3, \\frac{\\pi}{2} \\right)"
     # print(judge_correct(None, g, extract_answer(a)))
     test_ds = task.test_ds
-    with jsonlines.open('/hpc2ssd/JH_DATA/spooler/qxiao183/workspace/ziyu/open_reasoner/Qwen2.5-Math/evaluation/outputs/math_eval/math/test500_qwen25-math-cot_-1_seed0_t0.0_s0_e-1.jsonl', 'r') as f:
+    with jsonlines.open('envs/MATH/dataset/test500.jsonl', 'r') as f:
         res = []
         for outputs in tqdm(f):
             

@@ -1,0 +1,54 @@
+2024-12-18 18:54:22 - INFO - Started processing the JSON file.
+2024-12-18 18:54:30 - INFO - Processed Problem 1: Allie and Betty play a game where they take turns rolling a standard die. If a player rolls $n$, she is awarded $f(n)$ points, where  \[f(n) = \left\{
+\begin{array}{cl} 6 & \text{ if }n\text{ is a multiple of 2 and 3}, \\
+2 & \text{ if }n\text{ is only a multiple of 2}, \\
+0 & \text{ if }n\text{ is not a multiple of 2}.
+\end{array}
+\right.\]Allie rolls the die four times and gets a 5, 4, 1, and 2. Betty rolls and gets 6, 3, 3, and 2. What is the product of Allie's total points and Betty's total points?
+2024-12-18 18:54:31 - INFO - Final Answer: 32
+2024-12-18 18:59:30 - INFO - Finished processing the JSON file.
+2024-12-18 22:42:38 - INFO - Started processing the JSON file.
+2024-12-18 22:42:38 - INFO - Processed Problem 1: Allie and Betty play a game where they take turns rolling a standard die. If a player rolls $n$, she is awarded $f(n)$ points, where  \[f(n) = \left\{
+\begin{array}{cl} 6 & \text{ if }n\text{ is a multiple of 2 and 3}, \\
+2 & \text{ if }n\text{ is only a multiple of 2}, \\
+0 & \text{ if }n\text{ is not a multiple of 2}.
+\end{array}
+\right.\]Allie rolls the die four times and gets a 5, 4, 1, and 2. Betty rolls and gets 6, 3, 3, and 2. What is the product of Allie's total points and Betty's total points?
+2024-12-18 22:42:38 - INFO - Final Answer: 32
+2024-12-18 22:49:07 - INFO - Started processing the JSON file.
+2024-12-18 22:49:07 - INFO - Processed Problem 1: Allie and Betty play a game where they take turns rolling a standard die. If a player rolls $n$, she is awarded $f(n)$ points, where  \[f(n) = \left\{
+\begin{array}{cl} 6 & \text{ if }n\text{ is a multiple of 2 and 3}, \\
+2 & \text{ if }n\text{ is only a multiple of 2}, \\
+0 & \text{ if }n\text{ is not a multiple of 2}.
+\end{array}
+\right.\]Allie rolls the die four times and gets a 5, 4, 1, and 2. Betty rolls and gets 6, 3, 3, and 2. What is the product of Allie's total points and Betty's total points?
+2024-12-18 22:49:07 - INFO - Final Answer: 32
+2024-12-19 00:00:51 - INFO - Started processing the JSON file.
+2024-12-19 00:00:51 - INFO - Processed Problem 1: Allie and Betty play a game where they take turns rolling a standard die. If a player rolls $n$, she is awarded $f(n)$ points, where  \[f(n) = \left\{
+\begin{array}{cl} 6 & \text{ if }n\text{ is a multiple of 2 and 3}, \\
+2 & \text{ if }n\text{ is only a multiple of 2}, \\
+0 & \text{ if }n\text{ is not a multiple of 2}.
+\end{array}
+\right.\]Allie rolls the die four times and gets a 5, 4, 1, and 2. Betty rolls and gets 6, 3, 3, and 2. What is the product of Allie's total points and Betty's total points?
+2024-12-19 00:00:51 - INFO - Final Answer: 32
+2024-12-20 22:39:05 - INFO - Started processing the JSON file.
+2024-12-20 22:39:06 - INFO - Processed Problem 1: A board game spinner is divided into three parts labeled $A$, $B$  and $C$. The probability of the spinner landing on $A$ is $\frac{1}{3}$ and the probability of the spinner landing on $B$ is $\frac{5}{12}$.  What is the probability of the spinner landing on $C$? Express your answer as a common fraction.
+2024-12-20 22:39:06 - INFO - Final Answer: \frac{1}{4}
+2024-12-20 22:54:57 - INFO - Started processing the JSON file.
+2024-12-20 22:54:57 - INFO - Processed Problem 1: A board game spinner is divided into three parts labeled $A$, $B$  and $C$. The probability of the spinner landing on $A$ is $\frac{1}{3}$ and the probability of the spinner landing on $B$ is $\frac{5}{12}$.  What is the probability of the spinner landing on $C$? Express your answer as a common fraction.
+2024-12-20 22:54:57 - INFO - Final Answer: \frac{1}{4}
+2024-12-20 23:02:13 - INFO - Processed Problem 2: My school's math club has 6 boys and 8 girls.  I need to select a team to send to the state math competition.  We want 6 people on the team.  In how many ways can I select the team without restrictions?
+2024-12-20 23:02:14 - INFO - Final Answer: 3003
+2024-12-21 00:04:40 - INFO - Started processing the JSON file.
+2024-12-21 00:04:40 - INFO - Processed Problem 1: A board game spinner is divided into three parts labeled $A$, $B$  and $C$. The probability of the spinner landing on $A$ is $\frac{1}{3}$ and the probability of the spinner landing on $B$ is $\frac{5}{12}$.  What is the probability of the spinner landing on $C$? Express your answer as a common fraction.
+2024-12-21 00:04:40 - INFO - Final Answer: \frac{1}{4}
+2024-12-21 00:09:15 - INFO - Processed Problem 2: My school's math club has 6 boys and 8 girls.  I need to select a team to send to the state math competition.  We want 6 people on the team.  In how many ways can I select the team without restrictions?
+2024-12-21 00:09:15 - INFO - Final Answer: 3003
+2024-12-21 17:53:22 - INFO - Processed Problem 3: How many 4-letter words with at least one consonant can be constructed from the letters $A$, $B$, $C$, $D$, and $E$?  (Note that $B$, $C$, and $D$ are consonants, any word is valid, not just English language words, and letters may be used more than once.)
+2024-12-21 17:53:22 - INFO - Final Answer: 609
+2024-12-21 17:56:43 - INFO - Processed Problem 4: Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.
+2024-12-21 17:56:43 - INFO - Final Answer: \frac{11}{36}
+2024-12-22 13:33:23 - INFO - Processed Problem 5: Let $p$ be the probability that, in the process of repeatedly flipping a fair coin, one will encounter a run of $5$ heads before one encounters a run of $2$ tails. Given that $p$ can be written in the form $m/n$ where $m$ and $n$ are relatively prime positive integers, find $m+n$.
+
+2024-12-22 13:33:23 - INFO - Final Answer: 37
+2024-12-23 10:30:25 - INFO - Finished processing the JSON file.

@@ -6,6 +6,7 @@ from torch.utils.data import Dataset
 def get_train_test_dataset(*args, **kwargs):
     env_dir = Path(__file__).parent.parent
     test_ds = JsonlMathDataset(env_dir / "MATH/dataset/test500.jsonl")
+    # test_ds = JsonlMathDataset(env_dir / "MATH/dataset/test_demo.jsonl")
     train_ds = JsonlMathDataset(env_dir / "MATH/dataset/train.jsonl")
     return train_ds, test_ds
 
@@ -24,3 +25,7 @@ class JsonlMathDataset(Dataset):
     def __getitem__(self, index):
         x = self.data[index]
         return {"question": x["problem"], "answer": x["solution"]}
+
+if __name__ == '__main__':
+    env_dir = Path(__file__).parent.parent
+    print(env_dir / "MATH/dataset/test500.jsonl")

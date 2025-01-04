@@ -60,7 +60,7 @@ def setup_logging(log_file):
 
 def main():
     # Load configuration
-    config = load_config('config.yaml')
+    config = load_config('data/config.yaml')
     
     # Get parameters from config
     json_file_path = config['input']['json_file_path']
@@ -102,7 +102,7 @@ def main():
         # Check if further processing is needed
         if 0 < sum(correctness_flags) < initial_rollouts:
             print("Processing annotations ...\n")
-            filename = f"{file_prefix}_{i+1}_nodes_data.json"
+            filename = f"data/{file_prefix}_{i+1}_nodes_data.json"
             process_annotations(problem, nodes, lm_model, filename, max_iterations)
         
     # Log completion

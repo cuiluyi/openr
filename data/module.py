@@ -24,12 +24,26 @@ class Node:
         self.visits += 1
 
 # Evaluation
+# def check_correctness(expected_answer, generated_response):
+    # sentences = re.split(
+    #     r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', generated_response.strip()
+    # )
+    # last_sentence = sentences[-1] if sentences else ''
+    # return expected_answer.strip() in last_sentence.strip()
+
 def check_correctness(expected_answer, generated_response):
-    sentences = re.split(
-        r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', generated_response.strip()
-    )
-    last_sentence = sentences[-1] if sentences else ''
-    return expected_answer.strip() in last_sentence.strip()
+    try:
+        match = re.search(
+            r'(?<=\\boxed\{)\d+(?=\})', generated_response.strip()
+        )
+        return expected_answer.strip() in match.group()
+    except Exception:
+        sentences = re.split(
+            r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', generated_response.strip()
+        )
+        last_sentence = sentences[-1] if sentences else ''
+        return expected_answer.strip() in last_sentence.strip()
+
 
 def perform_rollouts(node, model: LM, num_rollouts=None):
     correctness_flags = []

@@ -28,7 +28,7 @@ bad_token = '-'
 step_tag = '\n\n\n\n\n' #ки
 step_tag2 = '\n\n'
 
-model_path = "../../models/Qwen/Qwen2.5-Math-7B-Instruct/"
+model_path = "/data/cuiluyi/resources/models/Qwen/Qwen2.5-Math-7B-Instruct/"
 
 # tokenizer = AutoTokenizer.from_pretrained(model_path)
 

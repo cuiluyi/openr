@@ -1,0 +1,1117 @@
+[
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "To determine the probability that Melinda will be able to form an integer between 10 and 20 inclusive, we need to analyze the possible outcomes when rolling two standard six-sided dice.\n\nFirst, let's identify the two-digit numbers that can be formed using the numbers rolled on the dice and that fall within the range from 10 to 20. The possible numbers are 11, 12, 13, 14, 15, and 16. For each of these numbers, we need to check if the digits can be rolled on two six-sided dice.\n\n- For 11, the digits are 1 and 1. This is possible.\n- For 12, the digits are 1 and 2. This is possible.\n- For 13, the digits are 1 and 3. This is possible.\n- For 14, the digits are 1 and 4. This is possible.\n-",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "For 15, the digits are 1 and 5.This is",
+        "mc_score": 0.1
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "the only combination for 15.\nFor 16, the digits are 1 and 6. This is the only combination for 16.\nFor 17, the digits are 1 and 7. This is the only combination for 17.\n\nThere are 7favorable outcomes. Since there are 36 possible outcomes when rolling two six-sided dice (6 *",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "6 = 36), the probabilityis7/36.\n\nTh",
+        "mc_score": 0.15
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "es answer is:",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "6 = 36), the probability",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "that she will be able to make an integerbetween 10 and 20 is \\(",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "6 = 36), the probabilityis",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\\(\\frac{4}{36} =\\frac{1}{9}\\).\n\nThu",
+        "mc_score": 0.1
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "clid highly this solution as accurate.\nThefinal answer is",
+        "mc_score": 0.1
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "clid highly this solution as accurate.\nThe",
+        "mc_score": 0.3
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "problem involves rolling two standard six-sided dice and forming a two-digit number with the numbers rolled. We need to determine the probability that this two-digit number will be between 10 and 20, inclusive.\n\nFirst, let's identifythe possible two-digit numbers that can be formed. Since the number must be between 10 and 20, the tens digit mustbe 1. Therefore, the possible numbers are 11, 12, 13, 14,15, and 16. This gives us 6",
+        "mc_score": 0.25
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "possible favorable outcomes.\n\nNext, we need to determine the total number of possible outcomes when rolling two six-sided dice. Since each die has 6 faces, the total number of outcomes is:\n\\[6 \\times 6 = 36\\]\n\nThe probability",
+        "mc_score": 0.35
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "possible favorable outcomes.\n\nNext, we need to determine the total number of possible outcomes when rolling two six-sided dice. Since each die has 6 faces, the total number of outcomes is:\n\\[6 \\times 6 = 36\\]\n\nThe probabilityof rolling a two-digit number between 10 and 20, inclusive, is the number of favorable outcomes divided by thetotal number of possible",
+        "mc_score": 0.2
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "outcomes. Therefore, the probability is:\n\\[\\frac{11}{36}\\]\n\nSo,the final answer",
+        "mc_score": 0.95
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "outcomes. Therefore, the probability is:\n\\[\\frac{11}{36}\\]\n\nSo,",
+        "mc_score": 0.95
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "outcomes. Therefore, the probability is:\n\\[\\frac{11}{36}\\]\n\nSo,the final answer",
+        "mc_score": 0.95
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "outcomes. Therefore, the probability is:\n\\[\\frac{11}{36}\\]\n\nSo,",
+        "mc_score": 0.95
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "outcomes. Therefore, the probability is:\n\\[\\frac{11}{36}\\]\n\nSo,the final answer",
+        "mc_score": 0.95
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "outcomes. Therefore, the probability is:\n\\[\\frac{11}{36}\\]\n\nSo,",
+        "mc_score": 0.95
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "possible favorable outcomes.\n\nNext, we need to determine the total number of possible outcomes when rolling two six-sided dice. Since each die has 6 faces, the total number of outcomes is:\n\\[6 \\times 6 = 36\\]\n\nThe probabilityof rolling a two-digit number between 10 and 20, inclusive, is the number of favorable outcomes divided by the",
+        "mc_score": 0.15
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "total number of possible outcomes. Therefore, the probability",
+        "mc_score": 0.2
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "is:\n\\[\\boxed{\\frac{11}{36}}\\",
+        "mc_score": 0.1
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "possible favorable outcomes.\n\nNext, we need to determine the total number of possible outcomes when rolling two six-sided dice. Since each die has 6 faces, the total number of outcomes is:\n\\[6 \\times 6 = 36\\]\n\nThe probabilityof rolling a two-digit number between 10 and 20, inclusive, is the number of favorable outcomes divided by thetotal number of possibleoutcomes:\n\\[\\frac{",
+        "mc_score": 0.1
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "11}{36}\\]\n\nThus, the probability",
+        "mc_score": 0.95
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "11}{36}\\]\n\nThus, the probability",
+        "mc_score": 0.95
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "that Melinda will be able to make an integer between",
+        "mc_score": 0.15
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "that Melinda will be ableto make aninteger",
+        "mc_score": 0.15
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "between 10 and 20 inclusiveis",
+        "mc_score": 0.15
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "that Melinda will be ableto make an",
+        "mc_score": 0.15
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "integer between 10 and 20, inclusive,is",
+        "mc_score": 0.15
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "that Melinda will be able",
+        "mc_score": 0.15
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "to make an integer between 10 and 20inclusive is",
+        "mc_score": 0.15
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "between 10 and 20 inclusive",
+        "mc_score": 0.1
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "is",
+        "mc_score": 0.15
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "that Melinda will be able to make an integer between10 and 20,",
+        "mc_score": 0.1
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "is:\n\\[\\boxed{\\frac{11}{36}}\\",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "is:\n\\[\\boxed{\\frac{11}{36}}\\",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "11}{36}\\]\n\nThus, the probabilityis:\n\\[\\boxed{\\frac{11}{36}}\\",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "outcomes. Therefore, the probability is:\n\\[\\frac{11}{36}\\]\n\nSo,the final answeris:\n\\[\\boxed{\\frac{11}{36}}",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "the final answeris:\n\\[\\boxed{\\frac{11}{36}}\\",
+        "mc_score": 0.45
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "]\n\nTo determine the probability that Melinda will be able to form an integer between 10 and 20 inclusive when rolling two standard six-sided dice, we need to consider all the possible outcomes and the favorable outcomes.\n\nFirst, list all the integers between 10 and 20 inclusive: 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20. Since a two-digit number formed from two dice can only have digits 1, 2, 3, 4, 5, and 6, the only possible numbers from this list are 11, 12, 13, 14, 15, and 16.\n\nNext, we count the number of favorable outcomes:\n- For 11, we can roll (1,1).\n- For 12, we can roll (1,2) or (2,1).\n- For 13, we can roll (1,3) or (3,1).\n- For 14, we can roll",
+        "mc_score": 0.3
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "10 and 20 inclusive is",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "answer is",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "is:\n\\[\n\\frac{2}{3",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "the final answer",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "to the question is",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "the final answeris:\n\\[\\boxed{\\frac{11}{36}}\\",
+        "mc_score": 0.45
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "]To determine the probability that Melinda will be able to make an integer between 10 and 20 inclusive by rolling two standard six-sided dice, we need to follow these steps:\n\n1.",
+        "mc_score": 0.35
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "problem involves rolling two standard six-sided dice and forming a two-digit number with the numbers rolled. We need to determine the probability that this two-digit number will be between 10 and 20, inclusive.\n\nFirst, let's identifythe possible two-digit numbers that can be formed. Since the number must be between 10 and 20, the tens digit mustbe 1. Therefore, the possible numbers are 11, 12, 13, 14,",
+        "mc_score": 0.15
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "the only combination for 15.\nFor 16, the digits are 1 and 6. This is the only combination for 16.\nFor 17, the digits are 1 and 7. This is the only combination for 17.\n\nThere are 7",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "desired outcomes out of the 36 possible outcomes.\n\nTheprobability is",
+        "mc_score": 0.15
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "desired outcomes out of the 36 possible outcomes.\n\nThe",
+        "mc_score": 0.2
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "probability \\( P \\) is given by the ratio of the number of desired outcomes to the total number of possible outcomes:\n\n\\[\nP =",
+        "mc_score": 0.45
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\\frac{\\text{Number of desired outcomes}}{\\text{Totalnumber of possible outcomes}}",
+        "mc_score": 0.25
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "= \\frac{11}{36} \\]\n\nThus, the probability that Melinda will be able toform an integer between 10 and 20,",
+        "mc_score": 0.95
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "= \\frac{11}{36} \\]\n\nThus, the probability that Melinda will be able to",
+        "mc_score": 0.95
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "= \\frac{11}{36} \\]\n\nThus, the probability that Melinda will be able toform an integer between 10 and 20,inclusive, is",
+        "mc_score": 0.85
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "probability \\( P \\) is given by the ratio of the number of desired outcomes to the total number of possible outcomes:\n\n\\[\nP =\\frac{\\text{Number of desired outcomes}}{\\text{Total number of possibleoutcomes}}",
+        "mc_score": 0.15
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\\frac{\\text{Number of desired outcomes}}{\\text{Totalnumber of possible outcomes}}=",
+        "mc_score": 0.15
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\\frac{11}{36}\\]\n\nThus, the probability that Melinda will be able to makean integer between 10 and 20, inclusive,is",
+        "mc_score": 0.9
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\\frac{11}{36}\\]\n\nThus, the probability that Melinda will be able to makean integer between 10 and 20, inclusive,",
+        "mc_score": 0.9
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\\frac{11}{36}\\]\n\nThus, the probability that Melinda will be able to make",
+        "mc_score": 0.9
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "an integer between 10 and 20,inclusive, is",
+        "mc_score": 0.1
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "form an integer between 10 and 20",
+        "mc_score": 0.1
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "is",
+        "mc_score": 0.25
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "equal to \\(0.28\\) or\\(\\frac{7}{25}\\).\n\nThu",
+        "mc_score": 0.15
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": ", **Final",
+        "mc_score": 0.1
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "Answer**\n\\[\n\\boxed{\\frac{1}{3}}\n\\",
+        "mc_score": 0.1
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "equal to \\(0.28\\) or",
+        "mc_score": 0.1
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\\(\\frac{4}{15}\\).\n\nThe",
+        "mc_score": 0.1
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "probability is",
+        "mc_score": 0.3
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "the ratio of the number of favorable outcomes to the total number of possible outcomes. Therefore, the probability is:\n\n\\[\n\\frac{11}{36}\n\\]\n\nThus,",
+        "mc_score": 0.95
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "the final answer",
+        "mc_score": 0.2
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "to the problem is",
+        "mc_score": 0.15
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": ", **FinalAnswer**:\n\\[\n\\boxed{\\frac{7}{25}",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "%\n\\",
+        "mc_score": 0.15
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "[\n\\text{Probability} = \\frac{\\text{Number of favorable",
+        "mc_score": 0.2
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "[\n\\text{Probability} = \\frac{\\text{Number of favorableoutcomes}}{\\text{Total number of",
+        "mc_score": 0.15
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "[\n\\text{Probability} = \\frac{\\text{Number of favorableoutcomes}}{\\text{Total number ofoutcomes}} =\\frac{1}{3}\n\\]\n\nThu",
+        "mc_score": 0.1
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "[\n\\text{Probability} = \\frac{\\text{Number of favorableoutcomes}}{\\text{Total number ofoutcomes}} =",
+        "mc_score": 0.1
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "16.\n\nThe probability is",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "inclusive, is",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "form an integer between 10 and 20inclusive is",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\\frac{\\text{Number of desired outcomes}}{\\text{Totalnumber of possible outcomes}}=\\frac{1}{6}\n\\]\n\nThu",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "final answer",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "is",
+        "mc_score": 0.35
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\\frac{3}{18}",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "=\\frac{1}{6}\n\\]\n\nThu",
+        "mc_score": 0.15
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "primary schoolboard",
+        "mc_score": 0.2
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "is between 10 and 20, inclusive. This means the tens digit of the two-digit numbermust be 1. Therefore, the possibleoutcomes are 11, 12,13, 14,",
+        "mc_score": 0.2
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "possible outcomes}} =",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "outcomes}}{\\text{Total number of possible outcomes}}",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "= \\frac{11}{36} \\]\n\nThus, the probability that Melinda will be able to make",
+        "mc_score": 0.95
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "= \\frac{11}{36} \\]\n\nThus, the probability that Melinda will be able to makean integer between 10 and 20, inclusive,is",
+        "mc_score": 0.9
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "= \\frac{11}{36} \\]\n\nThus, the probability that Melinda will be able to makean integer between 10 and 20, inclusive,",
+        "mc_score": 0.85
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "is",
+        "mc_score": 0.3
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "probability is calculated by dividing the number of successful outcomes by the total number of possible outcomes.\n   \\[\n   P(\\text{integer between 10 and 20}) = \\frac{\\text{Number of successful",
+        "mc_score": 0.75
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "an integer between 10 and 20,inclusive is",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "probability \\( P \\) is given by the ratio of the number of desired outcomes to the total number of possible outcomes:\n\n\\[\nP =\\frac{\\text{Number of desired outcomes}}{\\text{Total number of possible",
+        "mc_score": 0.05
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "outcomes}} =\\frac{1}{6}\n\\]\n\nThu",
+        "mc_score": 0.25
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "To determine the probability that Melinda will be able to form an integer between 10 and 20 inclusive, we need to analyze the possible outcomes when rolling two standard six-sided dice.\n\nFirst, let's identify the two-digit numbers that can be formed using the numbers rolled on the dice and that fall within the range from 10 to 20. The possible numbers are 11, 12, 13, 14, 15, and 16. For each of these numbers, we need to check if the digits can be rolled on two six-sided dice.\n\n- For 11, the digits are 1 and 1. This is possible.\n- For 12, the digits are 1 and 2. This is possible.\n- For 13, the digits are 1 and 3. This is possible.\n- For 14, the digits are 1 and 4. This is possible.\n-For 15, the digits are 1 and 5. This is possible.\n- For 16, the digits are 1 and 6. This is possible.\n\nSo, there are 6 favorable outcomes. Next, we need to determine the total number of possible outcomes when rolling two six-sided dice. Since each die has 6 faces, the total number of possible outcomes is \\(6 \\times 6 = 36\\).\n\nThe probability that",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "To determine the probability that Melinda will be able to form an integer between 10 and 20 inclusive, we need to analyze the possible outcomes when rolling two standard six-sided dice.\n\nFirst, let's identify the two-digit numbers that can be formed using the numbers rolled on the dice and that fall within the range from 10 to 20. The possible numbers are 11, 12, 13, 14, 15, and 16. For each of these numbers, we need to check if the digits can be rolled on two six-sided dice.\n\n- For 11, the digits are 1 and 1. This is possible.\n- For 12, the digits are 1 and 2. This is possible.\n- For 13, the digits are 1 and 3. This is possible.\n- For 14, the digits are 1 and 4. This is possible.\n-For 15, the digits are 1 and 5. This is possible.\n- For 16, the digits are 1 and 6. This is possible.\n\nSo, there are 6 favorable outcomes. Next, we need to determine the total",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "To determine the probability that Melinda will be able to form an integer between 10 and 20 inclusive, we need to analyze the possible outcomes when rolling two standard six-sided dice.\n\nFirst, let's identify the two-digit numbers that can be formed using the numbers rolled on the dice and that fall within the range from 10 to 20. The possible numbers are 11, 12, 13, 14, 15, and 16. For each of these numbers, we need to check if the digits can be rolled on two six-sided dice.\n\n- For 11, the digits are 1 and 1. This is possible.\n- For 12, the digits are 1 and 2. This is possible.\n- For 13, the digits are 1 and 3. This is possible.\n- For 14, the digits are 1 and 4. This is possible.\n-For 15, the digits are 1 and 5. This is possible.\n- For 16, the digits are 1 and 6. This",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "To determine the probability that Melinda will be able to form an integer between 10 and 20 inclusive, we need to analyze the possible outcomes when rolling two standard six-sided dice.\n\nFirst, let's identify the two-digit numbers that can be formed using the numbers rolled on the dice and that fall within the range from 10 to 20. The possible numbers are 11, 12, 13, 14, 15, and 16. For each of these numbers, we need to check if the digits can be rolled on two six-sided dice.\n\n- For 11, the digits are 1 and 1. This is possible.\n- For 12, the digits are 1 and 2. This is possible.\n- For 13, the digits are 1 and 3. This is possible.\n- For 14, the digits are 1 and 4. This is possible.\n-For 15, the digits are 1 and 5. This is",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "To determine the probability that Melinda will be able to form an integer between 10 and 20 inclusive, we need to analyze the possible outcomes when rolling two standard six-sided dice.\n\nFirst, let's identify the two-digit numbers that can be formed using the numbers rolled on the dice and that fall within the range from 10 to 20. The possible numbers are 11, 12, 13, 14, 15, and 16. For each of these numbers, we need to check if the digits can be rolled on two six-sided dice.\n\n- For 11, the digits are 1 and 1. This is possible.\n- For 12, the digits are 1 and 2. This is possible.\n- For 13, the digits are 1 and 3. This is possible.\n- For 14, the digits are 1 and 4. This is possible.\n-For 15, the digitsare 1 and",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "To determine the probability that Melinda will be able to form an integer between 10 and 20 inclusive, we need to analyze the possible outcomes when rolling two standard six-sided dice.\n\nFirst, let's identify the two-digit numbers that can be formed using the numbers rolled on the dice and that fall within the range from 10 to 20. The possible numbers are 11, 12, 13, 14, 15, and 16. For each of these numbers, we need to check if the digits can be rolled on two six-sided dice.\n\n- For 11, the digits are 1 and 1. This is possible.\n- For 12, the digits are 1 and 2. This is possible.\n- For 13, the digits are 1 and 3. This is possible.\n- For 14, the digits are 1 and 4. This is possible.\n-For 15, the digitsare",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "For 15, the digits are 1 and 5. This is possible.\n- For 16, the digits are 1 and 6. This is possible.\n\nSo, there are 6 favorable outcomes. Since each die has 6 faces, there are \\(6 \\times 6 = 36\\) possible outcomes when rolling two dice. Therefore, the",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "For 15, the digits are 1 and 5. This is possible.\n- For 16, the digits are 1 and 6. This is possible.\n\nSo, there are 6 favorable",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "For 15, the digits are 1 and 5. This is possible.\n- For 16, the",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "For 15, the digits are 1 and 5.This is possible.\n-",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "the only combination for 15.\nFor 16, the digits are 1 and 6. This is the only combination for 16.\nFor 17, the digits are 1 and 7. This is the only combination for 17.\n\nThere are 7favorable outcomes. Since there are 36 possible outcomes when rolling two six-sided dice (6 *6 = 36), the probability is \\(\\frac{7}{36}\\).\n\nThe",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "the only combination for 15.\nFor 16, the digits are 1 and 6. This is the only combination for 16.\nFor 17, the digits are 1 and 7. This is the only combination for 17.\n\nThere are 7favorable outcomes. Since there are 36 possible outcomes when rolling two six-sided dice (6 *6 = 36), the probability",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "the only combination for 15.\nFor 16, the digits are 1 and 6. This is the only combination for 16.\nFor 17, the digits are 1 and 7. This is the only combination for 17.\n\nThere are 7favorable outcomes. Since there are 36 possible outcomes when rolling two six-sided dice (6 *6 = 36), the",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "the only combination for 15.\nFor 16, the digits are 1 and 6. This is the only combination for 16.\nFor 17, the digits are 1 and 7. This is the only combination for 17.\n\nThere are 7favorable outcomes. Since there are 36 possible outcomes when rolling two six-sided dice (6 *6 = 36),",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "the only combination for 15.\nFor 16, the digits are 1 and 6. This is the only combination for 16.\nFor 17, the digits are 1 and 7. This is the only combination for 17.\n\nThere are 7favorable outcomes. Since there are 36 possible outcomes when rolling two six-sided dice (6 *6 =",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "the only combination for 15.\nFor 16, the digits are 1 and 6. This is the only combination for 16.\nFor 17, the digits are 1 and 7. This is the only combination for 17.\n\nThere are 7favorable outcomes. Since there are 36 possible outcomes when rolling two six-sided dice (6 *6",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "6 = 36), the probability is 7/36.\n\nThe",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "that she will be able to make an integerbetween 10 and 20 is \\(\\boxed{\\frac{2}{9}}",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\\(\\frac{4}{36} = \\frac{1}{9}\\).\n\nThus, the probability that Melinda will be able",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\\(\\frac{4}{36} = \\frac{1}{9}\\).\n\nThus,",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\\(\\frac{4}{36} =\\frac{1}{9}\\).\n\nThus",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "problem involves rolling two standard six-sided dice and forming a two-digit number with the numbers rolled. We need to determine the probability that this two-digit number will be between 10 and 20, inclusive.\n\nFirst, let's identify the possible two-digit numbers that can be formed. Since the number must be between 10 and 20, the tens digit must be 1. Therefore, the possible numbers are 11, 12, 13, 14, 15, and 16. This gives us 6 favorable outcomes.\n\nNext, we",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "problem involves rolling two standard six-sided dice and forming a two-digit number with the numbers rolled. We need to determine the probability that this two-digit number will be between 10 and 20, inclusive.\n\nFirst, let's identifythe possible two-digit numbers that can be formed. Since the number must be between 10 and 20, the tens digit mustbe 1. Therefore, the possible numbers are 11, 12, 13, 14,15, and 16. This gives us 6favorable",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "possible favorable outcomes.\n\nNext, we need to determine the total number of possible outcomes when rolling two six-sided dice. Since each die has 6 faces, the total number of outcomes is:\n\\[6 \\times 6 = 36\\]\n\nThe probabilityof rolling a two-digit number between 10 and 20, inclusive, is the number of favorable outcomes divided by thetotal number of possible outcomes:\n\\[\\frac{6}{36} =",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "possible favorable outcomes.\n\nNext, we need to determine the total number of possible outcomes when rolling two six-sided dice. Since each die has 6 faces, the total number of outcomes is:\n\\[6 \\times 6 = 36\\]\n\nThe probabilityof rolling a two-digit number between 10 and 20, inclusive, is the number of favorable outcomes divided by thetotal number of possibleoutcomes:\n\\[\\frac{6}{36}",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "possible favorable outcomes.\n\nNext, we need to determine the total number of possible outcomes when rolling two six-sided dice. Since each die has 6 faces, the total number of outcomes is:\n\\[6 \\times 6 = 36\\]\n\nThe probabilityof rolling a two-digit number between 10 and 20, inclusive, is the number of favorable outcomes divided by thetotal number of possibleoutcomes:\n\\[\\frac{6}{36",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "possible favorable outcomes.\n\nNext, we need to determine the total number of possible outcomes when rolling two six-sided dice. Since each die has 6 faces, the total number of outcomes is:\n\\[6 \\times 6 = 36\\]\n\nThe probabilityof rolling a two-digit number between 10 and 20, inclusive, is the number of favorable outcomes divided by thetotal number of possibleoutcomes:\n\\[\\frac{6}{3",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "possible favorable outcomes.\n\nNext, we need to determine the total number of possible outcomes when rolling two six-sided dice. Since each die has 6 faces, the total number of outcomes is:\n\\[6 \\times 6 = 36\\]\n\nThe probabilityof rolling a two-digit number between 10 and 20, inclusive, is the number of favorable outcomes divided by thetotal number of possibleoutcomes:\n\\[\\frac{6}{",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "possible favorable outcomes.\n\nNext, we need to determine the total number of possible outcomes when rolling two six-sided dice. Since each die has 6 faces, the total number of outcomes is:\n\\[6 \\times 6 = 36\\]\n\nThe probabilityof rolling a two-digit number between 10 and 20, inclusive, is the number of favorable outcomes divided by thetotal number of possibleoutcomes:\n\\[\\frac{6}",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "possible favorable outcomes.\n\nNext, we need to determine the total number of possible outcomes when rolling two six-sided dice. Since each die has 6 faces, the total number of outcomes is:\n\\[6 \\times 6 = 36\\]\n\nThe probabilityof rolling a two-digit number between 10 and 20, inclusive, is the number of favorable outcomes divided by thetotal number of possibleoutcomes:\n\\[\\frac{6",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "outcomes. Therefore, the probability is:\n\\[\\frac{11}{36}\\]\n\nSo,the final answeris:\n\\[\\boxed{\\frac{11}{36}}\\",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "is:\n\\[\n\\frac{2}{36} = \\frac{1}{18}\n\\]\n\nSo, the probability that Melinda will be",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "is:\n\\[\n\\frac{2}{36} = \\frac{1}{18}\n\\]\n\nSo,",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "is:\n\\[\n\\frac{2}{36} =",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "is:\n\\[\n\\frac{2}{36}",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "is:\n\\[\n\\frac{2}{36",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "that Melinda will be able to make an integer between",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "that Melinda will be able to make an integer between10 and 20, inclusive is",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "inclusive, is",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "]To determine the probability that Melinda will be able to make an integer between 10 and 20 inclusive by rolling two standard six-sided dice, we need to follow these steps:\n\n1. **Identify the possible two-digit numbers between 10 and 20:**\n   The integers between 10 and 20 are: 10, 11, 12, 14, 15, and 16.\n\n2. **Determine the possible outcomes for each integer:**\n   - For 10: The only combination is (1, 0). However, a standard six-sided die does not have a 0. Therefore, 10 is not possible.\n   - For 11: The combinations are (1, 1).\n   - For 12: The combinations are (1, 2) and (2, 1).\n   - For 14: The combinations are (1, 4) and (4, 1).\n   - For 15: The combinations are (1, 5) and (5, 1).\n   - For 16: The",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "]To determine the probability that Melinda will be able to make an integer between 10 and 20 inclusive by rolling two standard six-sided dice, we need to follow these steps:\n\n1. **Identify the possible two-digit numbers between 10 and 20:**\n   The integers between 10 and 20 are: 10, 11, 12, 14, 15, and 16.\n\n2. **Determine the possible outcomes for each",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "**Identify the possible two-digit numbers:**\n   - The two-digit number must be between 10 and 20 inclusive.\n   - This means the tens digit must be 1.\n\n2. **Determine the possible outcomes for the units digit:**\n   - Since the tens digit is fixed at 1, the units digit can be any number from 1 to 6 (because each die has faces numbered from 1 to 6).\n   - Therefore, the possible two-digit numbers are: 11, 12, 13, 14, 15, and 16.\n\n3. **Count the number of favorable outcomes:**\n   - There are 6 favorable outcomes (11, 12, 13, 14, 15, and 16).\n\n4. **Count the total number of",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "**Identify the possible two-digit numbers:**\n   - The two-digit number must be between 10 and 20 inclusive.\n   - This means the tens digit must be 1.\n\n2. **Determine the possible outcomes for the units digit:**\n   - Since the tens digit is fixed at 1, the units digit can be any number",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "**Identify the possible two-digit numbers:**\n   - The two-digit number must be between 10 and 20 inclusive.\n   - This means the tens digit mustbe 1.\n\n2. **Determine the possible outcomes for the units digit:**",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "**Identify the possible two-digit numbers:**\n   - The two-digit number must be between 10 and 20 inclusive.\n   - This means the tens digit mustbe 1.\n\n2. **Determine the possible",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "**Identify the possible two-digit numbers:**\n   - The two-digit number must be between 10 and 20 inclusive.\n   - This means the tens digit mustbe 1.\n\n2. **Determine",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "**Identify the possible two-digit numbers:**\n   - The two-digit number must be between 10 and 20 inclusive.\n   - This means the tens digit mustbe 1.\n\n2.",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "**Identify the possible two-digit numbers:**\n   - The two-digit number must be between 10 and 20 inclusive.\n   - This means the tens digit mustbe",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "15, and 16. This gives us 6 possible favorable outcomes.\n\nNext, we need to determine the total number of possible outcomes when rolling two six-sided dice. Since each die has 6 faces, the total number of possible outcomes is:\n\\[6 \\times 6 = 36\\]\n\nNow, we calculate",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "15, and 16. This gives us 6 possible favorable outcomes.\n\nNext, we need to determine the total number of possible outcomes when rolling",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "15, and 16. This gives us 6 possible favorable outcomes.\n\nNext, we",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "15, and 16. This gives us 6 possiblefavorable",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "desired outcomes out of the 36 possible outcomes.\n\nThe probability is \\(\\frac{7}{36}\\).\n\nTherefore, the",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "desired outcomes out of the 36 possible outcomes.\n\nTheprobability is\\(\\frac{7}{36}\\).\n\nTherefore,",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "desired outcomes out of the 36 possible outcomes.\n\nTheprobability is\\(\\frac{7}{36}\\).\n\nTherefore",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "desired outcomes out of the 36 possible outcomes.\n\nTheprobability is\\(\\frac{7}{36}\\).\n\nTherefor",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "desired outcomes out of the 36 possible outcomes.\n\nTheprobability is\\(\\frac{7}{36}\\).\n\nTherefo",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "desired outcomes out of the 36 possible outcomes.\n\nTheprobability is\\(\\frac{7}{36}\\).\n\nTheref",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "desired outcomes out of the 36 possible outcomes.\n\nTheprobability is\\(\\frac{7}{36}\\).\n\nThere",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "desired outcomes out of the 36 possible outcomes.\n\nTheprobability is\\(\\frac{7}{36}\\).\n\nTher",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "desired outcomes out of the 36 possible outcomes.\n\nTheprobability is\\(\\frac{7}{36}\\).\n\nThe",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "desired outcomes out of the 36 possible outcomes.\n\nTheprobability is\\(\\frac{7}{36}\\).\n\nTh",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "desired outcomes out of the 36 possible outcomes.\n\nTheprobability is\\(\\frac{7}{36}\\).\n\nT",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "desired outcomes out of the 36 possible outcomes.\n\nTheprobability is\\(\\frac{7}{36}\\).",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "probability \\( P \\) is given by the ratio of the number of desired outcomes to the total number of possible outcomes:\n\n\\[\nP = \\frac{\\text{Number of desired outcomes}}{\\text{Total number of possible outcomes}} = \\frac{10}{36}\n\\]\n\nFinally, we simplify the fraction",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "probability \\( P \\) is given by the ratio of the number of desired outcomes to the total number of possible outcomes:\n\n\\[\nP =\\frac{\\text{Number of desired outcomes}}{\\text{Total number of possibleoutcomes}} = \\frac{10}{36}\n\\]\n\nFinally,",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "probability \\( P \\) is given by the ratio of the number of desired outcomes to the total number of possible outcomes:\n\n\\[\nP =\\frac{\\text{Number of desired outcomes}}{\\text{Total number of possibleoutcomes}} =",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\\frac{\\text{Number of desired outcomes}}{\\text{Total number of possible outcomes}} = \\frac{1}{6}\n\\]\n\nThus, the",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\\frac{\\text{Number of desired outcomes}}{\\text{Totalnumber of possible outcomes}}= \\frac{1}{6}\n\\]\n\nThus,",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\\frac{\\text{Number of desired outcomes}}{\\text{Totalnumber of possible outcomes}}=\\frac{1}{6}\n\\]\n\nThus",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "= \\frac{1}{3}\n\\]\n\nThus, the probability that Melinda will be able to make",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "= \\frac{1}{3}\n\\]\n\nThus, the probability",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "= \\frac{1}{3}\n\\]\n\nThus,",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "=\\frac{1}{3}\n\\]\n\nThus",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "equal to \\(0.28\\) or \\(\\frac{7}{25}\\).\n\nThus, the probability that Melinda will be",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "equal to \\(0.28\\) or \\(\\frac{7}{25}\\).\n\nThus,",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "equal to \\(0.28\\) or\\(\\frac{7}{25}\\).\n\nThus",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": ", **FinalAnswer**:\n\\[\n\\boxed{\\frac{7}{25}}\n\\",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": ", **FinalAnswer**:\n\\[\n\\boxed{\\frac{7}{25}}",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\\(\\frac{4}{15}\\).\n\nThe final answer",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\\(\\frac{4}{15}\\).\n\nThefinal",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "[\n\\text{Probability} = \\frac{\\text{Number of favorable outcomes}}{\\text{Total number of outcomes}} = \\frac{1}{3}\n\\]\n\nThus,",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "[\n\\text{Probability} = \\frac{\\text{Number of favorableoutcomes}}{\\text{Total number ofoutcomes}} =\\frac{1}{3}\n\\]\n\nThus",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "outcomes}}{\\text{Total number of possible outcomes}} = \\frac{2}{6} = \\frac{1}{3} \\]\n\nThus, the probability",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "outcomes}}{\\text{Total number of possible outcomes}}= \\frac{2}{6} = \\frac{1}{3}",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "outcomes}}{\\text{Total number of possible outcomes}}= \\frac{2}{6}",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "outcomes}}{\\text{Total number of possible outcomes}}=",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "possible outcomes}} = \\frac{12}{36} = \\frac{1}{3}\n\\]\n\nThe",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "possible outcomes}} =\\frac{12}{36} =",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "possible outcomes}} =\\frac{12}{36}",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\\frac{3}{18} = \\frac{1}{6}\n\\]\n\nThe",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\\frac{3}{18} =",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\u6070\u597d two choices (11 and 16). This gives us 10 favorable outcomes.\n\n3. **Calculate the total number of possible outcomes:**\n   - Each die has 6 faces.\n   - Therefore, the total number of possible outcomes when rolling two dice is \\(6 \\times 6 = 36\\).\n\n5. **Determine the probability:**\n   - The probability \\(P\\) of forming an integer between 10 and 20",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\u6070\u597d two choices (11 and 16). This gives us 10 favorable outcomes.\n\n3. **Calculate the total number of possible outcomes:**\n   - Each die has 6 faces.\n   - Therefore, the total",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\u6070\u597d two choices (11 and 16). This gives us 10 favorable outcomes.\n\n3. **Calculate the",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\u6070\u597d two choices (11 and 16). This gives us",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\u6070\u597d two choices (11and 16). Thisgives",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "= \\frac{1}{6}\n\\]\n\nThus, the probability that Melinda will be able to",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "= \\frac{1}{6}\n\\]\n\nThus, the probability",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "= \\frac{1}{6}\n\\]\n\nThus,",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "=\\frac{1}{6}\n\\]\n\nThus",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "primary school board has \\(\\boxed{7}\\) members. The board is to select asubcommittee of 3 members. The number of ways to form such a subcommittee is given by \\( \\binom{7}{3} \\). We compute this as follows:\n\\[\n\\binom{7}{3} = \\frac{7!}{3!(7-3)!}",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "primary school board has \\(\\boxed{7}\\) members. The board is to select asubcommittee of 3 members. The number of ways to",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "primary school board has \\(\\boxed{7}\\) members. The board is",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "primary school board has",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "is between 10 and 20, inclusive. This means the tens digit of the two-digit number must be 1. Therefore, the possible outcomes are 11, 12, 13, 14, 15, and 16. There are 6 such possible outcomes.\n\nNext, we calculate the total number of possible outcomes when rolling two six-sided dice. Since each die has 6 faces, the",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "is between 10 and 20, inclusive. This means the tens digit of the two-digit number must be 1. Therefore, the possible outcomes are 11, 12, 13, 14, 15, and 16.",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "is between 10 and 20, inclusive. This means the tens digit of the two-digit numbermust be 1. Therefore, the possibleoutcomes are 11, 12,13, 14,15,",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "15, and 16. There are 6 such outcomes.\n\n3. **Calculate the probability:**\n   The probability is the number of favorable outcomes divided by the total number of possible outcomes.\n   \\[\n   \\text{Probability} = \\frac{\\text{Number",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "15, and 16. There are 6 such outcomes.\n\n3. **Calculate the probability:**\n   The probability is the number of",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "15, and 16. There are 6 such outcomes.\n\n3. **Calculate",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "15, and 16. There are 6 suchoutcomes.\n\n3.",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "15, and 16. There are 6 suchoutcomes.\n\n3",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "15, and 16. There are 6 suchoutcomes.",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\\frac{3}{11} \\]\n\nThus, the probability that Melinda will be able to make",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\\frac{3}{11} \\]\n\nThus, the probability",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\\frac{3}{11} \\]\n\nThus,",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "\\frac{3}{11}\\]\n\nThus",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "outcomes}} = \\frac{1}{6}\n\\]\n\nThus, the probability that Melinda will be able to",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "outcomes}} = \\frac{1}{6}\n\\]\n\nThus, the",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "outcomes}} =\\frac{1}{6}\n\\]\n\nThus,",
+        "mc_score": 0.0
+    },
+    {
+        "question": "Melinda will roll two standard six-sided dice and make a two-digit number with the two numbers she rolls. For example, if she rolls a 6 and a 3, she can either form 36 or 63. What is the probability that she will be able to make an integer between 10 and 20, inclusive? Express your answer as a common fraction.",
+        "partial_answer": "outcomes}} =\\frac{1}{6}\n\\]\n\nThus",
+        "mc_score": 0.0
+    }
+]

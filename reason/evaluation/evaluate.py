@@ -145,24 +145,39 @@ if __name__ == "__main__":
                 for _ in range(config.num_worker)
             ]
         )
+
+        def safe_evaluate(p, x, solver_fn):
+            try:
+                # 调用 evaluate_problem 并返回结果
+                return p.evaluate_problem.remote(x, solver_fn)
+            except Exception as e:
+                # 捕获异常并记录错误，返回一个特殊标记
+                print(f"Error evaluating problem: {x}. Exception: {e}")
+                return None  # 返回一个 None 占位
+
         res_q = actor_pool.map_unordered(
-            lambda p, x: p.evaluate_problem.remote(x, solver_fn), test_ds
-        )       # Distributes tasks from the test_ds dataset across the worker pool asynchronously and
-                # collects results in any order as they complete. Every worker has a new searching tree as we reset the
-                # tree in solver_fn
-        for i, (problem_inst, result, output) in enumerate(
-            tqdm(res_q, total=len(test_ds))
-        ):
-            results.append(result)
-            if record_writer:
-                obj = {
-                    # "i": i,
-                    "question": problem_inst["question"],
-                    "groundtruth": problem_inst["answer"],
-                    "result": result,
-                    "output": output,
-                }
-                record_writer.write(obj)
+            lambda p, x: safe_evaluate(p, x, solver_fn), test_ds
+        )  
+        # Distributes tasks from the test_ds dataset across the worker pool asynchronously and
+        # collects results in any order as they complete. Every worker has a new searching tree as we reset the
+        # tree in solver_fn
+
+        for i, item in enumerate(tqdm(res_q, total=len(test_ds))):
+            try:
+                problem_inst, result, output = item
+                results.append(result)
+                if record_writer:
+                    obj = {
+                        # "i": i,
+                        "question": problem_inst["question"],
+                        "groundtruth": problem_inst["answer"],
+                        "result": result,
+                        "output": output,
+                    }
+                    record_writer.write(obj)
+            except Exception as e:
+                print(f"Error: {e}")
+                continue
         avg_res = (tree.map_structure(lambda *xs: np.mean(xs), *results),)
         if record_writer:
             json.dump(avg_res, open(save_dir / "avg_result.json", "w"))
