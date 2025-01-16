@@ -83,7 +83,7 @@ if __name__ == "__main__":
         lm_step_tag = "\n\n"
     else:
         lm_step_tag = "ки\n"
-    llm_gen_fn = VLLMRemoteCaller(
+    lm_call = VLLMRemoteCaller(
         config.LM, config.controller_addr, lm_step_tag=lm_step_tag
     )
     
@@ -141,7 +141,7 @@ if __name__ == "__main__":
 
         actor_pool = ActorPool(
             [
-                RemoteMathEvaluator.remote(config.task_name, llm_gen_fn, rm_call)
+                RemoteMathEvaluator.remote(config.task_name, lm_call, rm_call)
                 for _ in range(config.num_worker)
             ]
         )
