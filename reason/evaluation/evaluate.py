@@ -83,10 +83,10 @@ if __name__ == "__main__":
         lm_step_tag = "\n\n"
     else:
         lm_step_tag = "ки\n"
-
     llm_gen_fn = VLLMRemoteCaller(
         config.LM, config.controller_addr, lm_step_tag=lm_step_tag
     )
+    
     if config.RM == "dummy":
         rm_config = RewardModelBaseConfig(
             step_tag=prm_step_tag, format_str=prm_format_str
@@ -233,7 +233,6 @@ if __name__ == "__main__":
             num_path=config.num_sequence,
         )
         solver_fn = partial(rstar_mcts, method_config, gen_config)
-
     else:
         raise ValueError(f"Unknown method: {config.method}")
     cfg_dict_record["method"] = config.method
