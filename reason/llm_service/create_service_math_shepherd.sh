@@ -29,7 +29,7 @@ NUM_RM_WORKER=1
 echo "Wait 10 seconds ..."
 sleep 5
 
-echo "Starting workers"
+echo "Starting policy-model workers"
 for i in $(seq 0 $((NUM_LM_WORKER-1)))
 do
   WORKER_PORT=$((WORKER_BASE_PORT+i))
@@ -40,7 +40,7 @@ do
 done
 
 
-# start value service
+echo "Starting reward-model workers"
 for i in $(seq 0 $((NUM_RM_WORKER-1)))
 do
   WORKER_PORT=$((i+WORKER_BASE_PORT+NUM_LM_WORKER))
