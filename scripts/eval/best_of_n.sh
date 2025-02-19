@@ -1,18 +1,14 @@
 python reason/evaluation/evaluate.py \
     --LM Qwen2.5-Math-1.5B-Instruct \
     --RM Qwen2.5-Math-PRM-7B \
-    --task_name rstar \
+    --task_name MATH \
+    --temperature 1 \
+    --num_sequence 2 \
     --max_new_tokens 2048 \
-    --num_sequence 8 \
-    --tree_max_width 4 \
-    --tree_max_depth 50 \
     --save_dir results \
-    --method rstar_mcts \
+    --method best_of_n \
     --num_worker 16 \
     --controller_addr http://0.0.0.0:28777 \
-    --top_k 40 \
-    --top_p 0.95 \
-    --temperature 0.8 \
     # --local
 
 # Tips: Make sure the input (--LM, --RM) in the script aligns with variable ($POLICY_MODEL_NAME, $VALUE_MODEL_NAME) in the pending worker!

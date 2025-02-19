@@ -74,10 +74,14 @@ if __name__ == "__main__":
     # TODO(ziyu): move into some configuration file
     if "math-shepherd" in config.RM.lower():
         prm_step_tag = "ки\n"
+        prm_format_str = "{question} {answer}"
+    elif "qwen2.5-math-prm" in config.RM.lower():
+        prm_step_tag = "<extra_0>"
+        prm_format_str = "{question}&&&&&{answer}"
     else:
         # assume qwen
         prm_step_tag = "\n\n\n\n\n "
-    prm_format_str = "{question} {answer}"
+        prm_format_str = "{question} {answer}"
 
     if "qwen" in config.LM.lower():
         lm_step_tag = "\n\n"
@@ -145,23 +149,11 @@ if __name__ == "__main__":
                 for _ in range(config.num_worker)
             ]
         )
-
-        def safe_evaluate(p, x, solver_fn):
-            try:
-                # 调用 evaluate_problem 并返回结果
-                return p.evaluate_problem.remote(x, solver_fn)
-            except Exception as e:
-                # 捕获异常并记录错误，返回一个特殊标记
-                print(f"Error evaluating problem: {x}. Exception: {e}")
-                return None  # 返回一个 None 占位
-
         res_q = actor_pool.map_unordered(
-            lambda p, x: safe_evaluate(p, x, solver_fn), test_ds
-        )  
-        # Distributes tasks from the test_ds dataset across the worker pool asynchronously and
-        # collects results in any order as they complete. Every worker has a new searching tree as we reset the
-        # tree in solver_fn
-
+            lambda p, x: p.evaluate_problem.remote(x, solver_fn), test_ds
+        )       # Distributes tasks from the test_ds dataset across the worker pool asynchronously and
+                # collects results in any order as they complete. Every worker has a new searching tree as we reset the
+                # tree in solver_fn
         for i, item in enumerate(tqdm(res_q, total=len(test_ds))):
             try:
                 problem_inst, result, output = item

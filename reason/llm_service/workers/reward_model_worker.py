@@ -31,14 +31,16 @@ from fastchat.utils import (
     get_context_length,
     str_to_torch_dtype,
 )
-from prm.infer_fns import _qwen_math_infer_fn, _math_shepherd_infer_fn
+from prm.infer_fns import _qwen_math_infer_fn, _math_shepherd_infer_fn, _qwen_math_prm_infer_fn
 
 worker_id = str(uuid.uuid4())[:8]
 logger = build_logger("reward_model_worker", f"reward_model_worker_{worker_id}.log")
 
 
 def get_infer_fn(model_path):
-    if "qwen" in model_path.lower():
+    if "qwen2.5-math-prm" in model_path.lower().replace("_", "-"):
+        return _qwen_math_prm_infer_fn
+    elif "qwen" in model_path.lower():
         return _qwen_math_infer_fn
     elif "math-shepherd" in model_path.lower().replace("_", "-"):
         return _math_shepherd_infer_fn

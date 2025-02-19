@@ -114,6 +114,7 @@ if __name__ == "__main__":
     prm_and_tags = [
         # ("math-shepherd-mistral-7b-prm", 'ки\n'),
         ("checkpoint-2127", '\n\n\n\n\n '),
+        ("Math-psa", '\n\n\n\n\n ')
     ]
 
     main(Path(__file__).parent / 'record.jsonl', prm_and_tags)

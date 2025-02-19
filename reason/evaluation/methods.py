@@ -22,7 +22,7 @@ def cot(
     config: CoTConfig,
     gen_config: LMCallingConfig,
     problem_inst: Dict[str, str],
-    llm_call: LanguageModelCallingFunction,
+    lm_call: LanguageModelCallingFunction,
     rm_call: RewardModelCallingFunction,
 ) -> SolutionOutput:
     gen_config = LMCallingConfig(
@@ -33,7 +33,7 @@ def cot(
         max_new_tokens=gen_config.max_new_tokens,
     )
     config.num_sequence = 1
-    return best_of_n(config, gen_config, problem_inst, llm_call, rm_call)
+    return best_of_n(config, gen_config, problem_inst, lm_call, rm_call)
 
 
 @dataclass

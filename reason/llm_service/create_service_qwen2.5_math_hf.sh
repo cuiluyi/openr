@@ -4,17 +4,22 @@ HOST_ADDR=0.0.0.0
 CONTROLER_PORT=28777
 WORKER_BASE_PORT=30010
 
-echo PYTHON_EXECUTABLE=$(which python3)
-PYTHON_EXECUTABLE=$(which python3)
+echo PYTHON_EXECUTABLE=$(which python)
+PYTHON_EXECUTABLE=$(which python)
 
-MODEL_BASE=/data/cuiluyi/.cache/huggingface/hub/
-CUDA_DEVICE_BASE=0
-POLICY_MODEL_NAME=models--Qwen--Qwen2.5-Math-7B-Instruct
-VALUE_MODEL_NAME=qwen_prm/checkpoint-6898/
-# VALUE_MODEL_NAME=Qwen/Qwen2.5-Math-7B-PRM
+MODEL_BASE=/data/cuiluyi/resources/models
+
+# POLICY_MODEL_NAME=peiyi9979/mistral-7b-sft
+POLICY_MODEL_NAME=Qwen/Qwen2.5-Math-1.5B-Instruct
+
+# VALUE_MODEL_NAME=peiyi9979/math-shepherd-mistral-7b-prm
+VALUE_MODEL_NAME=Qwen/Math-psa-7B
+# VALUE_MODEL_NAME=Qwen/Qwen2.5-Math-PRM-7B
+
 MODEL_PATH=$MODEL_BASE/$POLICY_MODEL_NAME
 VALUE_MODEL_PATH=$MODEL_BASE/$VALUE_MODEL_NAME
 
+CUDA_DEVICE_BASE=0
 LOGDIR=logs_fastchat
 
 tmux start-server
