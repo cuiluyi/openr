@@ -83,6 +83,7 @@ class ModelWorker(BaseModelWorker):
             model_names,
             limit_worker_concurrency,
             conv_template=conv_template,
+            logger_instance=logger,
         )
 
         logger.info(f"Loading the model {self.model_names} on worker {worker_id} ...")

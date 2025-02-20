@@ -11,4 +11,4 @@ python reason/evaluation/evaluate.py \
     --controller_addr http://0.0.0.0:28777 \
     # --local
 
-# Tips: Make sure the input (--LM, --RM) in the script aligns with variable ($POLICY_MODEL_NAME, $VALUE_MODEL_NAME) in the pending worker!
+# Tips: Make sure the input (--LM, --RM) in the script aligns with the command output (basename $LANGUAGE_MODEL_NAME, basename $REWARD_MODEL_NAME) in the pending worker!

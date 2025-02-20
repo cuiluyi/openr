@@ -11,6 +11,7 @@ from fastchat.constants import WORKER_HEART_BEAT_INTERVAL
 from fastchat.conversation import Conversation
 from fastchat.utils import pretty_print_semaphore, build_logger
 
+from logging import Logger
 
 worker = None
 logger = None
@@ -34,6 +35,7 @@ class BaseModelWorker:
         model_names: List[str],
         limit_worker_concurrency: int,
         conv_template: str = None,
+        logger_instance: Logger = None,
     ):
         global logger, worker
 
@@ -53,6 +55,8 @@ class BaseModelWorker:
 
         self.heart_beat_thread = None
 
+        if logger_instance is not None:
+            logger = logger_instance
         if logger is None:
             logger = build_logger("model_worker", f"model_worker_{self.worker_id}.log")
         if worker is None:

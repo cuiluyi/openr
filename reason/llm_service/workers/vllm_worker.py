@@ -49,6 +49,7 @@ class VLLMWorker(BaseModelWorker):
             model_names,
             limit_worker_concurrency,
             conv_template,
+            logger_instance=logger,
         )
 
         logger.info(
