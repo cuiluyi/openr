@@ -5,10 +5,11 @@ python reason/evaluation/evaluate.py \
     --temperature 0.8 \
     --max_new_tokens 2048 \
     --num_sequence 1 \
+    --simulate_num 16 \
     --tree_max_width 4 \
     --tree_max_depth 50 \
     --save_dir results \
-    --method vanila_mcts \
+    --method mcts \
     --num_worker 16 \
     --controller_addr http://0.0.0.0:28777 \
     # --local

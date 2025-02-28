@@ -10,6 +10,7 @@ from reason.inference.rm_call import (
     RemoteRewardModelConfig,
 )
 from reason.evaluation.evaluator import SolutionOutput, Task, RemoteMathEvaluator
+from reason.evaluation.utils import setup_seed, jsonl_to_json
 import torch
 from functools import partial
 import json
@@ -27,13 +28,70 @@ from reason.evaluation.methods import *
 import ray
 
 
-def setup_seed(seed):
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-    np.random.seed(seed)
-    random.seed(seed)
-    os.environ["PYTHONHASHSEED"] = str(seed)
-    torch.backends.cudnn.deterministic = True
+def parallel_evaluate_test_dataset(
+    method_name: str, solver_fn: Callable, save_dir: Optional[Path] = None
+) -> List[Dict[str, Any]]:
+    if save_dir is not None:
+        record_writer = jsonlines.open(save_dir / f"record.jsonl", mode="w")
+    else:
+        record_writer = None
+
+    test_ds = task.test_ds
+    # test_ds = [test_ds[i] for i in range(32)]
+
+    results = []
+    if config.resume_dir is not None:
+        answered_questions = set()
+        with jsonlines.open(Path(config.resume_dir) / "record.jsonl", "r") as reader:
+            cnt = 0
+            for obj in reader:
+                results.append(obj["result"])
+                answered_questions.add(obj["question"])
+                if record_writer is not None:
+                    record_writer.write(obj)
+                    cnt += 1
+        print(f"Resumed {cnt} questions from {config.resume_dir}")
+        total_cnt = len(test_ds)
+        test_ds = [
+            problem_inst
+            for problem_inst in test_ds
+            if problem_inst["question"] not in answered_questions
+        ]
+        new_cnt = len(test_ds)
+        print(
+            f"After resuming, there are {new_cnt}/{total_cnt} new questions to answer."
+        )
+
+    actor_pool = ActorPool(
+        [
+            RemoteMathEvaluator.remote(config.task_name, lm_call, rm_call)
+            for _ in range(config.num_worker)
+        ]
+    )
+    res_q = actor_pool.map_unordered(
+        lambda p, x: p.evaluate_problem.remote(x, solver_fn), test_ds
+    )
+    # Distributes tasks from the test_ds dataset across the worker pool asynchronously and
+    # collects results in any order as they complete. Every worker has a new searching tree as we reset the
+    # tree in solver_fn
+    for i, item in enumerate(tqdm(res_q, total=len(test_ds))):
+        problem_inst, result, output = item
+        results.append(result)
+        if record_writer:
+            obj = {
+                # "i": i,
+                "question": problem_inst["question"],
+                "groundtruth": problem_inst["answer"],
+                "result": result,
+                "output": output,
+            }
+            record_writer.write(obj)
+    avg_res = (tree.map_structure(lambda *xs: np.mean(xs), *results),)
+    if record_writer:
+        json.dump(avg_res, open(save_dir / "avg_result.json", "w"))
+    print("Method: {}. Average result: {}".format(method_name, avg_res))
+    jsonl_to_json(save_dir / "record.jsonl", save_dir / "record.json")
+    return results
 
 
 if __name__ == "__main__":
@@ -49,6 +107,7 @@ if __name__ == "__main__":
     # method config
     parser.add_argument("--method", type=str, required=True)
     parser.add_argument("--num_sequence", type=int, default=1)
+    parser.add_argument("--simulate_num", type=int, default=1)
     # LM gen config
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--top_k", type=int, default=-1)
@@ -66,6 +125,7 @@ if __name__ == "__main__":
     config = parser.parse_args()
 
     setup_seed(config.seed)
+
     if config.local:
         print("run in pure local mode for debug only")
         config.num_worker = 1
@@ -90,7 +150,7 @@ if __name__ == "__main__":
     lm_call = VLLMRemoteCaller(
         config.LM, config.controller_addr, lm_step_tag=lm_step_tag
     )
-    
+
     if config.RM == "dummy":
         rm_config = RewardModelBaseConfig(
             step_tag=prm_step_tag, format_str=prm_format_str
@@ -107,77 +167,6 @@ if __name__ == "__main__":
 
     task = Task(task_name=config.task_name, is_few_shot=config.is_few_shot)
 
-    def parallel_evaluate_test_dataset(
-        method_name: str, solver_fn: Callable, save_dir: Optional[Path] = None
-    ) -> List[Dict[str, Any]]:
-        if save_dir is not None:
-            record_writer = jsonlines.open(save_dir / f"record.jsonl", mode="w")
-        else:
-            record_writer = None
-
-        test_ds = task.test_ds
-        # test_ds = [test_ds[i] for i in range(32)]
-
-        results = []
-        if config.resume_dir is not None:
-            answered_questions = set()
-            with jsonlines.open(
-                Path(config.resume_dir) / "record.jsonl", "r"
-            ) as reader:
-                cnt = 0
-                for obj in reader:
-                    results.append(obj["result"])
-                    answered_questions.add(obj["question"])
-                    if record_writer is not None:
-                        record_writer.write(obj)
-                        cnt += 1
-            print(f"Resumed {cnt} questions from {config.resume_dir}")
-            total_cnt = len(test_ds)
-            test_ds = [
-                problem_inst
-                for problem_inst in test_ds
-                if problem_inst["question"] not in answered_questions
-            ]
-            new_cnt = len(test_ds)
-            print(
-                f"After resuming, there are {new_cnt}/{total_cnt} new questions to answer."
-            )
-
-        actor_pool = ActorPool(
-            [
-                RemoteMathEvaluator.remote(config.task_name, lm_call, rm_call)
-                for _ in range(config.num_worker)
-            ]
-        )
-        res_q = actor_pool.map_unordered(
-            lambda p, x: p.evaluate_problem.remote(x, solver_fn), test_ds
-        )       # Distributes tasks from the test_ds dataset across the worker pool asynchronously and
-                # collects results in any order as they complete. Every worker has a new searching tree as we reset the
-                # tree in solver_fn
-        for i, item in enumerate(tqdm(res_q, total=len(test_ds))):
-            try:
-                problem_inst, result, output = item
-                results.append(result)
-                if record_writer:
-                    obj = {
-                        # "i": i,
-                        "question": problem_inst["question"],
-                        "groundtruth": problem_inst["answer"],
-                        "result": result,
-                        "output": output,
-                    }
-                    record_writer.write(obj)
-            except Exception as e:
-                print(f"Error: {e}")
-                continue
-        avg_res = (tree.map_structure(lambda *xs: np.mean(xs), *results),)
-        if record_writer:
-            json.dump(avg_res, open(save_dir / "avg_result.json", "w"))
-        print("Method: {}. Average result: {}".format(method_name, avg_res))
-        return results
-
-    solver_fns = {"cot": cot, "best_of_n": best_of_n}
-
     cfg_dict_record = dict()
     # XXX: qwen-2.5 requires add more stop words
     # not do it now.
@@ -185,8 +174,8 @@ if __name__ == "__main__":
     gen_config = LMCallingConfig(
         n=config.num_sequence,
         temperature=config.temperature,
-        top_k=config.top_k,
         top_p=config.top_p,
+        top_k=config.top_k,
         max_new_tokens=config.max_new_tokens,
     )
     cfg_dict_record["gen_config"] = gen_config.__dict__
@@ -210,21 +199,42 @@ if __name__ == "__main__":
     elif config.method == "vanila_mcts":
         method_config = VanilaMCTSConfig(
             task_name=config.task_name,
-            tree_max_depth=config.tree_max_depth,
             tree_max_width=config.tree_max_width,
+            tree_max_depth=config.tree_max_depth,
             select_by_prior=False,
             num_path=config.num_sequence,
         )
         solver_fn = partial(vanila_mcts, method_config, gen_config)
-    elif config.method == "rstar_mcts":
-        method_config = VanilaMCTSConfig(
+    elif config.method == "mcts":
+        method_config = MCTSConfig(
             task_name=config.task_name,
-            tree_max_depth=config.tree_max_depth,
             tree_max_width=config.tree_max_width,
+            tree_max_depth=config.tree_max_depth,
+            select_by_prior=False,
+            num_path=config.num_sequence,
+            simulate_num=config.simulate_num,
+        )
+        solver_fn = partial(mcts, method_config, gen_config)
+    elif config.method == "rstar_mcts":
+        method_config = RStarMCTSConfig(
+            task_name=config.task_name,
+            tree_max_width=config.tree_max_width,
+            tree_max_depth=config.tree_max_depth,
             select_by_prior=False,
             num_path=config.num_sequence,
         )
         solver_fn = partial(rstar_mcts, method_config, gen_config)
+    elif config.method == "mcts_beam_search":
+        method_config = MCTSBeamSearchConfig(
+            task_name=config.task_name,
+            tree_max_width=config.tree_max_width,
+            tree_max_depth=config.tree_max_depth,
+            select_by_prior=False,
+            num_path=config.num_sequence,  # TODO: add optional argument in script
+            # beam_size=config.num_sequence,  # TODO: add optional argument in script
+            simulate_num=config.simulate_num,
+        )
+        solver_fn = partial(mcts_beam_search, method_config, gen_config)
     else:
         raise ValueError(f"Unknown method: {config.method}")
     cfg_dict_record["method"] = config.method

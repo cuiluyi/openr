@@ -1,5 +1,5 @@
 import abc
-from typing import Dict, List, Optional
+from typing import List, Dict, Any, Optional, Tuple, Union, Callable, Type
 import numpy as np
 import copy
 import pdb
@@ -7,8 +7,11 @@ import torch
 from distributed.utils import print_with_rank
 from transformers import PreTrainedTokenizer
 from reason.inference.lm_call import LMCallingConfig, ConcatedLMGenResult
+from envs.filter import DiversityFilter
 
 INVALID_ANS = "[invalid]"
+
+diversity_filter = DiversityFilter()
 
 
 class NoLegalActionException(Exception):
@@ -153,7 +156,8 @@ class CoTEnv(BaseEnv):
         return self.get_state(), info
 
     def step(self, action, update_legal_action=True):
-        self.action_history.append(action)
+        if action is not None:
+            self.action_history.append(action)
         state = self.get_state()
         reward = self.get_reward()
         terminated, truncated, info = self.get_done_and_info()
@@ -184,7 +188,7 @@ class CoTEnv(BaseEnv):
 
     def get_state(self):
         # not join about sep_str here because we let vllm return with sep_str
-        ret = self._init_query + "".join(self.action_history)
+        ret = self._init_query + "".join(item for item in self.action_history if item is not None)
         return ret
 
     def post_process_act(self, action: str):
@@ -201,6 +205,7 @@ class CoTEnv(BaseEnv):
                 **self.config["generation_config"]
             ),
         )
+        result = diversity_filter.filter(result)
         texts = result.text
         logps_avg_by_len = result.logp_avg_by_len
         token_len = result.num_tokens

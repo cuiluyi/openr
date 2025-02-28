@@ -55,6 +55,21 @@ def _generate_fastchat(
         "echo": False,
         "include_stop_str_in_output": include_stop_str_in_output,
     }
+    # gen_params = {
+    #     "model": model_name,
+    #     "prompt": query_str,
+    #     "temperature": 0,
+    #     "n": n,
+    #     "top_p": 1,
+    #     "top_k": -1,
+    #     "stop_token_ids": stop_token_ids,
+    #     "max_new_tokens": max_new_tokens,
+    #     "stop": stop_str,
+    #     "echo": False,
+    #     "include_stop_str_in_output": include_stop_str_in_output,
+    #     "use_beam_search": True,
+    #     "best_of": 8,
+    # }
     response = requests.post(
         worker_addr + "/worker_generate",
         headers=headers,

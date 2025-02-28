@@ -3,7 +3,7 @@ python reason/evaluation/evaluate.py \
     --RM Qwen2.5-Math-PRM-7B \
     --task_name MATH \
     --temperature 1 \
-    --num_sequence 2 \
+    --num_sequence 4 \
     --max_new_tokens 2048 \
     --save_dir results \
     --method best_of_n \

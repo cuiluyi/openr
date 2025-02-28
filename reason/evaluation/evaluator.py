@@ -119,6 +119,21 @@ class MathEvaluator:
     def evaluate_problem(
         self, problem_inst: Dict[str, str], solver_fn: Callable
     ) -> List[str]:
+        # try:
+        #     solution: SolutionOutput = solver_fn(problem_inst, self.lm_call, self.rm_call)
+        #     result, output = self.analyze_output(problem_inst, solution.solutions)
+        #     total_completion_token = 0
+        #     for i, o in enumerate(output):
+        #         o["completion_tokens"] = solution.completion_tokens[i]
+        #         if isinstance(solution, TreeSearchSolutionOutput):
+        #             o["tree_completion_tokens"] = solution.tree_completion_tokens[i]
+        #         # We define the completion_tokens as the tokens comsumed between two generated
+        #         #  answers, therefore we need to take sum here.
+        #         total_completion_token += solution.completion_tokens[i]
+        #     result["total_completion_tokens"] = total_completion_token
+        #     return problem_inst, result, output
+        # except Exception as e:
+        #     return problem_inst, {"error": str(e)}, []
         solution: SolutionOutput = solver_fn(problem_inst, self.lm_call, self.rm_call)
         result, output = self.analyze_output(problem_inst, solution.solutions)
         total_completion_token = 0
@@ -131,6 +146,8 @@ class MathEvaluator:
             total_completion_token += solution.completion_tokens[i]
         result["total_completion_tokens"] = total_completion_token
         return problem_inst, result, output
+
+
 
     def analyze_output(self, problem_inst: Dict[str, str], gen_answers: List[str]):
         extracted_groundtruth = self._task.extract_groundtruth(problem_inst["answer"])
