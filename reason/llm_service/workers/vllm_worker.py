@@ -81,6 +81,7 @@ class VLLMWorker(BaseModelWorker):
         use_beam_search = params.get("use_beam_search", False)
         best_of = params.get("best_of", None)
         include_stop_str_in_output = params.get("include_stop_str_in_output", False)
+        seed = params.get("seed", 42)
 
         # Handle stop_str
         stop = set()
@@ -112,6 +113,7 @@ class VLLMWorker(BaseModelWorker):
             best_of=best_of,
             logprobs=1,
             include_stop_str_in_output=include_stop_str_in_output,
+            seed=seed,
         )
         results_generator = engine.generate(context, sampling_params, request_id)
 

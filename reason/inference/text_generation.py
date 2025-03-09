@@ -29,6 +29,7 @@ def _generate_fastchat(
     stop_str,
     include_stop_str_in_output,
     controller_addr,
+    seed,
 ) -> ConcatedLMGenResult:
 
     ret = requests.post(
@@ -54,6 +55,7 @@ def _generate_fastchat(
         "stop": stop_str,
         "echo": False,
         "include_stop_str_in_output": include_stop_str_in_output,
+        "seed": seed,
     }
     # gen_params = {
     #     "model": model_name,

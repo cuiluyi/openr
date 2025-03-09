@@ -27,8 +27,12 @@ def load_jsonl(file_path):
 
 
 def jsonl_to_json(jsonl_file, json_file):
-    with jsonlines.open(jsonl_file, mode="r") as reader:
-        data = [obj for obj in reader]  # 逐行读取并存入列表
+    with jsonlines.open(jsonl_file, mode='r') as reader:
+        try:
+            data = [obj for obj in reader]
+        except jsonlines.InvalidLineError as e:
+            print(f"无效行: {e.line}")
+            raise
 
     with open(json_file, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)  # 保存为 JSON 文件

@@ -1,6 +1,6 @@
 import copy
 import re
-from typing import List, Optional
+from typing import List, Optional, Callable
 import numpy as np
 from envs.base_env import CoTEnv, NoLegalActionException, INVALID_ANS
 from .prompt import COT_EXAMPLES, COT_TASK_DESC, PROBLEM_FORMAT_STR, SEP
@@ -40,6 +40,7 @@ class Env(CoTEnv):
         cot_example_str: str = COT_EXAMPLES,
         problem_format_str: str = PROBLEM_FORMAT_STR,
         reset=True,
+        reward_model_fn: Optional[Callable] = None,
     ):
         super().__init__(
             config,
@@ -49,6 +50,7 @@ class Env(CoTEnv):
             cot_example_str,
             problem_format_str,
             reset,
+            reward_model_fn,
         )
 
     @property

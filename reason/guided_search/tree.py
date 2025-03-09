@@ -89,9 +89,10 @@ class Node(object):
                 return
             self._parent.update_recursive(leaf_value, mcts_mode)
 
-    def _rollout(self, 
-                 env: Type[CoTEnv],
-                 reward_model_fn: Optional[Callable] = None,
+    def _rollout(
+        self, 
+        env: Type[CoTEnv],
+        reward_model_fn: Optional[Callable] = None,
     ) -> int:
         """
         Overview:
@@ -120,8 +121,7 @@ class Node(object):
                 ),
             )
             
-            # result = diversity_filter.filter(result)
-            steps: List[str] = result.text[0]
+            steps: str = result.text[0]
             prms: List[int] = reward_model_fn(
                 (
                     env.question,
@@ -570,10 +570,6 @@ class SearchTree:
 
         traj_list = []
 
-        # TODO(ziyu): split with 1. select 2. expand 3. rollout 4. backprop
-        #  for here is split the for loop with select and rollout
-        #  so that arbitrary rollout function can be used here.
-
         for i_path in range(num_path):
             simulate_node = self.root
             done = False
@@ -628,7 +624,8 @@ class SearchTree:
                     node.update_recursive(leaf_value, env_copy.mcts_mode)
 
                 # 多次模拟之后进行选择，并更新 simulate_node
-                action, simulate_node = self._select_child(simulate_node, simulate_env, criteria="visit_count")
+                # action, simulate_node = self._select_child(simulate_node, simulate_env, criteria="visit_count")
+                action, simulate_node = self._select_child(simulate_node, simulate_env, criteria="value")
 
                 simulate_env._next_state_terminated = {}
                 simulate_env._next_state_terminated[action] = simulate_node.terminated
@@ -738,117 +735,7 @@ class SearchTree:
         traj_list[-1]["api_completion_tokens"] = api_call_completion_tokens
         return traj_list
 
-    # def mcts_beam_search_dev0(
-    #     self,
-    #     initial_env: Type[CoTEnv],
-    #     num_path: int,
-    #     reward_model_fn: Optional[Callable] = None,
-    #     select_by_prior: bool = False,
-    #     simulate_num: int = 6,
-    # ) -> List[Dict]:
-    #     api_call_completion_tokens = 0
-    #     _, info = initial_env.reset(update_legal_action=True)
-    #     api_call_completion_tokens += info["api_completion_token"]
-    #     if self.root is None:
-    #         root = LanguageNode(text_state=initial_env.get_state())
-    #         self._expand_leaf_node(root, initial_env, reward_model_fn)
-    #         self.root = root
-
-    #     beam_size = num_path
-    #     simulate_nodes, simulate_envs = [self.root], [initial_env]
-    #     traj_list, top_k_nodes = [], []
-    #     finished = False
-    #     while True:
-    #         for simulate_node, simulate_env in zip(simulate_nodes, simulate_envs):
-    #             for _ in range(simulate_num):
-    #                 node = simulate_node
-    #                 env_copy = simulate_env.copy()
-    #                 done = False
-    #                 while not done:
-    #                     if node.visit_count > 0:
-    #                         # if node is visited, select the child with the highest UCB score
-    #                         action, node = self._select_child(node, env_copy)
-    #                     else:
-    #                         # choose rollout policy
-    #                         if select_by_prior:
-    #                             # select with prior probability
-    #                             action, node = self._select_by_prior(node, env_copy)
-    #                         else:
-    #                             # select with highest value, since visit_count = 0 in self.ucb
-    #                             #  will select node with highest value
-    #                             action, node = self._select_child(node, env_copy)
-
-    #                     # sync terminated flag here
-    #                     # XXX(ziyu): find a more clean way.
-    #                     env_copy._next_state_terminated = {}    # Maybe You can comment out this next line
-    #                     # assert node.last_action == action
-    #                     env_copy._next_state_terminated[action] = node.terminated
-
-    #                     _, _, terminated, truncated, info = env_copy.step(
-    #                         action, update_legal_action=node.is_leaf()
-    #                     )
-
-    #                     done = terminated or truncated
-
-    #                     if not done and node.is_leaf():
-    #                         self._expand_leaf_node(node, env_copy, reward_model_fn)
-
-    #                     # record api_tokens, if not expand, info["api_completion_token"] is 0
-    #                     api_call_completion_tokens += info["api_completion_token"]
-    #                 else:
-    #                     if node.visit_count > 0:
-    #                         leaf_value = node.value
-    #                     else:
-    #                         if self._init_critic_value:
-    #                             leaf_value = node._initial_value
-    #                         else:
-    #                             leaf_value = reward_model_fn(env_copy.get_state()).item()
-    #                 node.update_recursive(leaf_value, env_copy.mcts_mode)
-
-    #             # 多次模拟之后进行选择，并更新 simulate_node
-    #             selected_actions, selected_nodes = self._select_batch_final_action(simulate_node, beam_size, criteria="visit_count")
-
-    #             for action, node in zip(selected_actions, selected_nodes):
-    #                 env = simulate_env.copy()
-    #                 env._next_state_terminated = {}
-    #                 env._next_state_terminated[action] = node.terminated
-
-    #                 _, _, terminated, truncated, info = env.step(
-    #                     action, update_legal_action=node.is_leaf()
-    #                 )
-    #                 # if node.terminated:
-    #                 flag = terminated or truncated
-    #                 if flag:
-    #                     traj_data = {
-    #                         "path_idx": num_path - beam_size,
-    #                         "text": env.answer,
-    #                         "value": node.value,
-    #                         "api_completion_tokens": api_call_completion_tokens,
-    #                         "tree_completion_tokens": self._completion_tokens,
-    #                     }
-    #                     traj_list.append(traj_data)
-    #                     beam_size = beam_size - 1
-    #                     if beam_size == 0:
-    #                         finished = True
-    #                         break
-    #                     continue
-    #                 elif not flag and node.is_leaf():
-    #                     self._expand_leaf_node(node, env, reward_model_fn)
-    #                 heapq.heappush(top_k_nodes, (-node.visit_count, node, env))
-    #             if finished:
-    #                 break
-                
-    #         if finished or len(top_k_nodes) == 0:
-    #             break
-    #         simulate_nodes.clear()
-    #         simulate_envs.clear()
-    #         while top_k_nodes and len(simulate_nodes) < beam_size:
-    #             _, node, env = heapq.heappop(top_k_nodes)
-    #             simulate_nodes.append(node)
-    #             simulate_envs.append(env)
-    #     return traj_list
-
-    def mcts_beam_search(
+    def mcts_beam_search_dev0(
         self,
         initial_env: Type[CoTEnv],
         num_path: int,
@@ -870,10 +757,10 @@ class SearchTree:
         finished = False
         while True:
             for simulate_node, simulate_env in zip(simulate_nodes, simulate_envs):
-                done = False
                 for _ in range(simulate_num):
                     node = simulate_node
                     env_copy = simulate_env.copy()
+                    done = False
                     while not done:
                         if node.visit_count > 0:
                             # if node is visited, select the child with the highest UCB score
@@ -916,9 +803,9 @@ class SearchTree:
                     node.update_recursive(leaf_value, env_copy.mcts_mode)
 
                 # 多次模拟之后进行选择，并更新 simulate_node
-                selected_actions, selected_nodes = self._select_batch_final_action(simulate_node, beam_size, criteria="visit_count")
+                selected_actions, selected_nodes, selected_scores = self._select_batch_final_action(simulate_node, beam_size)
 
-                for action, node in zip(selected_actions, selected_nodes):
+                for action, node, score in zip(selected_actions, selected_nodes, selected_scores):
                     env = simulate_env.copy()
                     env._next_state_terminated = {}
                     env._next_state_terminated[action] = node.terminated
@@ -944,7 +831,8 @@ class SearchTree:
                         continue
                     elif not flag and node.is_leaf():
                         self._expand_leaf_node(node, env, reward_model_fn)
-                    heapq.heappush(top_k_nodes, (-node.visit_count, node, env))
+                    # heapq.heappush(top_k_nodes, (-node.visit_count, node, env))
+                    heapq.heappush(top_k_nodes, (-score, node, env))
                 if finished:
                     break
                 
@@ -957,6 +845,121 @@ class SearchTree:
                 simulate_nodes.append(node)
                 simulate_envs.append(env)
         return traj_list
+
+    def mcts_beam_search(
+        self,
+        initial_env: Type[CoTEnv],
+        num_path: int,
+        reward_model_fn: Optional[Callable] = None,
+        select_by_prior: bool = False,
+        simulate_num: int = 6,
+    ) -> List[Dict]:
+        api_call_completion_tokens = 0
+        _, info = initial_env.reset(update_legal_action=True)
+        api_call_completion_tokens += info["api_completion_token"]
+        if self.root is None:
+            root = LanguageNode(text_state=initial_env.get_state())
+            self._expand_leaf_node(root, initial_env, reward_model_fn)
+            self.root = root
+
+        beam_size = num_path
+        simulate_nodes, simulate_envs = [self.root], [initial_env]
+        traj_list, top_k_nodes = [], []
+        finished = False
+        while True:
+            for simulate_node, simulate_env in zip(simulate_nodes, simulate_envs):
+                # execute multiple simulations
+                for _ in range(simulate_num):
+                    node = simulate_node
+                    env_copy = simulate_env.copy()
+                    # step1: select a leaf node
+                    while not node.is_leaf():
+                        if select_by_prior:
+                            # select with prior probability
+                            action, node = self._select_by_prior(node, env_copy)
+                        else:
+                            # select with highest value, since visit_count = 0 in self.ucb
+                            #  will select node with highest value
+                            action, node = self._select_child(node, env_copy)
+
+                        if not node.is_leaf():
+                            env_copy._next_state_terminated = {}
+                            env_copy._next_state_terminated[action] = node.terminated
+                            env_copy.step(action, update_legal_action=False)
+
+                    # step2: expand
+                    if node.visit_count > 0:
+                        env_copy._next_state_terminated = {}
+                        env_copy._next_state_terminated[action] = node.terminated
+                        _, _, terminated, truncated, info = env_copy.step(
+                            action, update_legal_action=True
+                        )
+
+                        if terminated or truncated:
+                            continue
+                        
+                        # record api_tokens, if not expand, info["api_completion_token"] is 0
+                        api_call_completion_tokens += info["api_completion_token"]
+                        self._expand_leaf_node(node, env_copy, reward_model_fn)
+
+                        action, node = self._select_child(node, env_copy)
+                        env_copy._next_state_terminated = {}
+                        env_copy._next_state_terminated[action] = node.terminated
+                        env_copy.step(action, update_legal_action=False)
+                    else:
+                        env_copy._next_state_terminated = {}
+                        env_copy._next_state_terminated[action] = node.terminated
+                        env_copy.step(action, update_legal_action=False)
+
+                    # step3: rollout
+                    leaf_value = node._rollout(env_copy, reward_model_fn)
+
+                    # step4: backup
+                    node.update_recursive(leaf_value, env_copy.mcts_mode)
+
+                # 多次模拟之后进行选择，并更新 simulate_node
+                selected_actions, selected_nodes, selected_scores = self._select_batch_final_action(simulate_node, beam_size)
+
+                for action, node, score in zip(selected_actions, selected_nodes, selected_scores):
+                    env = simulate_env.copy()
+                    env._next_state_terminated = {}
+                    env._next_state_terminated[action] = node.terminated
+
+                    _, _, terminated, truncated, info = env.step(
+                        action, update_legal_action=node.is_leaf()
+                    )
+                    flag = terminated or truncated
+                    # heapq.heappush(top_k_nodes, (-score, flag, node, env))
+                    heapq.heappush(top_k_nodes, (-score, flag, node, env))
+                    
+            simulate_nodes.clear()
+            simulate_envs.clear()
+
+            if len(top_k_nodes) == 0:
+                break
+            while top_k_nodes and len(simulate_nodes) < beam_size:
+                _, flag, node, env = heapq.heappop(top_k_nodes)
+                if flag:
+                    traj_data = {
+                        "path_idx": num_path - beam_size,
+                        "text": env.answer,
+                        "value": node.value,
+                        "api_completion_tokens": api_call_completion_tokens,
+                        "tree_completion_tokens": self._completion_tokens,
+                    }
+                    traj_list.append(traj_data)
+                    beam_size = beam_size - 1
+                    if beam_size == 0:
+                        finished = True
+                        break
+                    continue
+                simulate_nodes.append(node)
+                simulate_envs.append(env)
+
+            if finished:
+                break
+        return traj_list
+
 
     def _simulate(
         self,
@@ -1098,10 +1101,12 @@ class SearchTree:
                 score = self._ucb_score(node, child_tmp)
             elif criteria == "uct":
                 score = self._uct_score(node, child_tmp)
-            elif  criteria == "puct":
+            elif criteria == "puct":
                 score = self._puct_score(node, child_tmp)
-            else:
+            elif criteria == "visit_count":
                 score = child_tmp.visit_count
+            else:
+                score = child_tmp.value
 
             if score > best_score:
                 best_score = score
@@ -1141,21 +1146,24 @@ class SearchTree:
                 score = self._ucb_score(node, child_tmp)
             elif criteria == "uct":
                 score = self._uct_score(node, child_tmp)
-            elif  criteria == "puct":
+            elif criteria == "puct":
                 score = self._puct_score(node, child_tmp)
-            else:
+            elif criteria == "visit_count":
                 score = child_tmp.visit_count
+            else:
+                score = child_tmp.value
 
             heapq.heappush(heap, (-score, action_tmp, child_tmp))
         
         # 提取前beam_size个元素
-        actions, childs = [], []
+        actions, childs, scores = [], [], []
         while heap and len(actions) < beam_size:
-            _, action_tmp, child_tmp = heapq.heappop(heap)
+            neg_score, action_tmp, child_tmp = heapq.heappop(heap)
             actions.append(action_tmp)
             childs.append(child_tmp)
+            scores.append(-neg_score)
         
-        return actions, childs
+        return actions, childs, scores
 
     def _select_by_prior(self, node: Node, simulate_env):
         data_tmp = [

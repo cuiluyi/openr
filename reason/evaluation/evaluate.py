@@ -29,13 +29,11 @@ import ray
 
 
 def parallel_evaluate_test_dataset(
-    method_name: str, solver_fn: Callable, save_dir: Optional[Path] = None
+    method_name: str,
+    solver_fn: Callable,
+    save_dir: Optional[Path] = None,
+    record_writer: Optional[jsonlines.Writer] = None,
 ) -> List[Dict[str, Any]]:
-    if save_dir is not None:
-        record_writer = jsonlines.open(save_dir / f"record.jsonl", mode="w")
-    else:
-        record_writer = None
-
     test_ds = task.test_ds
     # test_ds = [test_ds[i] for i in range(32)]
 
@@ -90,7 +88,6 @@ def parallel_evaluate_test_dataset(
     if record_writer:
         json.dump(avg_res, open(save_dir / "avg_result.json", "w"))
     print("Method: {}. Average result: {}".format(method_name, avg_res))
-    jsonl_to_json(save_dir / "record.jsonl", save_dir / "record.json")
     return results
 
 
@@ -110,8 +107,8 @@ if __name__ == "__main__":
     parser.add_argument("--simulate_num", type=int, default=1)
     # LM gen config
     parser.add_argument("--temperature", type=float, default=0.0)
-    parser.add_argument("--top_k", type=int, default=-1)
     parser.add_argument("--top_p", type=float, default=1)
+    parser.add_argument("--top_k", type=int, default=-1)
     parser.add_argument("--max_new_tokens", type=int, default=256)
     # Tree construction config
     parser.add_argument("--tree_max_depth", type=int, default=None)
@@ -177,6 +174,7 @@ if __name__ == "__main__":
         top_p=config.top_p,
         top_k=config.top_k,
         max_new_tokens=config.max_new_tokens,
+        seed=config.seed,
     )
     cfg_dict_record["gen_config"] = gen_config.__dict__
 
@@ -240,7 +238,9 @@ if __name__ == "__main__":
     cfg_dict_record["method"] = config.method
     cfg_dict_record["method_config"] = method_config.__dict__
 
-    if config.save_dir is not None:
+    if config.local or config.save_dir is None:
+        save_dir, record_writer = None, None
+    else:
         datetime_str = datetime.now().strftime("%Y%m%d_%H%M%S")
         save_dir = Path(config.save_dir) / task.task_name / config.method / datetime_str
         save_dir.mkdir(parents=True)
@@ -248,7 +248,6 @@ if __name__ == "__main__":
         cfg_dict_record["LM"] = config.LM
         cfg_dict_record["RM"] = config.RM
         json.dump(cfg_dict_record, open(save_dir / "config.json", "w"))
-    else:
-        save_dir = None
 
-    parallel_evaluate_test_dataset(config.method, solver_fn, save_dir)
+    parallel_evaluate_test_dataset(config.method, solver_fn, save_dir, record_writer)
+    jsonl_to_json(save_dir / "record.jsonl", save_dir / "record.json")

@@ -170,13 +170,13 @@ class Env(CoTEnv):
     @override
     def try_update_legal_action(self, node):
         cnt = 0
-        while cnt < 3:
+        while cnt < 5:
             cnt += 1
             try:
                 updated_node = self.update_legal_actions(node)
                 break
             except NoLegalActionException as e:
-                if cnt == 3:
+                if cnt == 5:
                     raise ResetException
 
         # info = {"api_completion_token": api_completion_token}

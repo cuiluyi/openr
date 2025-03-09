@@ -1,7 +1,10 @@
 python reason/evaluation/evaluate.py \
     --LM Qwen2.5-Math-1.5B-Instruct \
+    --RM Qwen2.5-Math-PRM-7B \
     --task_name MATH \
     --temperature 0.0 \
+    --top_p 0.95 \
+    --top_k -1 \
     --max_new_tokens 2048 \
     --save_dir results \
     --method cot \

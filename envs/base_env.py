@@ -7,11 +7,10 @@ import torch
 from distributed.utils import print_with_rank
 from transformers import PreTrainedTokenizer
 from reason.inference.lm_call import LMCallingConfig, ConcatedLMGenResult
-from envs.filter import DiversityFilter
+from envs.DiversityFilter import DiversityFilter
+from envs.CorrectFilter import CorrectFilter
 
 INVALID_ANS = "[invalid]"
-
-diversity_filter = DiversityFilter()
 
 
 class NoLegalActionException(Exception):
@@ -102,6 +101,7 @@ class CoTEnv(BaseEnv):
         cot_example_str: str,
         problem_format_str: str,
         reset=True,
+        reward_model_fn: Optional[Callable] = None,
     ):
         self.config = config
         self.mcts_mode = "play_with_bot_mode"
@@ -126,6 +126,8 @@ class CoTEnv(BaseEnv):
         else:
             self.task_prefix = None
 
+        self.reward_model_fn = reward_model_fn
+
         if reset:
             self.reset(update_legal_action=True)
 
@@ -142,7 +144,7 @@ class CoTEnv(BaseEnv):
         )
         if update_legal_action:
             cnt = 0
-            while cnt < 3:
+            while cnt < 5:
                 cnt += 1
                 try:
                     self._legal_actions, api_completion_token = (
@@ -150,28 +152,27 @@ class CoTEnv(BaseEnv):
                     )
                     break
                 except NoLegalActionException as e:
-                    if cnt == 3:
+                    if cnt == 5:
                         raise ResetException
         info = {"api_completion_token": api_completion_token}
         return self.get_state(), info
 
     def step(self, action, update_legal_action=True):
-        if action is not None:
-            self.action_history.append(action)
+        self.action_history.append(action)
         state = self.get_state()
         reward = self.get_reward()
         terminated, truncated, info = self.get_done_and_info()
         # update legal actions
         if not (terminated or truncated) and update_legal_action:
             cnt = 0
-            while cnt < 3:
+            while cnt < 5:
                 cnt += 1
                 try:
                     self._legal_actions, api_completion_token = self.update_legal_actions()
                     info["api_completion_token"] = api_completion_token
                     break
                 except NoLegalActionException as e:
-                    if cnt == 3:
+                    if cnt == 5:
                         terminated = True
                         reward = 0
                         self._legal_actions = None
@@ -196,16 +197,27 @@ class CoTEnv(BaseEnv):
         return action
 
     def update_legal_actions(self):
-        result: ConcatedLMGenResult = self.llm_gen_fn(
-            input_str=self.get_state(),
-            config=LMCallingConfig(
-                n=self.config["max_actions"],
-                stop_str=self.sep,
-                include_stop_str_in_output=True,
-                **self.config["generation_config"]
-            ),
-        )
-        result = diversity_filter.filter(result)
+        # diversity_filter = DiversityFilter()
+        correct_filter = CorrectFilter(self, self.reward_model_fn)
+
+        try_num = 10
+        for i in range(try_num):
+            result: ConcatedLMGenResult = self.llm_gen_fn(
+                input_str=self.get_state(),
+                config=LMCallingConfig(
+                    n=self.config["max_actions"],
+                    stop_str=self.sep,
+                    include_stop_str_in_output=True,
+                    **self.config["generation_config"]
+                ),
+            )
+            # result = diversity_filter.filter(result)
+            result = correct_filter.filter(result)
+            if result is not None:
+                break
+            if i == try_num - 1 and result is None:
+                result = correct_filter.max_step
+        
         texts = result.text
         logps_avg_by_len = result.logp_avg_by_len
         token_len = result.num_tokens
@@ -254,7 +266,6 @@ class CoTEnv(BaseEnv):
                 text_list, prob_list, num_token_list, finish_reason_list
             )
         ]
-
         self._next_state_terminated = next_state_terminated
         return _legal_actions, result.completion_tokens
 
@@ -298,13 +309,14 @@ class CoTEnv(BaseEnv):
 
     def copy(self):
         env = self.__class__(
-            self.config,
-            self.math_problems,
-            self.llm_gen_fn,
-            self._task_desc_str,
-            self._cot_example_str,
-            self._problem_format_str,
+            config=self.config,
+            math_problems=self.math_problems,
+            llm_gen_fn=self.llm_gen_fn,
+            task_desc_str=self._task_desc_str,
+            cot_example_str=self._cot_example_str,
+            problem_format_str=self._problem_format_str,
             reset=False,
+            reward_model_fn=self.reward_model_fn,
         )
         env.math_problem = copy.deepcopy(self.math_problem)
         env._legal_actions = copy.deepcopy(self._legal_actions)

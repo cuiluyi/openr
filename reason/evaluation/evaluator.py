@@ -120,20 +120,6 @@ class MathEvaluator:
         self, problem_inst: Dict[str, str], solver_fn: Callable
     ) -> List[str]:
         # try:
-        #     solution: SolutionOutput = solver_fn(problem_inst, self.lm_call, self.rm_call)
-        #     result, output = self.analyze_output(problem_inst, solution.solutions)
-        #     total_completion_token = 0
-        #     for i, o in enumerate(output):
-        #         o["completion_tokens"] = solution.completion_tokens[i]
-        #         if isinstance(solution, TreeSearchSolutionOutput):
-        #             o["tree_completion_tokens"] = solution.tree_completion_tokens[i]
-        #         # We define the completion_tokens as the tokens comsumed between two generated
-        #         #  answers, therefore we need to take sum here.
-        #         total_completion_token += solution.completion_tokens[i]
-        #     result["total_completion_tokens"] = total_completion_token
-        #     return problem_inst, result, output
-        # except Exception as e:
-        #     return problem_inst, {"error": str(e)}, []
         solution: SolutionOutput = solver_fn(problem_inst, self.lm_call, self.rm_call)
         result, output = self.analyze_output(problem_inst, solution.solutions)
         total_completion_token = 0
@@ -146,19 +132,18 @@ class MathEvaluator:
             total_completion_token += solution.completion_tokens[i]
         result["total_completion_tokens"] = total_completion_token
         return problem_inst, result, output
+        # except Exception as e:
+        #     return problem_inst, {"error": str(e)}, []
 
 
 
     def analyze_output(self, problem_inst: Dict[str, str], gen_answers: List[str]):
         extracted_groundtruth = self._task.extract_groundtruth(problem_inst["answer"])
+        # XXX(ziyu): for tree search methods with value_fn, should not call rm
+        #  to compute it again
+        input_list = [(problem_inst["question"], txt) for txt in gen_answers]
+        value_list = self.rm_call(input_list, lm_step_tag=self.lm_call.lm_step_tag)
 
-        if len(gen_answers) > 1:
-            input_list = [(problem_inst["question"], txt) for txt in gen_answers]
-            # XXX(ziyu): for tree search methods with value_fn, should not call rm
-            #  to compute it again
-            value_list = self.rm_call(input_list, lm_step_tag=self.lm_call.lm_step_tag)
-        else:
-            value_list = [[0]]
         output_list = [
             {"path_idx": i, "text": txt, "value": v}
             for i, (txt, v) in enumerate(zip(gen_answers, value_list))

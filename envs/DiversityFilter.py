@@ -31,8 +31,8 @@ class DiversityFilter:
     def filter(
         self,
         result: ConcatedLMGenResult,
-        semantic_thresh: float = 0.9,
-        ngram_thresh: float = 0.9,
+        semantic_thresh: float = 0.95,
+        ngram_thresh: float = 0.95,
     ) -> ConcatedLMGenResult:
         """同步过滤所有相关字段"""
         # 获取原始索引映射
@@ -106,11 +106,18 @@ class DiversityFilter:
 if __name__ == "__main__":
     # 原始生成结果
     raw_result = ConcatedLMGenResult(
+        # text=[
+        #     "To determine which student has the greatest average speed, we need to calculate the average speed for each student. Average speed is given by the formula:\n\n",
+        #     "To determine which student has the greatest average speed, we need to calculate the average speed for each student. The average speed is given by the formula:\n\n",
+        #     "To determine which student has the greatest average speed, we need to calculate the average speed for each student. The average speed is given by the formula:\n\n",
+        #     "To determine which student has the greatest average speed, we need to calculate the average speed for each student using the formula for average speed:\n\n",
+        # ],
         text=[
-            "To determine which student has the greatest average speed, we need to calculate the average speed for each student. Average speed is given by the formula:\n\n",
-            "To determine which student has the greatest average speed, we need to calculate the average speed for each student. The average speed is given by the formula:\n\n",
-            "To determine which student has the greatest average speed, we need to calculate the average speed for each student. The average speed is given by the formula:\n\n",
-            "To determine which student has the greatest average speed, we need to calculate the average speed for each student using the formula for average speed:\n\n",
+            "To find \\( (a_9)^9 \\), we first need to determine the periodicity of the sequence \\( (a_n) \\). Given \\( a_3 = a_1 \\), we will find the values of \\( a_4, a_5, \\) and so on, to see if the sequence is periodic.\n\n",
+            "Given the recurrence relation \\( a_{i+1} = \\frac{1}{1 - a_i} \\), we need to determine the behavior of the sequence. Let's compute the first few terms of the sequence in terms of \\( a_1 \\):\n\n",
+            "To solve the problem, we first need to determine the periodicity of the sequence \\( (a_n) \\). We start by expressing \\( a_2 \\) in terms of \\( a_1 \\):\n\\[ a_2 = \\frac{1}{1 - a_1}. \\]\nNext, we express \\( a_3 \\) in terms of \\( a_2 \\):\n\\[ a_3 = \\frac{1}{1 - a_2} = \\frac{1}{1 - \\frac{1}{1 - a_1}} = \\frac{1 - a_1}{1 - a_1 - 1} = \\frac{1 - a_1}{-a_1} = \\frac{a_1 - 1}{a_1} = 1 - \\frac{1}{a_1}. \\]\nSince we know that \\( a_3 = a_1 \\), we can set up the equation:\n\\[ a_1 = 1 - \\frac{1}{a_1}. \\]\nMultiplying both sides by \\( a_1 \\) gives:\n\\[ a_1^2 = a_1 - 1. \\]\nRearranging terms, we get a quadratic equation:\n\\[ a_1^2 - a_1 + 1 = 0. \\]\nThe solutions to this quadratic equation are:\n\\[ a_1 = \\frac{1 \\pm \\sqrt{1 - 4}}{2} = \\frac{1 \\pm \\sqrt{-3}}{2} = \\frac{1 \\pm i\\sqrt{3}}{2}. \\]\nLet's denote these solutions by \\( \\omega = \\frac{1 + i\\sqrt{3}}{2} \\) and \\( \\omega^2 = \\frac{1 - i\\sqrt{3}}{2} \\). These are the non-real cube roots of unity, satisfying \\( \\omega^3 = 1 \\) and \\( (\\omega^2)^3 = 1 \\), and \\( 1 + \\omega + \\omega^2 = 0 \\).\n\n",
+            "To solve for \\( (a_9)^9 \\), we first need to understand the periodicity of the sequence. Given that \\( a_3 = a_1 \\), we will investigate the sequence further to find its periodicity.\n\n",
+            "To solve for \\( (a_9)^9 \\) in the sequence \\( (a_n) \\) defined by \\( a_{i+1} = \\frac{1}{1 - a_i} \\) and given that \\( a_3 = a_1 \\), we will first determine the periodicity of the sequence. Let's start by expressing the first few terms of the sequence in terms of \\( a_1 \\).\n\n",
         ],
         prompt_tokens=369,
         num_tokens=[29, 30, 30, 27],
@@ -134,13 +141,14 @@ if __name__ == "__main__":
     filtered_result = filter.filter(raw_result)
 
     # 验证过滤结果
+    print(len(filtered_result.text))
     print(filtered_result.text)  # ["方法A", "方法B"]
     print(filtered_result.prompt_tokens)  # [10, 10]
     print(filtered_result.finish_reason)  # ["stop", "length"]
 
-    [
-        "Next, we need to find \\(\\theta\\), the angle that the line from the origin to the point makes with the positive \\(x\\)-axis. The formula for \\(\\theta\\) is:\n\\[\n\\theta = \\tan^{-1}\\left(\\frac{y}{x}\\right)\n\\]\nHowever, since \\(x = 0\\), we need to consider the position of the point in the coordinate plane. The point \\((0,3)\\) lies on the positive \\(y\\)-axis, so the angle \\(\\theta\\) is \\(\\frac{\\pi}{2}\\) radians.\n\n",
-        "Next, we calculate \\(\\theta\\), which is the angle formed with the positive \\(x\\)-axis. The formula for \\(\\theta\\) is:\n\\[\n\\theta = \\tan^{-1}\\left(\\frac{y}{x}\\right)\n\\]\nHowever, we need to consider the quadrant in which the point lies. Since the point \\((0,3)\\) is on the positive \\(y\\)-axis, \\(\\theta\\) is \\(\\frac{\\pi}{2}\\) (or 90 degrees).\n\n",
-    ]
-    [3, 12]
-    ["stop", "stop"]
+    # [
+    #     "Next, we need to find \\(\\theta\\), the angle that the line from the origin to the point makes with the positive \\(x\\)-axis. The formula for \\(\\theta\\) is:\n\\[\n\\theta = \\tan^{-1}\\left(\\frac{y}{x}\\right)\n\\]\nHowever, since \\(x = 0\\), we need to consider the position of the point in the coordinate plane. The point \\((0,3)\\) lies on the positive \\(y\\)-axis, so the angle \\(\\theta\\) is \\(\\frac{\\pi}{2}\\) radians.\n\n",
+    #     "Next, we calculate \\(\\theta\\), which is the angle formed with the positive \\(x\\)-axis. The formula for \\(\\theta\\) is:\n\\[\n\\theta = \\tan^{-1}\\left(\\frac{y}{x}\\right)\n\\]\nHowever, we need to consider the quadrant in which the point lies. Since the point \\((0,3)\\) is on the positive \\(y\\)-axis, \\(\\theta\\) is \\(\\frac{\\pi}{2}\\) (or 90 degrees).\n\n",
+    # ]
+    # [3, 12]
+    # ["stop", "stop"]

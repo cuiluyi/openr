@@ -31,6 +31,7 @@ def cot(
         top_k=1,
         top_p=1.0,
         max_new_tokens=gen_config.max_new_tokens,
+        seed=gen_config.seed
     )
     config.num_sequence = 1
     return best_of_n(config, gen_config, problem_inst, lm_call, rm_call)
@@ -94,6 +95,7 @@ def beam_search(
     lm_call: LanguageModelCallingFunction,
     rm_call: RewardModelCallingFunction,
 ) -> SolutionOutput:
+    rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
     task = Task(task_name=config.task_name)
     env = task.env_fn(
         config={
@@ -114,13 +116,16 @@ def beam_search(
             }
         ],
         llm_gen_fn=lm_call,
+        reward_model_fn=rm_call_fn,
         # TODO(ziyu): set sep by lm_call.lm_step_tag
     )
 
     search_tree = SearchTree(cfg={})
-    rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
     traj_list = search_tree.beam_search(
-        env, config.beam_size, config.tree_max_depth, rm_call_fn
+        simulate_env=env,
+        beam_size=config.beam_size,
+        max_step=config.tree_max_depth,
+        reward_model_fn=rm_call_fn
     )
     return TreeSearchSolutionOutput(
         solutions=[t["text"] for t in traj_list],
@@ -156,6 +161,7 @@ def vanila_mcts(
     lm_call: LanguageModelCallingFunction,
     rm_call: RewardModelCallingFunction
 ):
+    rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
     task = Task(task_name=config.task_name)
     env = task.env_fn(
         config={
@@ -176,6 +182,7 @@ def vanila_mcts(
             }
         ],
         llm_gen_fn=lm_call,
+        reward_model_fn=rm_call_fn,
     )
 
     search_tree = SearchTree(
@@ -185,7 +192,7 @@ def vanila_mcts(
             "init_critic_value": config.init_critic_value,
         }
     )
-    rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
+
     traj_list = search_tree.vanila_mcts(
         simulate_env=env,
         num_path=config.num_path,
@@ -222,6 +229,7 @@ def mcts(
     lm_call: LanguageModelCallingFunction,
     rm_call: RewardModelCallingFunction
 ):
+    rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
     task = Task(task_name=config.task_name)
     env = task.env_fn(
         config={
@@ -242,6 +250,7 @@ def mcts(
             }
         ],
         llm_gen_fn=lm_call,
+        reward_model_fn=rm_call_fn,
     )
 
     search_tree = SearchTree(
@@ -251,7 +260,7 @@ def mcts(
             "init_critic_value": config.init_critic_value,
         }
     )
-    rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
+
     traj_list = search_tree.mcts(
         simulate_env=env,
         num_path=config.num_path,
@@ -282,12 +291,13 @@ class RStarMCTSConfig(MCTSBaseConfig):
         assert self.num_path > 0
 
 def rstar_mcts(
-        config: RStarMCTSConfig,
-        gen_config: LMCallingConfig,
-        problem_inst: Dict[str, str],
-        lm_call: LanguageModelCallingFunction,
-        rm_call: RewardModelCallingFunction
+    config: RStarMCTSConfig,
+    gen_config: LMCallingConfig,
+    problem_inst: Dict[str, str],
+    lm_call: LanguageModelCallingFunction,
+    rm_call: RewardModelCallingFunction
 ):
+    rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
     task = Task(task_name=config.task_name)
     env = task.env_fn(
         config={
@@ -307,6 +317,7 @@ def rstar_mcts(
             }
         ],
         llm_gen_fn=lm_call,
+        reward_model_fn=rm_call_fn,
     )
 
     search_tree = RstarSearchTree(
@@ -316,7 +327,7 @@ def rstar_mcts(
             "init_critic_value": config.init_critic_value,
         }
     )
-    rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
+
     traj_list = search_tree.rstar_mcts(
         simulate_env=env,
         num_path=config.num_path,
@@ -350,12 +361,13 @@ class MCTSBeamSearchConfig(MCTSBaseConfig):
             "MCTSBeamSearch should set init_critic_value to True"
 
 def mcts_beam_search(
-        config: MCTSBeamSearchConfig,
-        gen_config: LMCallingConfig,
-        problem_inst: Dict[str, str],
-        lm_call: LanguageModelCallingFunction,
-        rm_call: RewardModelCallingFunction
+    config: MCTSBeamSearchConfig,
+    gen_config: LMCallingConfig,
+    problem_inst: Dict[str, str],
+    lm_call: LanguageModelCallingFunction,
+    rm_call: RewardModelCallingFunction
 ):
+    rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
     task = Task(task_name=config.task_name)
     env = task.env_fn(
         config={
@@ -376,6 +388,7 @@ def mcts_beam_search(
             }
         ],
         llm_gen_fn=lm_call,
+        reward_model_fn=rm_call_fn,
     )
 
     search_tree = SearchTree(
@@ -385,7 +398,7 @@ def mcts_beam_search(
             "init_critic_value": config.init_critic_value,
         }
     )
-    rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
+
     traj_list = search_tree.mcts_beam_search(
         initial_env=env,
         num_path=config.num_path,

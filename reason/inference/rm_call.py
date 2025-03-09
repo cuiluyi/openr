@@ -88,9 +88,9 @@ class RMRemoteCaller(RewardModelCallingFunction):
     ) -> Union[List[int], List[List[int]]]:
 
         if isinstance(question_answer_pairs[0], str):
-            response = self.replace_step_tag(question_answer_pairs[1], lm_step_tag)
             input_str = self.format_str.format(
-                question=question_answer_pairs[0], answer=response
+                question=question_answer_pairs[0],
+                answer=self.replace_step_tag(question_answer_pairs[1], lm_step_tag)
             )
         else:
             input_str = [

@@ -3,6 +3,8 @@ python reason/evaluation/evaluate.py \
     --RM Qwen2.5-Math-PRM-7B \
     --task_name MATH \
     --temperature 1 \
+    --top_p 0.95 \
+    --top_k -1 \
     --num_sequence 4 \
     --max_new_tokens 2048 \
     --save_dir results \

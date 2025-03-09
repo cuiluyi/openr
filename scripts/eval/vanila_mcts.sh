@@ -3,9 +3,11 @@ python reason/evaluation/evaluate.py \
     --RM Qwen2.5-Math-PRM-7B \
     --task_name MATH \
     --temperature 0.8 \
+    --top_p 1 \
+    --top_k -1 \
     --max_new_tokens 2048 \
     --num_sequence 1 \
-    --tree_max_width 4 \
+    --tree_max_width 16 \
     --tree_max_depth 50 \
     --save_dir results \
     --method vanila_mcts \
