@@ -624,8 +624,8 @@ class SearchTree:
                     node.update_recursive(leaf_value, env_copy.mcts_mode)
 
                 # 多次模拟之后进行选择，并更新 simulate_node
-                # action, simulate_node = self._select_child(simulate_node, simulate_env, criteria="visit_count")
-                action, simulate_node = self._select_child(simulate_node, simulate_env, criteria="value")
+                action, simulate_node = self._select_child(simulate_node, simulate_env, criteria="visit_count")
+                # action, simulate_node = self._select_child(simulate_node, simulate_env, criteria="value")
 
                 simulate_env._next_state_terminated = {}
                 simulate_env._next_state_terminated[action] = simulate_node.terminated
@@ -926,7 +926,7 @@ class SearchTree:
                     env._next_state_terminated[action] = node.terminated
 
                     _, _, terminated, truncated, info = env.step(
-                        action, update_legal_action=node.is_leaf()
+                        action, update_legal_action=False
                     )
                     flag = terminated or truncated
                     # heapq.heappush(top_k_nodes, (-score, flag, node, env))
@@ -952,9 +952,9 @@ class SearchTree:
                     if beam_size == 0:
                         finished = True
                         break
-                    continue
-                simulate_nodes.append(node)
-                simulate_envs.append(env)
+                else:
+                    simulate_nodes.append(node)
+                    simulate_envs.append(env)
 
             if finished:
                 break

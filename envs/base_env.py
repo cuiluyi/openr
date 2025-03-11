@@ -295,7 +295,8 @@ class CoTEnv(BaseEnv):
         elif self.sep not in self.action_history[-1]:
             # This is because the output is stopped by eos
             terminated = True
-        else: terminated = False
+        else:
+            terminated = False
 
         truncated = len(self.action_history) >= self.config["max_length"]
         assert len(self.action_history) <= self.config["max_length"]

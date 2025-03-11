@@ -12,7 +12,7 @@ python reason/evaluation/evaluate.py \
     --tree_max_depth 50 \
     --save_dir results \
     --method mcts_beam_search \
-    --num_worker 16 \
+    --num_worker 32 \
     --controller_addr http://0.0.0.0:28777 \
     # --local
 
