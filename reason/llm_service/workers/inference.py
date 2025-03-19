@@ -295,6 +295,8 @@ def generate_stream(
                     },
                     "finish_reason": None,
                 }
+                if hasattr(model, "head0"):
+                    model.change_head()
 
         if stopped:
             break
@@ -316,6 +318,8 @@ def generate_stream(
         },
         "finish_reason": finish_reason,
     }
+    if hasattr(model, "head0"):
+        model.change_head()
 
     # Clean
     del past_key_values, out

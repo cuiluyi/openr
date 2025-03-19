@@ -60,26 +60,20 @@ def main(record_path, prm_and_tags):
             res = {
                 k: 
                 judge_ans(
-                    question,
                     task.extract_groundtruth(groundtruth),
                     preds,
                     rm_v,
                     k,
-                    task.extract_answer,
-                    task.judge_correct
                 )
                 for k in AGG_FN_MAP.keys() if 'orm' not in k
             }
             orig_res = {
                 k: 
                 judge_ans(
-                    question,
                     task.extract_groundtruth(groundtruth),
                     preds,
                     original_v,
                     k,
-                    task.extract_answer,
-                    task.judge_correct
                 )
                 for k in AGG_FN_MAP.keys() if 'orm' not in k
             }

@@ -1,4 +1,5 @@
-test/
+ckpts/
+test/models_tutorials
 logs_fastchat/
 __pycache__/
 results/

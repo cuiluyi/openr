@@ -4,6 +4,8 @@ import importlib
 from multiprocessing import Pool
 from typing import Any, Callable, Dict, Optional, List, Union
 
+from math_verify import parse, verify
+
 import numpy as np
 import ray
 from envs import get_default_query_str_builder, get_env_datasets
@@ -54,16 +56,12 @@ CHOSEN_AGGR_METHODS = [
 
 
 def judge_ans(
-    problem_str: str,
     extracted_groundtruth: str,
-    output_list: List[str],
+    ans_list: List[str],
     v_list: List[float],
     aggration_mode: str,
-    extract_answer_fn,
-    judge_correct_fn,
     normalize=False,
 ):
-    ans_list = [extract_answer_fn(txt) for txt in output_list]
     valid_ans_list, valid_v_list = [], []
     for i, ans in enumerate(ans_list):
         if ans != INVALID_ANS:
@@ -81,7 +79,8 @@ def judge_ans(
     aggregated_ans = AGG_FN_MAP[aggration_mode](valid_ans_list, valid_v_list)
 
     return (
-        1 if judge_correct_fn(problem_str, extracted_groundtruth, aggregated_ans) else 0
+        # 1 if judge_correct_fn(problem_str, extracted_groundtruth, aggregated_ans) else 0
+        1 if verify(extracted_groundtruth, aggregated_ans) else 0
     )
 
 
@@ -138,7 +137,8 @@ class MathEvaluator:
 
 
     def analyze_output(self, problem_inst: Dict[str, str], gen_answers: List[str]):
-        extracted_groundtruth = self._task.extract_groundtruth(problem_inst["answer"])
+        # extracted_groundtruth = self._task.extract_groundtruth(problem_inst["answer"])
+        extracted_groundtruth = parse(problem_inst["answer"])
         # XXX(ziyu): for tree search methods with value_fn, should not call rm
         #  to compute it again
         input_list = [(problem_inst["question"], txt) for txt in gen_answers]
@@ -148,15 +148,14 @@ class MathEvaluator:
             {"path_idx": i, "text": txt, "value": v}
             for i, (txt, v) in enumerate(zip(gen_answers, value_list))
         ]
+        ans_list = [parse(txt) for txt in gen_answers]
+
         res = {
             agg_method: judge_ans(
-                problem_inst["question"],
                 extracted_groundtruth,
-                gen_answers,
+                ans_list,
                 value_list,
                 agg_method,
-                self._task.extract_answer,
-                self._task.judge_correct,
             )
             for agg_method in (
                 CHOSEN_AGGR_METHODS if len(gen_answers) > 1 else [MAJORITY_VOTE]

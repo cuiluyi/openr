@@ -129,7 +129,7 @@ if __name__ == "__main__":
         ray.init(local_mode=True)
 
     # TODO(ziyu): move into some configuration file
-    if "math-shepherd" in config.RM.lower():
+    if "mistral" in config.RM.lower():
         prm_step_tag = "ки\n"
         prm_format_str = "{question} {answer}"
     elif "qwen2.5-math-prm" in config.RM.lower():
@@ -140,10 +140,12 @@ if __name__ == "__main__":
         prm_step_tag = "\n\n\n\n\n "
         prm_format_str = "{question} {answer}"
 
-    if "qwen" in config.LM.lower():
-        lm_step_tag = "\n\n"
-    else:
+    if "mistral" in config.LM.lower():
         lm_step_tag = "ки\n"
+    else:
+        # assume qwen
+        lm_step_tag = "\n\n"
+
     lm_call = VLLMRemoteCaller(
         config.LM, config.controller_addr, lm_step_tag=lm_step_tag
     )

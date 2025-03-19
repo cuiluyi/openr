@@ -1,6 +1,7 @@
 from typing import List, Optional
 import requests
 from dataclasses import dataclass
+from reason.inference.utils import merge_dict_list
 
 
 @dataclass
@@ -15,6 +16,18 @@ class ConcatedLMGenResult:
     # post init compute number of completion_tokens
     def __post_init__(self):
         self.completion_tokens = sum(self.num_tokens)
+
+
+def get_resonse(worker_addr, headers, gen_params):
+    response = requests.post(
+        worker_addr + "/worker_generate",
+        headers=headers,
+        json=gen_params,
+        stream=True,
+    )
+    # print(response)
+    results = response.json()
+    return results
 
 
 def _generate_fastchat(
@@ -32,57 +45,67 @@ def _generate_fastchat(
     seed,
 ) -> ConcatedLMGenResult:
 
-    ret = requests.post(
-        controller_addr + "/get_worker_address", json={"model": model_name}
-    )
-
-    # print(ret.json())
-    
-    worker_addr = ret.json()["address"]
-    if not worker_addr:
-        raise ValueError("Language Model name {} does not exist.".format(model_name))
-
     headers = {"User-Agent": "FastChat Client"}
-    gen_params = {
-        "model": model_name,
-        "prompt": query_str,
-        "temperature": temperature,
-        "n": n,
-        "top_p": top_p,
-        "top_k": top_k,
-        "stop_token_ids": stop_token_ids,
-        "max_new_tokens": max_new_tokens,
-        "stop": stop_str,
-        "echo": False,
-        "include_stop_str_in_output": include_stop_str_in_output,
-        "seed": seed,
-    }
-    # gen_params = {
-    #     "model": model_name,
-    #     "prompt": query_str,
-    #     "temperature": 0,
-    #     "n": n,
-    #     "top_p": 1,
-    #     "top_k": -1,
-    #     "stop_token_ids": stop_token_ids,
-    #     "max_new_tokens": max_new_tokens,
-    #     "stop": stop_str,
-    #     "echo": False,
-    #     "include_stop_str_in_output": include_stop_str_in_output,
-    #     "use_beam_search": True,
-    #     "best_of": 8,
-    # }
-    response = requests.post(
-        worker_addr + "/worker_generate",
-        headers=headers,
-        json=gen_params,
-        stream=True,
-    )
+    model_list = model_name.split("&")
 
-    results = response.json()
+    if len(model_list) == 1:
+        ret = requests.post(
+            controller_addr + "/get_worker_address", json={"model": model_name}
+        )
+        worker_addr = ret.json()["address"]
+        if not worker_addr:
+            raise ValueError(
+                "Language Model name {} does not exist.".format(model_name)
+            )
 
-    # print(results)
-    
+        gen_params = {
+            "model": model_name,
+            "prompt": query_str,
+            "temperature": temperature,
+            "n": n,
+            "top_p": top_p,
+            "top_k": top_k,
+            "stop_token_ids": stop_token_ids,
+            "max_new_tokens": max_new_tokens,
+            "stop": stop_str,
+            "echo": False,
+            "include_stop_str_in_output": include_stop_str_in_output,
+            "seed": seed,
+        }
+        results = get_resonse(worker_addr, headers, gen_params)
+    else:
+        for i in range(n):
+            model_name = model_list[i % len(model_list)]
+            ret = requests.post(
+                controller_addr + "/get_worker_address", json={"model": model_name}
+            )
+            worker_addr = ret.json()["address"]
+            if not worker_addr:
+                raise ValueError(
+                    "Language Model name {} does not exist.".format(model_name)
+                )
+
+            gen_params = {
+                "model": model_name,
+                "prompt": query_str,
+                "temperature": temperature,
+                "n": 1,
+                "top_p": top_p,
+                "top_k": top_k,
+                "stop_token_ids": stop_token_ids,
+                "max_new_tokens": max_new_tokens,
+                "stop": stop_str,
+                "echo": False,
+                "include_stop_str_in_output": include_stop_str_in_output,
+                "seed": seed,
+            }
+            if i == 0:
+                results = get_resonse(worker_addr, headers, gen_params)
+            else:
+                results = merge_dict_list(
+                    [results, get_resonse(worker_addr, headers, gen_params)]
+                )
+
     output_token_lens = results["output_token_len"]
     cum_logps = results["cumulative_logprob"]
     avg_len_logps = [

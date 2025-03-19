@@ -25,6 +25,7 @@ antlr4-python3-runtime==4.11.1 # ! The version needs to be compatible with sympy
 word2number
 Pebble
 timeout-decorator
+ninja
 flash_attn
 python_dateutil
 tensorboardX
@@ -32,3 +33,4 @@ scikit-learn
 # for rstar
 pyparsing
 fuzzywuzzy
+math-verify[antlr4_13_2]
