@@ -83,7 +83,7 @@ class CoTEnv(BaseEnv):
 
     @property
     def stop_str(self):
-        return NotImplementedError
+        return self._stop_str
 
     def _is_correct(self, completion) -> bool:
         raise NotImplementedError
@@ -115,6 +115,7 @@ class CoTEnv(BaseEnv):
         self._task_desc_str = task_desc_str
         self._cot_example_str = cot_example_str
         self._problem_format_str = problem_format_str
+        self._stop_str = config.get("stop_str", None)
 
         prefixes = []
         if self._task_desc_str is not None:

@@ -636,9 +636,10 @@ class SearchTree:
 
                 done = terminated or truncated
 
+            lm_step_tag = simulate_env.llm_gen_fn.lm_step_tag
             traj_data = {
                 "path_idx": i_path,
-                "text": simulate_env.answer,
+                "text": simulate_env.answer if simulate_env.answer.endswith(lm_step_tag) else simulate_env.answer + lm_step_tag,
                 "value": leaf_value,
                 "api_completion_tokens": api_call_completion_tokens,
                 "tree_completion_tokens": self._completion_tokens,

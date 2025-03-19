@@ -33,9 +33,9 @@ class Env(CoTEnv):
 
     def __init__(
         self,
-        config,
-        math_problems,
-        llm_gen_fn,
+        config: dict,
+        math_problems:dict,
+        llm_gen_fn: Callable,
         task_desc_str: str = COT_TASK_DESC,
         cot_example_str: str = COT_EXAMPLES,
         problem_format_str: str = PROBLEM_FORMAT_STR,
@@ -52,10 +52,6 @@ class Env(CoTEnv):
             reset,
             reward_model_fn,
         )
-
-    @property
-    def stop_str(self):
-        return STOP_STR
 
     def post_process_act(self, action: str):
         if not action.endswith(self.sep):

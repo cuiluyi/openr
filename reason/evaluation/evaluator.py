@@ -145,7 +145,11 @@ class MathEvaluator:
         value_list = self.rm_call(input_list, lm_step_tag=self.lm_call.lm_step_tag)
 
         output_list = [
-            {"path_idx": i, "text": txt, "value": v}
+            {
+                "path_idx": i,
+                "text": txt,
+                "value": v
+             }
             for i, (txt, v) in enumerate(zip(gen_answers, value_list))
         ]
         ans_list = [parse(txt) for txt in gen_answers]
