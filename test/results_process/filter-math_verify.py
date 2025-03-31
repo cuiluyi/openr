@@ -6,7 +6,8 @@ from math_verify import parse, verify
 
 
 file_path = (
-    "/data/cuiluyi/openr/results/MATH/mcts_beam_search/20250311_204912/record.jsonl"
+    "/data/cuiluyi/openr/results/metrics/test/mcts_beam_search/20250311_204912/record.jsonl"
+    # "/data/cuiluyi/openr/results/MATH/mcts_beam_search/20250311_204912/record.jsonl"
     # "/data/cuiluyi/openr/results/MATH/mcts_beam_search/20250311_204912/partial_correct_data.json"
 )
 
@@ -26,7 +27,7 @@ def check_partial_correct(a, b, c, d, ground_truth, ans_list):
     if a + b + c + d != 0:
         return False
     for ans in ans_list:
-        if verify(ans, ground_truth):
+        if verify(ground_truth, ans):
             return True
     return False
 

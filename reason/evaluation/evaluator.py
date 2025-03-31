@@ -23,7 +23,7 @@ from envs.base_env import INVALID_ANS
 
 
 class Task:
-    def __init__(self, task_name: str, is_few_shot: bool = False):
+    def __init__(self, task_name: str, dataset_id : str, is_few_shot: bool = False):
         self.task_name = task_name
         task_module = importlib.import_module(f"envs.{task_name}")
         if task_name == "MATH" or "rstar":
@@ -33,8 +33,11 @@ class Task:
         else:
             raise NotImplementedError(f"Task {task_name} is not supported")
 
+        self.dataset_id = dataset_id
         self._is_few_shot = is_few_shot
         self.env_fn = task_module.Env
+
+        self._train_ds, self._test_ds = get_env_datasets(self.task_name, self.dataset_id)
 
     def prompt_fn(self, problem_input: str):
         return get_default_query_str_builder(self.task_name)(
@@ -43,7 +46,11 @@ class Task:
 
     @property
     def test_ds(self):
-        return get_env_datasets(self.task_name)[1]
+        return self._test_ds
+
+    @property
+    def train_ds(self):
+        return self._train_ds
 
 
 CHOSEN_AGGR_METHODS = [
@@ -100,18 +107,13 @@ class TreeSearchSolutionOutput(SolutionOutput):
 
 
 class MathEvaluator:
-
     def __init__(
         self,
-        task: Union[str, Task],
+        task: Task,
         lm_call: LanguageModelCallingFunction,
         rm_call: RewardModelCallingFunction,
     ):
-        if isinstance(task, str):
-            self._task = Task(task_name=task)
-        else:
-            assert isinstance(task, Task)
-            self._task = task
+        self._task = task
         self.lm_call = lm_call
         self.rm_call = rm_call
 
@@ -162,7 +164,8 @@ class MathEvaluator:
                 agg_method,
             )
             for agg_method in (
-                CHOSEN_AGGR_METHODS if len(gen_answers) > 1 else [MAJORITY_VOTE]
+                # CHOSEN_AGGR_METHODS if len(gen_answers) > 1 else [MAJORITY_VOTE]
+                CHOSEN_AGGR_METHODS
             )
         }
         return res, output_list

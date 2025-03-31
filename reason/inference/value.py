@@ -27,5 +27,11 @@ def _value_inference_fastchat(
         stream=True,
     )
     results = response.json()
+    # try:
+    #     results = response.json()
+    # except Exception as e:
+    #     print(worker_addr + "/worker_value_inference")
+    #     print(headers)
+    #     print(gen_params)
     value = results["value"]
     return value

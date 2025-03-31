@@ -2,9 +2,9 @@ from importlib import import_module
 from transformers import PreTrainedTokenizer
 
 
-def get_env_datasets(env_name: str, **kwargs):
+def get_env_datasets(env_name: str, dataset_id: str, **kwargs):
     task_module = import_module(f"envs.{env_name}")
-    return task_module.get_train_test_dataset(**kwargs)
+    return task_module.get_train_test_dataset(dataset_id, **kwargs)
 
 
 def get_default_query_str_builder(env_name: str, **kwargs):

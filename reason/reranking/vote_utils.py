@@ -12,9 +12,6 @@ PRM_LAST_VOTE = "prm_last_vote"
 
 
 def _agg_majority_vote(x_list: List[str], unused_v_list: List[List[float]]):
-    # counts = Counter(x_list)
-    # most_common = max(counts, key=counts.get)
-    # return most_common
     groups = []  # 存储等价类的代表元素及其计数
 
     for x in x_list:
@@ -22,7 +19,7 @@ def _agg_majority_vote(x_list: List[str], unused_v_list: List[List[float]]):
         # 遍历现有等价类，检查是否与当前元素匹配
         for i in range(len(groups)):
             representative, count = groups[i]
-            if verify(x, representative):
+            if verify(representative, x):
                 # 找到匹配的等价类，增加计数
                 groups[i] = (representative, count + 1)
                 found = True
@@ -40,16 +37,6 @@ def _agg_majority_vote(x_list: List[str], unused_v_list: List[List[float]]):
             result = representative
     return result
 
-
-# def _agg_orm_vote(x_list: List[str], v_list: List[float]):
-#     assert len(x_list) == len(v_list)
-#     x_dict = defaultdict(lambda: 0.0)
-#     for x, v in zip(x_list, v_list):
-#         x_dict[x] += v
-
-#     highest_x = max(x_dict, key=x_dict.get)
-#     return highest_x
-
 def _agg_orm_vote(x_list: List[str], v_list: List[float]) -> str:
     assert len(x_list) == len(v_list)
     groups = []  # 存储等价类的代表元素及其总值
@@ -59,7 +46,7 @@ def _agg_orm_vote(x_list: List[str], v_list: List[float]) -> str:
         # 遍历现有等价类，检查是否与当前元素等价
         for i in range(len(groups)):
             representative, total = groups[i]
-            if verify(x, representative):
+            if verify(representative, x):
                 # 找到等价类，累加值并更新分组
                 groups[i] = (representative, total + v)
                 found = True

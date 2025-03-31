@@ -16,6 +16,7 @@ if __name__ == "__main__":
     import tree
     import numpy as np
     from tqdm import tqdm
+
     _, ds = get_train_test_dataset()
     print(len(ds))
     print(ds[0])
@@ -38,7 +39,9 @@ if __name__ == "__main__":
                 "answer": extract_groundtruth(problem["answer"]),
             }
         ],
-        llm_gen_fn=VLLMRemoteCaller("Qwen2.5-Math-1.5B-Instruct", "http://0.0.0.0:28777"),
+        llm_gen_fn=VLLMRemoteCaller(
+            "Qwen2.5-Math-1.5B-Instruct", "http://0.0.0.0:28777"
+        ),
         reset=False,
     )
 
@@ -49,11 +52,17 @@ if __name__ == "__main__":
     print(env.question)
     print(env.answer)
 
-    task = Task("MATH")
-    evaluator = MathEvaluator("MATH",
-                              VLLMRemoteCaller("Qwen2.5-Math-7B-Instruct", 'http://0.0.0.0:28777'),
-                              DummyRewardModelCaller())
-    
+    task = Task(
+        task_name="MATH",
+        dataset_id="HuggingFaceH4/MATH-500",
+        is_few_shot=False,
+    )
+    evaluator = MathEvaluator(
+        "MATH",
+        VLLMRemoteCaller("Qwen2.5-Math-7B-Instruct", "http://0.0.0.0:28777"),
+        DummyRewardModelCaller(),
+    )
+
     # res = env.step(f"The answer is: {problem['answer']} ки", update_legal_action=False)
     # print(res)
     # print(env.get_state())
@@ -62,14 +71,17 @@ if __name__ == "__main__":
     # g = "\\left( 3, \\frac{\\pi}{2} \\right)"
     # print(judge_correct(None, g, extract_answer(a)))
     test_ds = task.test_ds
-    with jsonlines.open('envs/MATH/dataset/test500.jsonl', 'r') as f:
+    with jsonlines.open("envs/MATH/dataset/test500.jsonl", "r") as f:
         res = []
         for outputs in tqdm(f):
-            
-            problem_inst = {"question": outputs['question'], "answer": outputs['solution']}
-            res.append(evaluator.analyze_output(problem_inst, outputs['code'])[0])
-            if res[-1]['majority_vote'] != outputs['score'][0]:
-                print(res[-1], outputs['score'][0])
+
+            problem_inst = {
+                "question": outputs["question"],
+                "answer": outputs["solution"],
+            }
+            res.append(evaluator.analyze_output(problem_inst, outputs["code"])[0])
+            if res[-1]["majority_vote"] != outputs["score"][0]:
+                print(res[-1], outputs["score"][0])
             # print(res[-1], outputs['score'][0])
-    
+
     print(tree.map_structure(lambda *xs: np.mean(xs), *res))

@@ -1,41 +1,17 @@
-from argparse import ArgumentParser
+import requests
 
-from config.config_utils import str2bool
-
-# 1.创建参数解析器
-parser = ArgumentParser(description="这是一个解析命令行参数示例")
-
-# 2.添加参数
-parser = ArgumentParser()
-parser.add_argument("--LM", type=str, required=True)
-parser.add_argument("--RM", type=str, default="dummy")
-parser.add_argument("--controller_addr", type=str, default="http://0.0.0.0:28778")
-# task config
-parser.add_argument("--task_name", type=str, default="gsm8k")
-parser.add_argument("--test", type=str2bool, default=True)
-parser.add_argument("--is_few_shot", type=str2bool, default=False)
-parser.add_argument("--seed", type=int, default=0)
-# method config
-parser.add_argument("--method", type=str, required=True)
-parser.add_argument("--num_sequence", type=int, default=1)
-# LM gen config
-parser.add_argument("--temperature", type=float, default=0.0)
-parser.add_argument("--top_k", type=int, default=-1)
-parser.add_argument("--top_p", type=float, default=1)
-parser.add_argument("--max_new_tokens", type=int, default=256)
-# Tree construction config
-parser.add_argument("--tree_max_depth", type=int, default=None)
-parser.add_argument("--tree_max_width", type=int, default=None)
-# ckpg config
-parser.add_argument("--save_dir", type=str, default=None)
-parser.add_argument("--resume_dir", type=str, default=None)
-# parallel config
-parser.add_argument("--local", action="store_true", default=False)
-parser.add_argument("--num-worker", type=int, default=32)       # 注意这里参数名有 - 符号，后面会转化为 _ 符号
-config = parser.parse_args()
-
-# 3.解析命令行参数
-args = parser.parse_args()
-
-# 4.获取并打印参数值
-print(args)
+response = requests.post(
+    "http://0.0.0.0:30011/worker_value_inference",
+    headers={"User-Agent": "FastChat Client"},
+    json={
+        "input_str": [
+            "The first six rows of Pascal's triangle are shown below, beginning with row zero. Except for the $1$ at each end, row $4$ consists of only even numbers, as does row $2.$ How many of the first $20$ rows have this property? (Don't include row $0$ or row $1$). \\begin{tabular}{ccccccccccc}\n&&&&&1&&&&&\\\\\n&&&&1&&1&&&&\\\\\n&&&1&&2&&1&&&\\\\\n&&1&&3&&3&&1&&\\\\\n&1&&4&&6&&4&&1&\\\\\n1&&5&&10&&10&&5&&1\\\\\n\\end{tabular}&&&&&To determine how many of the first 20 rows of Pascal's triangle (excluding row 0 and row 1) consist entirely of even numbers except for the 1s at each end, we need to understand the properties of the binomial coefficients in Pascal's triangle. <extra_0>",
+            "The first six rows of Pascal's triangle are shown below, beginning with row zero. Except for the $1$ at each end, row $4$ consists of only even numbers, as does row $2.$ How many of the first $20$ rows have this property? (Don't include row $0$ or row $1$). \\begin{tabular}{ccccccccccc}\n&&&&&1&&&&&\\\\\n&&&&1&&1&&&&\\\\\n&&&1&&2&&1&&&\\\\\n&&1&&3&&3&&1&&\\\\\n&1&&4&&6&&4&&1&\\\\\n1&&5&&10&&10&&5&&1\\\\\n\\end{tabular}&&&&&To determine how many of the first 20 rows of Pascal's triangle (excluding row 0 and row 1) consist entirely of even numbers except for the 1s at each end, we need to analyze the properties of binomial coefficients. Specifically, we need to understand when the binomial coefficients \\(\\binom{n}{k}\\) for \\(1 \\leq k \\leq n-1\\) are all even. <extra_0>",
+            "The first six rows of Pascal's triangle are shown below, beginning with row zero. Except for the $1$ at each end, row $4$ consists of only even numbers, as does row $2.$ How many of the first $20$ rows have this property? (Don't include row $0$ or row $1$). \\begin{tabular}{ccccccccccc}\n&&&&&1&&&&&\\\\\n&&&&1&&1&&&&\\\\\n&&&1&&2&&1&&&\\\\\n&&1&&3&&3&&1&&\\\\\n&1&&4&&6&&4&&1&\\\\\n1&&5&&10&&10&&5&&1\\\\\n\\end{tabular}&&&&&To determine how many of the first 20 rows of Pascal's triangle (excluding row 0 and row 1) have the property that all interior numbers are even, we need to analyze the structure of Pascal's triangle. <extra_0>",
+            "The first six rows of Pascal's triangle are shown below, beginning with row zero. Except for the $1$ at each end, row $4$ consists of only even numbers, as does row $2.$ How many of the first $20$ rows have this property? (Don't include row $0$ or row $1$). \\begin{tabular}{ccccccccccc}\n&&&&&1&&&&&\\\\\n&&&&1&&1&&&&\\\\\n&&&1&&2&&1&&&\\\\\n&&1&&3&&3&&1&&\\\\\n&1&&4&&6&&4&&1&\\\\\n1&&5&&10&&10&&5&&1\\\\\n\\end{tabular}&&&&&To determine how many of the first 20 rows of Pascal's triangle have the property that all the interior numbers are even (except for the 1's at each end), we need to analyze the binomial coefficients in each row. <extra_0>",
+        ]
+    },
+    stream=True,
+)
+print(response)
+print(response.json())

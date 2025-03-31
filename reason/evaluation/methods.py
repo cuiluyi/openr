@@ -21,6 +21,7 @@ class CoTConfig(BasicConfig):
 def cot(
     config: CoTConfig,
     gen_config: LMCallingConfig,
+    task: Task,
     problem_inst: Dict[str, str],
     lm_call: LanguageModelCallingFunction,
     rm_call: RewardModelCallingFunction,
@@ -34,7 +35,7 @@ def cot(
         seed=gen_config.seed
     )
     config.num_sequence = 1
-    return best_of_n(config, gen_config, problem_inst, lm_call, rm_call)
+    return best_of_n(config, gen_config, task, problem_inst, lm_call, rm_call)
 
 
 @dataclass
@@ -45,6 +46,7 @@ class BestOfNConfig(BasicConfig):
 def best_of_n(
     config: BestOfNConfig,
     gen_config: LMCallingConfig,
+    task: Task,
     problem_inst: Dict[str, str],
     lm_call: LanguageModelCallingFunction,
     rm_call: RewardModelCallingFunction,
@@ -53,7 +55,6 @@ def best_of_n(
         print("Warning: max_new_tokens is less than 256")
 
     gen_config.n = config.num_sequence
-    task = Task(task_name=config.task_name)
     prompt = task.prompt_fn(problem_inst["question"])
     output = lm_call(prompt, gen_config)
     completion_tokens = output.num_tokens
@@ -91,12 +92,12 @@ class BeamSearchConfig(TreeSearchConfig):
 def beam_search(
     config: BeamSearchConfig,
     gen_config: LMCallingConfig,
+    task: Task,
     problem_inst: Dict[str, str],
     lm_call: LanguageModelCallingFunction,
     rm_call: RewardModelCallingFunction,
 ) -> SolutionOutput:
     rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
-    task = Task(task_name=config.task_name)
     env = task.env_fn(
         config={
             "max_actions": config.tree_max_width,
@@ -157,12 +158,12 @@ class VanilaMCTSConfig(MCTSBaseConfig):
 def vanila_mcts(
     config: VanilaMCTSConfig,
     gen_config: LMCallingConfig,
+    task: Task,
     problem_inst: Dict[str, str],
     lm_call: LanguageModelCallingFunction,
     rm_call: RewardModelCallingFunction
 ):
     rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
-    task = Task(task_name=config.task_name)
     env = task.env_fn(
         config={
             "max_actions": config.tree_max_width,
@@ -225,12 +226,12 @@ class MCTSConfig(MCTSBaseConfig):
 def mcts(
     config: MCTSConfig,
     gen_config: LMCallingConfig,
+    task: Task,
     problem_inst: Dict[str, str],
     lm_call: LanguageModelCallingFunction,
     rm_call: RewardModelCallingFunction
 ):
     rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
-    task = Task(task_name=config.task_name)
     env = task.env_fn(
         config={
             "max_actions": config.tree_max_width,
@@ -293,12 +294,12 @@ class RStarMCTSConfig(MCTSBaseConfig):
 def rstar_mcts(
     config: RStarMCTSConfig,
     gen_config: LMCallingConfig,
+    task: Task,
     problem_inst: Dict[str, str],
     lm_call: LanguageModelCallingFunction,
     rm_call: RewardModelCallingFunction
 ):
     rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
-    task = Task(task_name=config.task_name)
     env = task.env_fn(
         config={
             "max_actions": config.tree_max_width,
@@ -363,12 +364,12 @@ class MCTSBeamSearchConfig(MCTSBaseConfig):
 def mcts_beam_search(
     config: MCTSBeamSearchConfig,
     gen_config: LMCallingConfig,
+    task: Task,
     problem_inst: Dict[str, str],
     lm_call: LanguageModelCallingFunction,
     rm_call: RewardModelCallingFunction
 ):
     rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
-    task = Task(task_name=config.task_name)
     env = task.env_fn(
         config={
             "max_actions": config.tree_max_width,
