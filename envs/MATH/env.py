@@ -1,6 +1,7 @@
 import copy
 import re
 from typing import List, Optional, Callable
+from math_verify import parse, verify
 import numpy as np
 from envs.base_env import CoTEnv, NoLegalActionException, INVALID_ANS
 from .prompt import COT_EXAMPLES, COT_TASK_DESC, PROBLEM_FORMAT_STR, SEP
@@ -60,13 +61,8 @@ class Env(CoTEnv):
         return action
 
     def _is_correct(self, completion):
-        extracted_answer = extract_answer(completion)
-        # print("Compare: {} -- {}".format(extrated_answer,
-        #  self.math_problem['answer']))
-        # return extrated_answer == self.math_problem['answer']
-        return judge_correct(
-            self.math_problem["question"], self.math_problem["answer"], extracted_answer
-        )
+        extracted_answer = parse(completion)
+        return verify(self.math_problem["answer"], extracted_answer)
 
     def get_reward(self):
         """To implement based on learned reward model"""

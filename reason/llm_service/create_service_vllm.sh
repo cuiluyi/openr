@@ -19,16 +19,16 @@ REWARD_MODEL_NAME=Qwen/Qwen2.5-Math-PRM-7B
 LANGUAGE_MODEL_PATH=$MODEL_BASE/$LANGUAGE_MODEL_NAME
 REWARD_MODEL_PATH=$MODEL_BASE/$REWARD_MODEL_NAME
 
-CUDA_DEVICE_BASE=5
-LOGDIR=logs_fastchat
+CUDA_DEVICE_BASE=4
+LOGDIR=logs/fastchat
 
 tmux start-server
 tmux new-session -s FastChat -n controller -d
 tmux send-keys "export LOGDIR=${LOGDIR}" Enter
 tmux send-keys "$PYTHON_EXECUTABLE -m fastchat.serve.controller --port ${CONTROLER_PORT} --host $HOST_ADDR" Enter
 
-NUM_LM_WORKER=1
-NUM_RM_WORKER=1
+NUM_LM_WORKER=2
+NUM_RM_WORKER=2
 
 echo "Wait 5 seconds ..."
 sleep 5

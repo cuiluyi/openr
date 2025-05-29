@@ -20,7 +20,7 @@ LANGUAGE_MODEL_PATH=$MODEL_BASE/$LANGUAGE_MODEL_NAME
 REWARD_MODEL_PATH=$MODEL_BASE/$REWARD_MODEL_NAME
 
 CUDA_DEVICE_BASE=0
-LOGDIR=logs_fastchat
+LOGDIR=logs/fastchat
 
 tmux start-server
 tmux new-session -s FastChat -n controller -d

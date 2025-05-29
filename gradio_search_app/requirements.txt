@@ -1,0 +1,7 @@
+Gradio
+numpy
+ray
+transformers
+math_verify
+loguru
+tqdm

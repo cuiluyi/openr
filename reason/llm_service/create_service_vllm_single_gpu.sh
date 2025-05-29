@@ -18,7 +18,7 @@ REWARD_MODEL_NAME=Qwen/Qwen2.5-Math-PRM-7B
 
 LANGUAGE_MODEL_PATH=$MODEL_BASE/$LANGUAGE_MODEL_NAME
 REWARD_MODEL_PATH=$MODEL_BASE/$REWARD_MODEL_NAME
-LOGDIR=logs_fastchat
+LOGDIR=logs/fastchat
 
 tmux start-server
 tmux new-session -s FastChat -n controller -d
@@ -35,11 +35,11 @@ WORKER_PORT=$((WORKER_BASE_PORT))
 tmux new-window -n policy_worker_0
 tmux send-keys "export LOGDIR=${LOGDIR}" Enter
 # You can also add --dtype bfloat16, --swap-space 32, --gpu-memory-utilization, etc. For all options, see the help message of `python reason.llm_service.workers.vllm_worker -h`
-tmux send-keys "CUDA_VISIBLE_DEVICES=6 $PYTHON_EXECUTABLE -m reason.llm_service.workers.vllm_worker --model-path $LANGUAGE_MODEL_PATH --controller-address http://$HOST_ADDR:$CONTROLER_PORT --host $HOST_ADDR --port $WORKER_PORT --worker-address http://$HOST_ADDR:$WORKER_PORT" Enter
+tmux send-keys "CUDA_VISIBLE_DEVICES=4 $PYTHON_EXECUTABLE -m reason.llm_service.workers.vllm_worker --model-path $LANGUAGE_MODEL_PATH --controller-address http://$HOST_ADDR:$CONTROLER_PORT --host $HOST_ADDR --port $WORKER_PORT --worker-address http://$HOST_ADDR:$WORKER_PORT" Enter
 
 
 echo "Starting reward-model workers"
 WORKER_PORT=$((WORKER_BASE_PORT+1))
 tmux new-window -n value_worker_0
 tmux send-keys "export LOGDIR=${LOGDIR}" Enter
-tmux send-keys "CUDA_VISIBLE_DEVICES=7 $PYTHON_EXECUTABLE -m reason.llm_service.workers.reward_model_worker --model-path $REWARD_MODEL_PATH --controller-address http://$HOST_ADDR:$CONTROLER_PORT --host $HOST_ADDR --port $WORKER_PORT --worker-address http://$HOST_ADDR:$WORKER_PORT" Enter
+tmux send-keys "CUDA_VISIBLE_DEVICES=5 $PYTHON_EXECUTABLE -m reason.llm_service.workers.reward_model_worker --model-path $REWARD_MODEL_PATH --controller-address http://$HOST_ADDR:$CONTROLER_PORT --host $HOST_ADDR --port $WORKER_PORT --worker-address http://$HOST_ADDR:$WORKER_PORT" Enter

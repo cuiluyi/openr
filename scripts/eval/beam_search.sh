@@ -8,7 +8,7 @@ python reason/evaluation/evaluate.py \
     --top_k -1 \
     --max_new_tokens 2048 \
     --num_sequence 3 \
-    --tree_max_width 9 \
+    --tree_max_width 2 \
     --tree_max_depth 50 \
     --save_dir results \
     --method beam_search \
@@ -17,5 +17,3 @@ python reason/evaluation/evaluate.py \
     # --local
 
 # --LM "Qwen2.5-Math-1.5B-Instruct&s1-20250312_213742&s1-20250314_003214" \
-# Tips: Make sure the input (--LM, --RM) in the script aligns with the command output (basename $LANGUAGE_MODEL_NAME, basename $REWARD_MODEL_NAME) in the pending worker!
-# if you debug into the ray code, you must set the option '--local'

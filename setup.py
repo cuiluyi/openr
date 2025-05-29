@@ -1,4 +1,3 @@
-from setuptools import setup, find_packages
+import torch
 
-
-setup(name="OPENR", packages=find_packages())
+print("可见 GPU 数量:", torch.cuda.device_count())

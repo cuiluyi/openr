@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 import functools
 from typing import Dict
+
+from math_verify import parse, verify
+
 from reason.inference.lm_call import LMCallingConfig, LanguageModelCallingFunction
 from reason.inference.rm_call import RewardModelCallingFunction
 from reason.evaluation.evaluator import SolutionOutput, Task, TreeSearchSolutionOutput
@@ -26,16 +29,23 @@ def cot(
     lm_call: LanguageModelCallingFunction,
     rm_call: RewardModelCallingFunction,
 ) -> SolutionOutput:
-    gen_config = LMCallingConfig(
-        n=1,
-        temperature=0,
-        top_k=1,
-        top_p=1.0,
-        max_new_tokens=gen_config.max_new_tokens,
-        seed=gen_config.seed
-    )
+    # gen_config = LMCallingConfig(
+    #     n=1,
+    #     temperature=0,
+    #     top_k=1,
+    #     top_p=1.0,
+    #     max_new_tokens=gen_config.max_new_tokens,
+    #     seed=gen_config.seed
+    # )
     config.num_sequence = 1
-    return best_of_n(config, gen_config, task, problem_inst, lm_call, rm_call)
+    return best_of_n(
+        config,
+        gen_config,
+        task,
+        problem_inst,
+        lm_call,
+        rm_call,
+    )
 
 
 @dataclass
@@ -64,6 +74,53 @@ def best_of_n(
     )
 
 
+# # best_of_n with correct filter
+# def best_of_n(
+#     config: BestOfNConfig,
+#     gen_config: LMCallingConfig,
+#     task: Task,
+#     problem_inst: Dict[str, str],
+#     lm_call: LanguageModelCallingFunction,
+#     rm_call: RewardModelCallingFunction,
+# ) -> SolutionOutput:
+#     num_sequence = config.num_sequence
+#     beam_search_config = BeamSearchConfig(
+#         task_name=config.task_name,
+#         tree_max_depth=50,
+#         tree_max_width=1,
+#         beam_size=1,
+#     )
+#     def merge_tree_solutions(
+#         output1: TreeSearchSolutionOutput,
+#         output2: TreeSearchSolutionOutput,
+#     ) -> TreeSearchSolutionOutput:
+#         return TreeSearchSolutionOutput(
+#             tree_completion_tokens=output1.tree_completion_tokens
+#             + output2.tree_completion_tokens,
+#             solutions=output1.solutions + output2.solutions,
+#             completion_tokens=output1.completion_tokens + output2.completion_tokens,
+#         )
+#     result = beam_search(
+#         beam_search_config,
+#         gen_config,
+#         task,
+#         problem_inst,
+#         lm_call,
+#         rm_call,
+#     )
+#     for _ in range(num_sequence - 1):
+#         temp = beam_search(
+#             beam_search_config,
+#             gen_config,
+#             task,
+#             problem_inst,
+#             lm_call,
+#             rm_call,
+#         )
+#         result = merge_tree_solutions(result, temp)
+#     return result
+
+
 @dataclass
 class TreeSearchConfig(BasicConfig):
     # construction config
@@ -73,10 +130,9 @@ class TreeSearchConfig(BasicConfig):
     init_critic_value: bool = True
 
     def __post_init__(self):
-        assert self.tree_max_width > 0, \
-            "Tree width must be greater than 0"
-        assert self.tree_max_depth > 0, \
-            "Tree depth must be greater than 0"
+        assert self.tree_max_width > 0, "Tree width must be greater than 0"
+        assert self.tree_max_depth > 0, "Tree depth must be greater than 0"
+
 
 @dataclass
 class BeamSearchConfig(TreeSearchConfig):
@@ -84,10 +140,9 @@ class BeamSearchConfig(TreeSearchConfig):
 
     def __post_init__(self):
         super().__post_init__()
-        assert self.beam_size > 0, \
-            "Beam size must be greater than 0"
-        assert self.init_critic_value, \
-            "BeamSearch should set init_critic_value to True"
+        assert self.beam_size > 0, "Beam size must be greater than 0"
+        assert self.init_critic_value, "BeamSearch should set init_critic_value to True"
+
 
 def beam_search(
     config: BeamSearchConfig,
@@ -113,7 +168,7 @@ def beam_search(
         math_problems=[
             {
                 "question": problem_inst["question"],
-                "answer": task.extract_groundtruth(problem_inst["answer"]),
+                "answer": parse(problem_inst["answer"]),
             }
         ],
         llm_gen_fn=lm_call,
@@ -126,7 +181,7 @@ def beam_search(
         simulate_env=env,
         beam_size=config.beam_size,
         max_step=config.tree_max_depth,
-        reward_model_fn=rm_call_fn
+        reward_model_fn=rm_call_fn,
     )
     return TreeSearchSolutionOutput(
         solutions=[t["text"] for t in traj_list],
@@ -134,26 +189,30 @@ def beam_search(
         tree_completion_tokens=[t["tree_completion_tokens"] for t in traj_list],
     )
 
+
 @dataclass
 class MCTSBaseConfig(TreeSearchConfig):
     # PUCT hparams
     pb_c_base: float = 19652
     pb_c_init: float = 1.25
 
+
 @dataclass
 class VanilaMCTSConfig(MCTSBaseConfig):
     # rollout step strategy, if `select_by_prior` is False,
     #  then select by the initial critic value
     # otherwise, random choice by the prior probability
-    select_by_prior: bool = False 
+    select_by_prior: bool = False
     num_path: int = 1
-    
+
     def __post_init__(self):
         super().__post_init__()
         if not self.select_by_prior:
-            assert self.init_critic_value, \
-                "VanilaMCTS with greedy as rollout method should set init_critic_value to True"
+            assert (
+                self.init_critic_value
+            ), "VanilaMCTS with greedy as rollout method should set init_critic_value to True"
         assert self.num_path > 0
+
 
 def vanila_mcts(
     config: VanilaMCTSConfig,
@@ -161,7 +220,7 @@ def vanila_mcts(
     task: Task,
     problem_inst: Dict[str, str],
     lm_call: LanguageModelCallingFunction,
-    rm_call: RewardModelCallingFunction
+    rm_call: RewardModelCallingFunction,
 ):
     rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
     env = task.env_fn(
@@ -212,16 +271,18 @@ class MCTSConfig(MCTSBaseConfig):
     # rollout step strategy, if `select_by_prior` is False,
     #  then select by the initial critic value
     # otherwise, random choice by the prior probability
-    select_by_prior: bool = False 
+    select_by_prior: bool = False
     num_path: int = 1
     simulate_num: int = 1
-    
+
     def __post_init__(self):
         super().__post_init__()
         if not self.select_by_prior:
-            assert self.init_critic_value, \
-                "MCTS with greedy as rollout method should set init_critic_value to True"
+            assert (
+                self.init_critic_value
+            ), "MCTS with greedy as rollout method should set init_critic_value to True"
         assert self.num_path > 0
+
 
 def mcts(
     config: MCTSConfig,
@@ -229,7 +290,7 @@ def mcts(
     task: Task,
     problem_inst: Dict[str, str],
     lm_call: LanguageModelCallingFunction,
-    rm_call: RewardModelCallingFunction
+    rm_call: RewardModelCallingFunction,
 ):
     rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
     env = task.env_fn(
@@ -287,9 +348,11 @@ class RStarMCTSConfig(MCTSBaseConfig):
     def __post_init__(self):
         super().__post_init__()
         if not self.select_by_prior:
-            assert self.init_critic_value, \
-                "VanilaMCTS with greedy as rollout method should set init_critic_value to True"
+            assert (
+                self.init_critic_value
+            ), "VanilaMCTS with greedy as rollout method should set init_critic_value to True"
         assert self.num_path > 0
+
 
 def rstar_mcts(
     config: RStarMCTSConfig,
@@ -297,7 +360,7 @@ def rstar_mcts(
     task: Task,
     problem_inst: Dict[str, str],
     lm_call: LanguageModelCallingFunction,
-    rm_call: RewardModelCallingFunction
+    rm_call: RewardModelCallingFunction,
 ):
     rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
     env = task.env_fn(
@@ -308,7 +371,7 @@ def rstar_mcts(
             "generation_config": {
                 "temperature": gen_config.temperature,
                 "top_p": gen_config.top_p,
-                "top_k": gen_config.top_k,      # this is fixed for each llm call
+                "top_k": gen_config.top_k,  # this is fixed for each llm call
             },
         },
         math_problems=[
@@ -333,14 +396,13 @@ def rstar_mcts(
         simulate_env=env,
         num_path=config.num_path,
         reward_model_fn=rm_call_fn,
-        select_by_prior=config.select_by_prior
+        select_by_prior=config.select_by_prior,
     )
     return TreeSearchSolutionOutput(
         solutions=[t["text"] for t in traj_list],
         completion_tokens=[t["api_completion_tokens"] for t in traj_list],
         tree_completion_tokens=[t["tree_completion_tokens"] for t in traj_list],
     )
-
 
 
 @dataclass
@@ -355,11 +417,14 @@ class MCTSBeamSearchConfig(MCTSBaseConfig):
     def __post_init__(self):
         super().__post_init__()
         if not self.select_by_prior:
-            assert self.init_critic_value, \
-                "MCTSBeamSearch method should set init_critic_value to True"
+            assert (
+                self.init_critic_value
+            ), "MCTSBeamSearch method should set init_critic_value to True"
         assert self.num_path > 0
-        assert self.init_critic_value, \
-            "MCTSBeamSearch should set init_critic_value to True"
+        assert (
+            self.init_critic_value
+        ), "MCTSBeamSearch should set init_critic_value to True"
+
 
 def mcts_beam_search(
     config: MCTSBeamSearchConfig,
@@ -367,7 +432,7 @@ def mcts_beam_search(
     task: Task,
     problem_inst: Dict[str, str],
     lm_call: LanguageModelCallingFunction,
-    rm_call: RewardModelCallingFunction
+    rm_call: RewardModelCallingFunction,
 ):
     rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
     env = task.env_fn(

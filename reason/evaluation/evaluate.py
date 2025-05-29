@@ -1,16 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Union
-from config.config_utils import str2bool
-from reason.inference.lm_call import LMCallingConfig, VLLMRemoteCaller
-from reason.inference.rm_call import (
-    RMRemoteCaller,
-    DummyRewardModelCaller,
-    RewardModelBaseConfig,
-    RemoteRewardModelConfig,
-)
-from reason.evaluation.evaluator import SolutionOutput, Task, RemoteMathEvaluator
-from reason.evaluation.utils import setup_seed, jsonl_to_json
+
 import torch
 from functools import partial
 import json
@@ -28,6 +19,16 @@ from reason.evaluation.methods import *
 import ray
 
 from config import get_args
+from config.config_utils import str2bool
+from reason.inference.lm_call import LMCallingConfig, VLLMRemoteCaller
+from reason.inference.rm_call import (
+    RMRemoteCaller,
+    DummyRewardModelCaller,
+    RewardModelBaseConfig,
+    RemoteRewardModelConfig,
+)
+from reason.evaluation.evaluator import SolutionOutput, Task, RemoteMathEvaluator
+from reason.evaluation.utils import setup_seed, jsonl_to_json
 
 
 def parallel_evaluate_test_dataset(
@@ -89,7 +90,8 @@ def parallel_evaluate_test_dataset(
             record_writer.write(obj)
     avg_res = (tree.map_structure(lambda *xs: np.mean(xs), *results),)
     if record_writer:
-        json.dump(avg_res, open(save_dir / "avg_result.json", "w"))
+        with open(save_dir / "avg_result.json", "w") as f:
+            json.dump(avg_res, f, indent=4)
     print("Method: {}. Average result: {}".format(method_name, avg_res))
     return results
 
@@ -109,7 +111,9 @@ if __name__ == "__main__":
         prm_format_str = "{question} {answer}"
     elif "qwen2.5-math-prm" in args.RM.lower():
         prm_step_tag = "<extra_0>"
-        prm_format_str = "{question}<this is qwen2.5-math-prm seperation &&&&& >{answer}"
+        prm_format_str = (
+            "{question}<this is qwen2.5-math-prm seperation &&&&& >{answer}"
+        )
     else:
         # assume qwen
         prm_step_tag = "\n\n\n\n\n "
@@ -122,7 +126,9 @@ if __name__ == "__main__":
         lm_step_tag = "\n\n"
 
     lm_call = VLLMRemoteCaller(
-        args.LM, args.controller_addr, lm_step_tag=lm_step_tag
+        args.LM,
+        args.controller_addr,
+        lm_step_tag=lm_step_tag,
     )
 
     if args.RM == "dummy":
@@ -231,7 +237,8 @@ if __name__ == "__main__":
         record_writer = jsonlines.open(save_dir / f"record.jsonl", mode="w")
         cfg_dict_record["LM"] = args.LM
         cfg_dict_record["RM"] = args.RM
-        json.dump(cfg_dict_record, open(save_dir / "config.json", "w"))
+        with open(save_dir / "config.json", "w") as f:
+            json.dump(cfg_dict_record, f, indent=4)
 
     parallel_evaluate_test_dataset(args.method, solver_fn, save_dir, record_writer)
     jsonl_to_json(save_dir / "record.jsonl", save_dir / "record.json")

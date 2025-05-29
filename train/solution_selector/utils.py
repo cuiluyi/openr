@@ -14,9 +14,8 @@ def make_step_rewards(logits, token_masks):
         sample = probabilities[i]  # seq_len, num_labels
         positive_probs = sample[sample != 0].view(-1, 2)[
             :, 1
-        ]  # valid_tokens, num_labels
-        non_zero_elements_list = positive_probs.tolist()
-        all_scores_res.append(non_zero_elements_list)
+        ].item()
+        all_scores_res.append(positive_probs)
     return all_scores_res
 
 

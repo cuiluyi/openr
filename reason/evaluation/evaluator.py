@@ -24,20 +24,22 @@ from envs.base_env import INVALID_ANS
 
 class Task:
     def __init__(self, task_name: str, dataset_id : str, is_few_shot: bool = False):
-        self.task_name = task_name
-        task_module = importlib.import_module(f"envs.{task_name}")
-        if task_name == "MATH" or "rstar":
-            self.extract_answer = task_module.extract_answer
-            self.extract_groundtruth = task_module.extract_groundtruth
-            self.judge_correct = task_module.judge_correct
-        else:
+        SUPPORTED_TASKS = ["MATH", "rstar", "Online"]
+        if task_name not in SUPPORTED_TASKS:
             raise NotImplementedError(f"Task {task_name} is not supported")
 
-        self.dataset_id = dataset_id
+        self.task_name = "MATH" if task_name == "Online" else task_name
+        task_module = importlib.import_module(f"envs.{self.task_name}")
+        self.extract_answer = task_module.extract_answer
+        self.extract_groundtruth = task_module.extract_groundtruth
+        self.judge_correct = task_module.judge_correct
+        
         self._is_few_shot = is_few_shot
         self.env_fn = task_module.Env
 
-        self._train_ds, self._test_ds = get_env_datasets(self.task_name, self.dataset_id)
+        if task_name != "Online":
+            self.dataset_id = dataset_id
+            self._train_ds, self._test_ds = get_env_datasets(self.task_name, self.dataset_id)
 
     def prompt_fn(self, problem_input: str):
         return get_default_query_str_builder(self.task_name)(

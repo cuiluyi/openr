@@ -8,7 +8,7 @@ python reason/evaluation/evaluate.py \
     --top_k -1 \
     --max_new_tokens 2048 \
     --num_sequence 2 \
-    --simulate_num 8 \
+    --simulate_num 4 \
     --tree_max_width 4 \
     --tree_max_depth 50 \
     --save_dir results \

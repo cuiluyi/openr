@@ -623,6 +623,9 @@ class SearchTree:
                     # step4: backup
                     node.update_recursive(leaf_value, env_copy.mcts_mode)
 
+                if simulate_node.children == {}:
+                    break
+
                 # 多次模拟之后进行选择，并更新 simulate_node
                 action, simulate_node = self._select_child(simulate_node, simulate_env, criteria="visit_count")
                 # action, simulate_node = self._select_child(simulate_node, simulate_env, criteria="value")
@@ -918,6 +921,9 @@ class SearchTree:
                     # step4: backup
                     node.update_recursive(leaf_value, env_copy.mcts_mode)
 
+                if simulate_node.children == {}:
+                    break
+                
                 # 多次模拟之后进行选择，并更新 simulate_node
                 selected_actions, selected_nodes, selected_scores = self._select_batch_final_action(simulate_node, beam_size)
 

@@ -18,7 +18,7 @@ REWARD_MODEL_NAME=Qwen/Math-psa-7B
 
 LANGUAGE_MODEL_PATH=$MODEL_BASE/$LANGUAGE_MODEL_NAME
 REWARD_MODEL_PATH=$MODEL_BASE/$REWARD_MODEL_NAME
-LOGDIR=logs_fastchat
+LOGDIR=logs/fastchat
 
 tmux start-server
 tmux new-session -s FastChat -n controller -d

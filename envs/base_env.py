@@ -7,7 +7,7 @@ import torch
 from distributed.utils import print_with_rank
 from transformers import PreTrainedTokenizer
 from reason.inference.lm_call import LMCallingConfig, ConcatedLMGenResult
-from envs.DiversityFilter import DiversityFilter
+# from envs.DiversityFilter import DiversityFilter
 from envs.CorrectFilter import CorrectFilter
 
 INVALID_ANS = "[invalid]"
@@ -143,6 +143,7 @@ class CoTEnv(BaseEnv):
             problem_input=self.math_problem["question"],
             is_few_shot=self.is_few_shot,
         )
+        api_completion_token = 0
         if update_legal_action:
             cnt = 0
             while cnt < 5:
@@ -198,27 +199,44 @@ class CoTEnv(BaseEnv):
         return action
 
     def update_legal_actions(self):
-        # diversity_filter = DiversityFilter()
-        correct_filter = CorrectFilter(self, self.reward_model_fn)
+        # # diversity_filter = DiversityFilter()
+        # correct_filter = CorrectFilter(self, self.reward_model_fn)
 
-        try_num = 10
-        for i in range(try_num):
-            result: ConcatedLMGenResult = self.llm_gen_fn(
-                input_str=self.get_state(),
-                config=LMCallingConfig(
-                    n=self.config["max_actions"],
-                    stop_str=self.sep,
-                    include_stop_str_in_output=True,
-                    **self.config["generation_config"]
-                ),
-            )
-            # result = diversity_filter.filter(result)
-            result = correct_filter.filter(result)
-            if result is not None:
-                break
-            if i == try_num - 1 and result is None:
-                result = correct_filter.max_step
-        
+        # try_num = 10
+        # for i in range(try_num):
+        #     result: ConcatedLMGenResult = self.llm_gen_fn(
+        #         input_str=self.get_state(),
+        #         config=LMCallingConfig(
+        #             n=self.config["max_actions"],
+        #             stop_str=self.sep,
+        #             include_stop_str_in_output=True,
+        #             **self.config["generation_config"]
+        #         ),
+        #     )
+        #     if isinstance(result.finish_reason, str):
+        #         result.finish_reason = [result.finish_reason]
+
+        #     # result = diversity_filter.filter(result)
+        #     result = correct_filter.filter(result)
+        #     if result is not None:
+        #         break
+        #     if i == try_num - 1 and result is None:
+        #         result = correct_filter.max_step
+        #         # if correct_filter.max_prm_value < 0.8:
+        #         #     raise NoLegalActionException("No possible action have been generated.")
+
+        result: ConcatedLMGenResult = self.llm_gen_fn(
+            input_str=self.get_state(),
+            config=LMCallingConfig(
+                n=self.config["max_actions"],
+                stop_str=self.sep,
+                include_stop_str_in_output=True,
+                **self.config["generation_config"]
+            ),
+        )
+        if isinstance(result.finish_reason, str):
+                result.finish_reason = [result.finish_reason]
+
         texts = result.text
         logps_avg_by_len = result.logp_avg_by_len
         token_len = result.num_tokens
@@ -288,24 +306,28 @@ class CoTEnv(BaseEnv):
 
     def get_done_and_info(self):
         info = {"winner": 0}
-        # done when reaches maximum length or LLM generates stop words
-        if self.stop_str is not None and self.stop_str in self.action_history[-1]:
-            terminated = True
-        elif self._next_state_terminated[self.action_history[-1]]:
-            terminated = True
-        elif self.sep not in self.action_history[-1]:
-            # This is because the output is stopped by eos
-            terminated = True
-        else:
-            terminated = False
+        try:
+            # done when reaches maximum length or LLM generates stop words
+            if self.stop_str is not None and self.stop_str in self.action_history[-1]:
+                terminated = True
+            elif self._next_state_terminated[self.action_history[-1]]:
+                terminated = True
+            elif self.sep not in self.action_history[-1]:
+                # This is because the output is stopped by eos
+                terminated = True
+            else:
+                terminated = False
+        except Exception as e:
+            print(self)
 
         truncated = len(self.action_history) >= self.config["max_length"]
         assert len(self.action_history) <= self.config["max_length"]
         if terminated or truncated:
-            if self._is_correct(self.action_history[-1]):
-                info["winner"] = 1
-            else:
-                info["winner"] = 2
+            # if self._is_correct(self.action_history[-1]):
+            #     info["winner"] = 1
+            # else:
+            #     info["winner"] = 2
+            info["winner"] = 0
             return terminated, truncated, info
         return terminated, truncated, info
 
