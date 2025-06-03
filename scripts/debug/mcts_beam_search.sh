@@ -1,4 +1,5 @@
-python reason/evaluation/evaluate.py \
+python -m debugpy --listen 63655 --wait-for-client \
+    reason/evaluation/evaluate.py \
     --LM Qwen2.5-Math-1.5B-Instruct \
     --RM Qwen2.5-Math-PRM-7B \
     --task_name MATH \
@@ -14,7 +15,8 @@ python reason/evaluation/evaluate.py \
     --save_dir results \
     --method mcts_beam_search \
     --num_worker 32 \
-    --controller_addr http://0.0.0.0:28777
+    --controller_addr http://0.0.0.0:28777 \
+    --local
 
 # --LM "Qwen2.5-Math-1.5B-Instruct&s1-20250312_213742&s1-20250314_003214" \
 # Tips: Make sure the input (--LM, --RM) in the script aligns with the command output (basename $LANGUAGE_MODEL_NAME, basename $REWARD_MODEL_NAME) in the pending worker!

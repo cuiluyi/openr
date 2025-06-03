@@ -31,8 +31,8 @@ class DiversityFilter:
     def filter(
         self,
         result: ConcatedLMGenResult,
-        semantic_thresh: float = 0.95,
-        ngram_thresh: float = 0.95,
+        semantic_thresh: float = 0.90,
+        ngram_thresh: float = 0.8,
     ) -> ConcatedLMGenResult:
         """同步过滤所有相关字段"""
         # 获取原始索引映射
@@ -114,7 +114,7 @@ if __name__ == "__main__":
         # ],
         text=[
             "To find \\( (a_9)^9 \\), we first need to determine the periodicity of the sequence \\( (a_n) \\). Given \\( a_3 = a_1 \\), we will find the values of \\( a_4, a_5, \\) and so on, to see if the sequence is periodic.\n\n",
-            "Given the recurrence relation \\( a_{i+1} = \\frac{1}{1 - a_i} \\), we need to determine the behavior of the sequence. Let's compute the first few terms of the sequence in terms of \\( a_1 \\):\n\n",
+            # "Given the recurrence relation \\( a_{i+1} = \\frac{1}{1 - a_i} \\), we need to determine the behavior of the sequence. Let's compute the first few terms of the sequence in terms of \\( a_1 \\):\n\n",
             "To solve the problem, we first need to determine the periodicity of the sequence \\( (a_n) \\). We start by expressing \\( a_2 \\) in terms of \\( a_1 \\):\n\\[ a_2 = \\frac{1}{1 - a_1}. \\]\nNext, we express \\( a_3 \\) in terms of \\( a_2 \\):\n\\[ a_3 = \\frac{1}{1 - a_2} = \\frac{1}{1 - \\frac{1}{1 - a_1}} = \\frac{1 - a_1}{1 - a_1 - 1} = \\frac{1 - a_1}{-a_1} = \\frac{a_1 - 1}{a_1} = 1 - \\frac{1}{a_1}. \\]\nSince we know that \\( a_3 = a_1 \\), we can set up the equation:\n\\[ a_1 = 1 - \\frac{1}{a_1}. \\]\nMultiplying both sides by \\( a_1 \\) gives:\n\\[ a_1^2 = a_1 - 1. \\]\nRearranging terms, we get a quadratic equation:\n\\[ a_1^2 - a_1 + 1 = 0. \\]\nThe solutions to this quadratic equation are:\n\\[ a_1 = \\frac{1 \\pm \\sqrt{1 - 4}}{2} = \\frac{1 \\pm \\sqrt{-3}}{2} = \\frac{1 \\pm i\\sqrt{3}}{2}. \\]\nLet's denote these solutions by \\( \\omega = \\frac{1 + i\\sqrt{3}}{2} \\) and \\( \\omega^2 = \\frac{1 - i\\sqrt{3}}{2} \\). These are the non-real cube roots of unity, satisfying \\( \\omega^3 = 1 \\) and \\( (\\omega^2)^3 = 1 \\), and \\( 1 + \\omega + \\omega^2 = 0 \\).\n\n",
             "To solve for \\( (a_9)^9 \\), we first need to understand the periodicity of the sequence. Given that \\( a_3 = a_1 \\), we will investigate the sequence further to find its periodicity.\n\n",
             "To solve for \\( (a_9)^9 \\) in the sequence \\( (a_n) \\) defined by \\( a_{i+1} = \\frac{1}{1 - a_i} \\) and given that \\( a_3 = a_1 \\), we will first determine the periodicity of the sequence. Let's start by expressing the first few terms of the sequence in terms of \\( a_1 \\).\n\n",

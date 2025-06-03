@@ -1,4 +1,3 @@
-
 from argparse import ArgumentParser
 
 from config.config_utils import str2bool

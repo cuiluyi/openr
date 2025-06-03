@@ -7,8 +7,9 @@ import torch
 from distributed.utils import print_with_rank
 from transformers import PreTrainedTokenizer
 from reason.inference.lm_call import LMCallingConfig, ConcatedLMGenResult
-# from envs.DiversityFilter import DiversityFilter
-from envs.CorrectFilter import CorrectFilter
+
+# from envs.diversity_filter import DiversityFilter
+from envs.correct_filter import CorrectFilter
 
 INVALID_ANS = "[invalid]"
 
@@ -108,6 +109,7 @@ class CoTEnv(BaseEnv):
         self.math_problems = math_problems
         self.llm_gen_fn = llm_gen_fn
         self.action_history = None
+        self.values = []
         self.math_problem = None
         self._legal_actions = None
         self.is_few_shot = config.get("is_few_shot", False)
@@ -136,6 +138,7 @@ class CoTEnv(BaseEnv):
         # reset environment to problem idx
         self.set_problem(idx=0)
         self.action_history = []
+        self.values = []
         self._init_query = self.build_query_str(
             cot_examples=self._cot_example_str,
             cot_task_desc=self._task_desc_str,
@@ -159,8 +162,9 @@ class CoTEnv(BaseEnv):
         info = {"api_completion_token": api_completion_token}
         return self.get_state(), info
 
-    def step(self, action, update_legal_action=True):
+    def step(self, action, value=0, update_legal_action=True):
         self.action_history.append(action)
+        self.values.append(value)
         state = self.get_state()
         reward = self.get_reward()
         terminated, truncated, info = self.get_done_and_info()
@@ -170,7 +174,9 @@ class CoTEnv(BaseEnv):
             while cnt < 5:
                 cnt += 1
                 try:
-                    self._legal_actions, api_completion_token = self.update_legal_actions()
+                    self._legal_actions, api_completion_token = (
+                        self.update_legal_actions()
+                    )
                     info["api_completion_token"] = api_completion_token
                     break
                 except NoLegalActionException as e:
@@ -191,7 +197,9 @@ class CoTEnv(BaseEnv):
 
     def get_state(self):
         # not join about sep_str here because we let vllm return with sep_str
-        ret = self._init_query + "".join(item for item in self.action_history if item is not None)
+        ret = self._init_query + "".join(
+            item for item in self.action_history if item is not None
+        )
         return ret
 
     def post_process_act(self, action: str):
@@ -235,7 +243,7 @@ class CoTEnv(BaseEnv):
             ),
         )
         if isinstance(result.finish_reason, str):
-                result.finish_reason = [result.finish_reason]
+            result.finish_reason = [result.finish_reason]
 
         texts = result.text
         logps_avg_by_len = result.logp_avg_by_len
@@ -248,7 +256,7 @@ class CoTEnv(BaseEnv):
             # XXX: this process can be improve or moved to other place
             # this is a pre-judge of terminal flag or certain action, by
             # whether the text-generation is stop by the <eos> or stop_str
-            
+
             terminated = not texts[i].endswith(self.sep)
 
             processed_act = self.post_process_act(texts[i])
@@ -256,7 +264,7 @@ class CoTEnv(BaseEnv):
                 len(processed_act) > 0
                 and processed_act not in text_list
                 # only stop is valid, otherwise the output action is truncated actually
-                and result.finish_reason[i] == "stop" 
+                and result.finish_reason[i] == "stop"
             ):
                 text_list.append(processed_act)
                 prob_list.append(logps_avg_by_len[i])
@@ -269,10 +277,14 @@ class CoTEnv(BaseEnv):
             print_with_rank("gen_result: {}".format(result))
             raise NoLegalActionException("No possible action have been generated.")
 
+        # from .utils import entropy_from_logprobs
+        # relative_entropy = entropy_from_logprobs(prob_list)
+        
         prob_list = np.exp(prob_list)
         prob_list = np.array(prob_list)
         # normalize probability
         prob_list = prob_list / np.sum(prob_list)
+        
 
         _legal_actions = [
             {
@@ -280,9 +292,13 @@ class CoTEnv(BaseEnv):
                 "prob": prob,
                 "num_token": n_token,
                 "finish_reason": finish_reason,
+                # "weight": relative_entropy,
             }
             for action, prob, n_token, finish_reason in zip(
-                text_list, prob_list, num_token_list, finish_reason_list
+                text_list,
+                prob_list,
+                num_token_list,
+                finish_reason_list,
             )
         ]
         self._next_state_terminated = next_state_terminated
@@ -294,11 +310,10 @@ class CoTEnv(BaseEnv):
     @property
     def query(self):
         return self._init_query
-    
-    @property
-    def question(self)->str:
-        return self.math_problem["question"]
 
+    @property
+    def question(self) -> str:
+        return self.math_problem["question"]
 
     @property
     def answer(self):
@@ -345,6 +360,7 @@ class CoTEnv(BaseEnv):
         env.math_problem = copy.deepcopy(self.math_problem)
         env._legal_actions = copy.deepcopy(self._legal_actions)
         env.action_history = copy.deepcopy(self.action_history)
+        env.values = copy.deepcopy(self.values)
         env._init_query = copy.deepcopy(self._init_query)
         env._next_state_terminated = copy.deepcopy(self._next_state_terminated)
         return env

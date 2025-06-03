@@ -10,7 +10,6 @@ python reason/evaluation/evaluate.py \
     --save_dir results \
     --method cot \
     --num_worker 16 \
-    --controller_addr http://0.0.0.0:28777 \
-    # --local
+    --controller_addr http://0.0.0.0:28777
 
 # --LM "Qwen2.5-Math-1.5B-Instruct&s1-20250312_213742&s1-20250314_003214" \

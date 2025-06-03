@@ -29,23 +29,13 @@ def cot(
     lm_call: LanguageModelCallingFunction,
     rm_call: RewardModelCallingFunction,
 ) -> SolutionOutput:
-    # gen_config = LMCallingConfig(
-    #     n=1,
-    #     temperature=0,
-    #     top_k=1,
-    #     top_p=1.0,
-    #     max_new_tokens=gen_config.max_new_tokens,
-    #     seed=gen_config.seed
-    # )
-    config.num_sequence = 1
-    return best_of_n(
-        config,
-        gen_config,
-        task,
-        problem_inst,
-        lm_call,
-        rm_call,
-    )
+    config = BestOfNConfig(**config.__dict__, num_sequence=1)
+
+    if gen_config.n != 1:
+        print("Warning: generation config n is set to 1 for CoT method")
+    gen_config.n = config.num_sequence
+
+    return best_of_n(config, gen_config, task, problem_inst, lm_call, rm_call)
 
 
 @dataclass
@@ -68,9 +58,17 @@ def best_of_n(
     prompt = task.prompt_fn(problem_inst["question"])
     output = lm_call(prompt, gen_config)
     completion_tokens = output.num_tokens
+
+    question_answer_pairs = [(problem_inst["question"], txt) for txt in output.text]
+    values = rm_call(
+        question_answer_pairs=question_answer_pairs,
+        lm_step_tag=lm_call.lm_step_tag,
+    )
+
     return SolutionOutput(
         solutions=output.text,
         completion_tokens=completion_tokens,
+        values=values,
     )
 
 
@@ -151,7 +149,7 @@ def beam_search(
     problem_inst: Dict[str, str],
     lm_call: LanguageModelCallingFunction,
     rm_call: RewardModelCallingFunction,
-) -> SolutionOutput:
+) -> TreeSearchSolutionOutput:
     rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
     env = task.env_fn(
         config={
@@ -187,6 +185,7 @@ def beam_search(
         solutions=[t["text"] for t in traj_list],
         completion_tokens=[t["api_completion_tokens"] for t in traj_list],
         tree_completion_tokens=[t["tree_completion_tokens"] for t in traj_list],
+        values=[t["values"] for t in traj_list],
     )
 
 
@@ -221,7 +220,7 @@ def vanila_mcts(
     problem_inst: Dict[str, str],
     lm_call: LanguageModelCallingFunction,
     rm_call: RewardModelCallingFunction,
-):
+) -> TreeSearchSolutionOutput:
     rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
     env = task.env_fn(
         config={
@@ -263,6 +262,7 @@ def vanila_mcts(
         solutions=[t["text"] for t in traj_list],
         completion_tokens=[t["api_completion_tokens"] for t in traj_list],
         tree_completion_tokens=[t["tree_completion_tokens"] for t in traj_list],
+        values=[t["values"] for t in traj_list],
     )
 
 
@@ -291,7 +291,7 @@ def mcts(
     problem_inst: Dict[str, str],
     lm_call: LanguageModelCallingFunction,
     rm_call: RewardModelCallingFunction,
-):
+) -> TreeSearchSolutionOutput:
     rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
     env = task.env_fn(
         config={
@@ -334,6 +334,7 @@ def mcts(
         solutions=[t["text"] for t in traj_list],
         completion_tokens=[t["api_completion_tokens"] for t in traj_list],
         tree_completion_tokens=[t["tree_completion_tokens"] for t in traj_list],
+        values=[t["values"] for t in traj_list],
     )
 
 
@@ -361,7 +362,7 @@ def rstar_mcts(
     problem_inst: Dict[str, str],
     lm_call: LanguageModelCallingFunction,
     rm_call: RewardModelCallingFunction,
-):
+) -> TreeSearchSolutionOutput:
     rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
     env = task.env_fn(
         config={
@@ -402,6 +403,7 @@ def rstar_mcts(
         solutions=[t["text"] for t in traj_list],
         completion_tokens=[t["api_completion_tokens"] for t in traj_list],
         tree_completion_tokens=[t["tree_completion_tokens"] for t in traj_list],
+        values=[t["values"] for t in traj_list],
     )
 
 
@@ -433,7 +435,7 @@ def mcts_beam_search(
     problem_inst: Dict[str, str],
     lm_call: LanguageModelCallingFunction,
     rm_call: RewardModelCallingFunction,
-):
+) -> TreeSearchSolutionOutput:
     rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
     env = task.env_fn(
         config={
@@ -477,4 +479,5 @@ def mcts_beam_search(
         solutions=[t["text"] for t in traj_list],
         completion_tokens=[t["api_completion_tokens"] for t in traj_list],
         tree_completion_tokens=[t["tree_completion_tokens"] for t in traj_list],
+        values=[t["values"] for t in traj_list],
     )

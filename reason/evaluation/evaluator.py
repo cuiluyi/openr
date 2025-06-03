@@ -1,14 +1,17 @@
-from dataclasses import dataclass
-from datetime import datetime
 import importlib
+from datetime import datetime
+from dataclasses import dataclass
 from multiprocessing import Pool
-from typing import Any, Callable, Dict, Optional, List, Union
+from typing import Any, Callable, Dict, Optional, List, Union, Tuple
 
-from math_verify import parse, verify
 
 import numpy as np
 import ray
+from math_verify import parse, verify
+
+
 from envs import get_default_query_str_builder, get_env_datasets
+from envs.base_env import INVALID_ANS
 from reason.inference.lm_call import LanguageModelCallingFunction
 from reason.inference.rm_call import RewardModelCallingFunction
 from reason.reranking.vote_utils import (
@@ -19,11 +22,10 @@ from reason.reranking.vote_utils import (
     PRM_LAST_MAX,
     AGG_FN_MAP,
 )
-from envs.base_env import INVALID_ANS
 
 
 class Task:
-    def __init__(self, task_name: str, dataset_id : str, is_few_shot: bool = False):
+    def __init__(self, task_name: str, dataset_id: str, is_few_shot: bool = False):
         SUPPORTED_TASKS = ["MATH", "rstar", "Online"]
         if task_name not in SUPPORTED_TASKS:
             raise NotImplementedError(f"Task {task_name} is not supported")
@@ -33,17 +35,20 @@ class Task:
         self.extract_answer = task_module.extract_answer
         self.extract_groundtruth = task_module.extract_groundtruth
         self.judge_correct = task_module.judge_correct
-        
+
         self._is_few_shot = is_few_shot
         self.env_fn = task_module.Env
 
         if task_name != "Online":
             self.dataset_id = dataset_id
-            self._train_ds, self._test_ds = get_env_datasets(self.task_name, self.dataset_id)
+            self._train_ds, self._test_ds = get_env_datasets(
+                self.task_name, self.dataset_id
+            )
 
     def prompt_fn(self, problem_input: str):
         return get_default_query_str_builder(self.task_name)(
-            problem_input, is_few_shot=self._is_few_shot
+            problem_input,
+            is_few_shot=self._is_few_shot,
         )
 
     @property
@@ -87,10 +92,7 @@ def judge_ans(
         valid_v_list = valid_v_list.tolist()
     aggregated_ans = AGG_FN_MAP[aggration_mode](valid_ans_list, valid_v_list)
 
-    return (
-        # 1 if judge_correct_fn(problem_str, extracted_groundtruth, aggregated_ans) else 0
-        1 if verify(extracted_groundtruth, aggregated_ans) else 0
-    )
+    return 1 if verify(extracted_groundtruth, aggregated_ans) else 0
 
 
 @dataclass
@@ -101,6 +103,7 @@ class SolutionOutput:
     #  for beam search, it's a list of zeros, except the last element indicates total tokens
     #  for mcts, it's a list of int, indicate how many tokens comsumed between two paths
     completion_tokens: List[int]
+    values: Optional[List[float]]
 
 
 @dataclass
@@ -120,16 +123,29 @@ class MathEvaluator:
         self.rm_call = rm_call
 
     def evaluate_problem(
-        self, problem_inst: Dict[str, str], solver_fn: Callable
+        self,
+        problem_inst: Dict[str, str],
+        solver_fn: Callable,
     ) -> List[str]:
         # try:
-        solution: SolutionOutput = solver_fn(problem_inst, self.lm_call, self.rm_call)
-        result, output = self.analyze_output(problem_inst, solution.solutions)
+        solution: SolutionOutput = solver_fn(
+            problem_inst,
+            self.lm_call,
+            self.rm_call,
+        )
+            
+        result, output = self.analyze_output(
+            problem_inst,
+            solution.solutions,
+            solution.values,
+        )
+        
         total_completion_token = 0
         for i, o in enumerate(output):
             o["completion_tokens"] = solution.completion_tokens[i]
             if isinstance(solution, TreeSearchSolutionOutput):
                 o["tree_completion_tokens"] = solution.tree_completion_tokens[i]
+
             # We define the completion_tokens as the tokens comsumed between two generated
             #  answers, therefore we need to take sum here.
             total_completion_token += solution.completion_tokens[i]
@@ -138,37 +154,32 @@ class MathEvaluator:
         # except Exception as e:
         #     return problem_inst, {"error": str(e)}, []
 
-
-
-    def analyze_output(self, problem_inst: Dict[str, str], gen_answers: List[str]):
-        # extracted_groundtruth = self._task.extract_groundtruth(problem_inst["answer"])
-        extracted_groundtruth = parse(problem_inst["answer"])
-        # XXX(ziyu): for tree search methods with value_fn, should not call rm
-        #  to compute it again
-        input_list = [(problem_inst["question"], txt) for txt in gen_answers]
-        value_list = self.rm_call(input_list, lm_step_tag=self.lm_call.lm_step_tag)
+    def analyze_output(
+        self,
+        problem_inst: Dict[str, str],
+        gen_answers: List[str],
+        values_list: List[List[float]],
+    ) -> Tuple[Dict[str, int], List[Dict[str, Any]]]:
+        parsed_groundtruth = parse(problem_inst["answer"])
 
         output_list = [
             {
                 "path_idx": i,
-                "text": txt,
-                "value": v
-             }
-            for i, (txt, v) in enumerate(zip(gen_answers, value_list))
+                "text": answer,
+                "value": values,
+            }
+            for i, (answer, values) in enumerate(zip(gen_answers, values_list))
         ]
-        ans_list = [parse(txt) for txt in gen_answers]
+        parsed_ans_list = [parse(txt) for txt in gen_answers]
 
         res = {
             agg_method: judge_ans(
-                extracted_groundtruth,
-                ans_list,
-                value_list,
+                parsed_groundtruth,
+                parsed_ans_list,
+                values_list,
                 agg_method,
             )
-            for agg_method in (
-                # CHOSEN_AGGR_METHODS if len(gen_answers) > 1 else [MAJORITY_VOTE]
-                CHOSEN_AGGR_METHODS
-            )
+            for agg_method in CHOSEN_AGGR_METHODS
         }
         return res, output_list
 

@@ -1,25 +1,20 @@
+import json
+import tree
 from datetime import datetime
+from functools import partial
 from pathlib import Path
+from tqdm import tqdm
 from typing import Any, Callable, Dict, List, Optional, Union
 
-import torch
-from functools import partial
-import json
+
 import jsonlines
-import time
 import numpy as np
-from tqdm import tqdm
-from argparse import ArgumentParser
-import os
-import random
-from multiprocessing import Pool
-import tree
+import ray
 from ray.util.actor_pool import ActorPool
 from reason.evaluation.methods import *
-import ray
+
 
 from config import get_args
-from config.config_utils import str2bool
 from reason.inference.lm_call import LMCallingConfig, VLLMRemoteCaller
 from reason.inference.rm_call import (
     RMRemoteCaller,
@@ -65,13 +60,13 @@ def parallel_evaluate_test_dataset(
 
     actor_pool = ActorPool(
         [
-            # RemoteMathEvaluator.remote(config.task_name, lm_call, rm_call)
             RemoteMathEvaluator.remote(task, lm_call, rm_call)
             for _ in range(args.num_worker)
         ]
     )
     res_q = actor_pool.map_unordered(
-        lambda p, x: p.evaluate_problem.remote(x, solver_fn), test_ds
+        lambda p, x: p.evaluate_problem.remote(x, solver_fn),
+        test_ds,
     )
     # Distributes tasks from the test_ds dataset across the worker pool asynchronously and
     # collects results in any order as they complete. Every worker has a new searching tree as we reset the
@@ -133,7 +128,8 @@ if __name__ == "__main__":
 
     if args.RM == "dummy":
         rm_config = RewardModelBaseConfig(
-            step_tag=prm_step_tag, format_str=prm_format_str
+            step_tag=prm_step_tag,
+            format_str=prm_format_str,
         )
         rm_call = DummyRewardModelCaller(rm_config)
     else:
@@ -166,16 +162,19 @@ if __name__ == "__main__":
     cfg_dict_record["gen_config"] = gen_config.__dict__
 
     if args.method == "cot":
-        method_config = CoTConfig(
-            args.task_name,
-        )
+        method_config = CoTConfig(args.task_name)
         solver_fn = partial(cot, method_config, gen_config, task)
     elif args.method == "best_of_n":
         method_config = BestOfNConfig(
             args.task_name,
             num_sequence=args.num_sequence,
         )
-        solver_fn = partial(best_of_n, method_config, gen_config, task)
+        solver_fn = partial(
+            best_of_n,
+            method_config,
+            gen_config,
+            task,
+        )
     elif args.method == "beam_search":
         method_config = BeamSearchConfig(
             task_name=args.task_name,
@@ -183,7 +182,12 @@ if __name__ == "__main__":
             tree_max_width=args.tree_max_width,
             beam_size=args.num_sequence,
         )
-        solver_fn = partial(beam_search, method_config, gen_config, task)
+        solver_fn = partial(
+            beam_search,
+            method_config,
+            gen_config,
+            task,
+        )
     elif args.method == "vanila_mcts":
         method_config = VanilaMCTSConfig(
             task_name=args.task_name,
@@ -192,7 +196,12 @@ if __name__ == "__main__":
             select_by_prior=False,
             num_path=args.num_sequence,
         )
-        solver_fn = partial(vanila_mcts, method_config, gen_config, task)
+        solver_fn = partial(
+            vanila_mcts,
+            method_config,
+            gen_config,
+            task,
+        )
     elif args.method == "mcts":
         method_config = MCTSConfig(
             task_name=args.task_name,
@@ -202,7 +211,12 @@ if __name__ == "__main__":
             num_path=args.num_sequence,
             simulate_num=args.simulate_num,
         )
-        solver_fn = partial(mcts, method_config, gen_config, task)
+        solver_fn = partial(
+            mcts,
+            method_config,
+            gen_config,
+            task,
+        )
     elif args.method == "rstar_mcts":
         method_config = RStarMCTSConfig(
             task_name=args.task_name,
@@ -211,7 +225,12 @@ if __name__ == "__main__":
             select_by_prior=False,
             num_path=args.num_sequence,
         )
-        solver_fn = partial(rstar_mcts, method_config, gen_config, task)
+        solver_fn = partial(
+            rstar_mcts,
+            method_config,
+            gen_config,
+            task,
+        )
     elif args.method == "mcts_beam_search":
         method_config = MCTSBeamSearchConfig(
             task_name=args.task_name,

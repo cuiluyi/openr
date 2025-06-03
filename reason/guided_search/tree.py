@@ -90,7 +90,7 @@ class Node(object):
             self._parent.update_recursive(leaf_value, mcts_mode)
 
     def _rollout(
-        self, 
+        self,
         env: Type[CoTEnv],
         reward_model_fn: Optional[Callable] = None,
     ) -> int:
@@ -105,35 +105,22 @@ class Node(object):
         terminated, truncated, _ = env.get_done_and_info()
 
         if terminated or truncated:
-            prms: List[int] = reward_model_fn(
-                (
-                    env.question,
-                    env.answer
-                )
-            )
+            prms: List[int] = reward_model_fn((env.question, env.answer))
             return min(prms)
         else:
             result: ConcatedLMGenResult = env.llm_gen_fn(
                 input_str=env.get_state(),
-                config=LMCallingConfig(
-                    n=1,
-                    **env.config["generation_config"]
-                ),
+                config=LMCallingConfig(n=1, **env.config["generation_config"]),
             )
-            
+
             steps: str = result.text[0]
-            prms: List[int] = reward_model_fn(
-                (
-                    env.question,
-                    env.answer + steps
-                )
-            )
+            prms: List[int] = reward_model_fn((env.question, env.answer + steps))
 
             previous_steps_num = len(env.answer.split(env.llm_gen_fn.lm_step_tag)) - 1
             value = min(prms[:previous_steps_num])
             solution_reward = min(prms)
             return 0.5 * (value + solution_reward)
-    
+
     def is_leaf(self) -> Dict:
         """
         Overview:
@@ -171,7 +158,7 @@ class Node(object):
         # ]
         return {
             "visit_cnt": self.visit_count,
-            "value": self.value,
+            "values": self.value,
             "prior_p": float(self.prior_p_ori),
             "initial_value": self._initial_value,
             "terminated": self.terminated,
@@ -441,7 +428,7 @@ class SearchTree:
             traj_data = {
                 "path_idx": i_path,
                 "text": env_copy.answer,
-                "value": leaf_value,
+                "values": leaf_value,
                 "api_completion_tokens": api_call_completion_tokens,
                 "tree_completion_tokens": self._completion_tokens,
             }
@@ -541,10 +528,10 @@ class SearchTree:
     #         traj_data = {
     #             "path_idx": i_path,
     #             "text": simulate_env.answer,
-    #             "value": leaf_value,
+    #             "values": leaf_value,
     #             "api_completion_tokens": api_call_completion_tokens,
     #             "tree_completion_tokens": self._completion_tokens,
-    #         }            
+    #         }
     #         traj_list.append(traj_data)
 
     #         # reset api_call_completion_tokens
@@ -603,7 +590,7 @@ class SearchTree:
 
                         if terminated or truncated:
                             continue
-                        
+
                         # record api_tokens, if not expand, info["api_completion_token"] is 0
                         api_call_completion_tokens += info["api_completion_token"]
                         self._expand_leaf_node(node, env_copy, reward_model_fn)
@@ -627,7 +614,9 @@ class SearchTree:
                     break
 
                 # 多次模拟之后进行选择，并更新 simulate_node
-                action, simulate_node = self._select_child(simulate_node, simulate_env, criteria="visit_count")
+                action, simulate_node = self._select_child(
+                    simulate_node, simulate_env, criteria="visit_count"
+                )
                 # action, simulate_node = self._select_child(simulate_node, simulate_env, criteria="value")
 
                 simulate_env._next_state_terminated = {}
@@ -642,11 +631,15 @@ class SearchTree:
             lm_step_tag = simulate_env.llm_gen_fn.lm_step_tag
             traj_data = {
                 "path_idx": i_path,
-                "text": simulate_env.answer if simulate_env.answer.endswith(lm_step_tag) else simulate_env.answer + lm_step_tag,
-                "value": leaf_value,
+                "text": (
+                    simulate_env.answer
+                    if simulate_env.answer.endswith(lm_step_tag)
+                    else simulate_env.answer + lm_step_tag
+                ),
+                "values": leaf_value,
                 "api_completion_tokens": api_call_completion_tokens,
                 "tree_completion_tokens": self._completion_tokens,
-            }            
+            }
             traj_list.append(traj_data)
 
             # reset api_call_completion_tokens
@@ -700,7 +693,7 @@ class SearchTree:
                         key=lambda x: x[2],
                         reverse=True,
                     )[:k]
-                    for c_act, c_node, c_value in top_k_children:
+                    for _, c_node, c_value in top_k_children:
                         new_env = cur_env.copy()
                         heapq.heappush(top_k_nodes, (-c_value, c_node, new_env))
 
@@ -711,7 +704,9 @@ class SearchTree:
             # XXX(ziyu): this could be optimized by batch expand
             for value, node, new_env in top_k_nodes:
                 _, _, terminated, truncated, info = new_env.step(
-                    node.last_action, update_legal_action=True
+                    node.last_action,
+                    node._initial_value,
+                    update_legal_action=True,
                 )
                 api_call_completion_tokens += info["api_completion_token"]
                 if terminated or truncated:
@@ -729,7 +724,7 @@ class SearchTree:
                 {
                     "path_idx": i,
                     "text": e_env.answer,
-                    "value": -neg_e_v,
+                    "values": e_env.values,
                     "api_completion_tokens": 0,
                     "tree_completion_tokens": 0,
                     # num_generated_token is hard to compute for each single answer
@@ -781,7 +776,9 @@ class SearchTree:
 
                         # sync terminated flag here
                         # XXX(ziyu): find a more clean way.
-                        env_copy._next_state_terminated = {}    # Maybe You can comment out this next line
+                        env_copy._next_state_terminated = (
+                            {}
+                        )  # Maybe You can comment out this next line
                         # assert node.last_action == action
                         env_copy._next_state_terminated[action] = node.terminated
 
@@ -803,13 +800,19 @@ class SearchTree:
                             if self._init_critic_value:
                                 leaf_value = node._initial_value
                             else:
-                                leaf_value = reward_model_fn(env_copy.get_state()).item()
+                                leaf_value = reward_model_fn(
+                                    env_copy.get_state()
+                                ).item()
                     node.update_recursive(leaf_value, env_copy.mcts_mode)
 
                 # 多次模拟之后进行选择，并更新 simulate_node
-                selected_actions, selected_nodes, selected_scores = self._select_batch_final_action(simulate_node, beam_size)
+                selected_actions, selected_nodes, selected_scores = (
+                    self._select_batch_final_action(simulate_node, beam_size)
+                )
 
-                for action, node, score in zip(selected_actions, selected_nodes, selected_scores):
+                for action, node, score in zip(
+                    selected_actions, selected_nodes, selected_scores
+                ):
                     env = simulate_env.copy()
                     env._next_state_terminated = {}
                     env._next_state_terminated[action] = node.terminated
@@ -823,7 +826,7 @@ class SearchTree:
                         traj_data = {
                             "path_idx": num_path - beam_size,
                             "text": env.answer,
-                            "value": node.value,
+                            "values": node.value,
                             "api_completion_tokens": api_call_completion_tokens,
                             "tree_completion_tokens": self._completion_tokens,
                         }
@@ -839,7 +842,7 @@ class SearchTree:
                     heapq.heappush(top_k_nodes, (-score, node, env))
                 if finished:
                     break
-                
+
             if finished or len(top_k_nodes) == 0:
                 break
             simulate_nodes.clear()
@@ -901,7 +904,7 @@ class SearchTree:
 
                         if terminated or truncated:
                             continue
-                        
+
                         # record api_tokens, if not expand, info["api_completion_token"] is 0
                         api_call_completion_tokens += info["api_completion_token"]
                         self._expand_leaf_node(node, env_copy, reward_model_fn)
@@ -923,11 +926,15 @@ class SearchTree:
 
                 if simulate_node.children == {}:
                     break
-                
-                # 多次模拟之后进行选择，并更新 simulate_node
-                selected_actions, selected_nodes, selected_scores = self._select_batch_final_action(simulate_node, beam_size)
 
-                for action, node, score in zip(selected_actions, selected_nodes, selected_scores):
+                # 多次模拟之后进行选择，并更新 simulate_node
+                selected_actions, selected_nodes, selected_scores = (
+                    self._select_batch_final_action(simulate_node, beam_size)
+                )
+
+                for action, node, score in zip(
+                    selected_actions, selected_nodes, selected_scores
+                ):
                     env = simulate_env.copy()
                     env._next_state_terminated = {}
                     env._next_state_terminated[action] = node.terminated
@@ -938,7 +945,7 @@ class SearchTree:
                     flag = terminated or truncated
                     # heapq.heappush(top_k_nodes, (-score, flag, node, env))
                     heapq.heappush(top_k_nodes, (-score, flag, node, env))
-                    
+
             simulate_nodes.clear()
             simulate_envs.clear()
 
@@ -950,7 +957,7 @@ class SearchTree:
                     traj_data = {
                         "path_idx": num_path - beam_size,
                         "text": env.answer,
-                        "value": node.value,
+                        "values": node.value,
                         "api_completion_tokens": api_call_completion_tokens,
                         "tree_completion_tokens": self._completion_tokens,
                     }
@@ -966,7 +973,6 @@ class SearchTree:
             if finished:
                 break
         return traj_list
-
 
     def _simulate(
         self,
@@ -1063,7 +1069,7 @@ class SearchTree:
                     {
                         "text": simulate_env.answer,
                         "correct": winner == 1,
-                        "value": leaf_value,
+                        "values": leaf_value,
                     }
                 )
 
@@ -1083,7 +1089,8 @@ class SearchTree:
             node.update_recursive(-leaf_value, simulate_env.mcts_mode)
 
     def _select_child(
-        self, node: LanguageNode,
+        self,
+        node: LanguageNode,
         simulate_env: Type[CoTEnv],
         criteria: str = "puct",
     ) -> Tuple[Union[int, float], Node]:
@@ -1126,8 +1133,8 @@ class SearchTree:
         return action, child
 
     def _select_batch_final_action(
-        self, 
-        node: LanguageNode, 
+        self,
+        node: LanguageNode,
         beam_size: int,
         criteria: str = "puct",
     ) -> List[Tuple[str, LanguageNode]]:
@@ -1144,7 +1151,7 @@ class SearchTree:
         """
         # 处理空子节点情况
         if not node.children:
-            return [ (None, node) ] if beam_size > 0 else []
+            return [(None, node)] if beam_size > 0 else []
 
         # 使用堆结构高效选择top-k
         heap = []
@@ -1161,7 +1168,7 @@ class SearchTree:
                 score = child_tmp.value
 
             heapq.heappush(heap, (-score, action_tmp, child_tmp))
-        
+
         # 提取前beam_size个元素
         actions, childs, scores = [], [], []
         while heap and len(actions) < beam_size:
@@ -1169,7 +1176,7 @@ class SearchTree:
             actions.append(action_tmp)
             childs.append(child_tmp)
             scores.append(-neg_score)
-        
+
         return actions, childs, scores
 
     def _select_by_prior(self, node: Node, simulate_env):
@@ -1212,6 +1219,9 @@ class SearchTree:
         else:
             leaf_value = node._initial_value
             assert len(simulate_env.legal_actions) > 0
+
+            # child_values = [x["prob"] for x in simulate_env.legal_actions]
+
             prms = reward_fn(
                 [
                     (
@@ -1253,9 +1263,7 @@ class SearchTree:
                     child_values.append(0.0)
                 elif len(rs) == 0:
                     logger.warning(
-                        "Empty PRM value for: \nState: \n{} \naction: \n{}, will be set to 0.0".format(
-                            text_state, act
-                        )
+                        f"Empty PRM value for: \nState: \n{text_state} \naction: \n{act}, will be set to 0.0"
                     )
                     child_values.append(0.0)
                 else:
@@ -1318,7 +1326,9 @@ class SearchTree:
         """
         value_score = child.value
 
-        return value_score + math.sqrt(self.root.visit_count / (child.visit_count + 0.000001)) 
+        return value_score + math.sqrt(
+            self.root.visit_count / (child.visit_count + 0.000001)
+        )
 
     def _puct_score(self, parent: Node, child: Node) -> float:
         """
@@ -1330,17 +1340,21 @@ class SearchTree:
         Returns:
             - score (:obj:`Bool`): The UCB score.
         """
-        
+
         c_puct = (
             math.log((parent.visit_count + self._pb_c_base + 1) / self._pb_c_base)
             + self._pb_c_init
         )
         value_score = child.value
-        prior_score = c_puct * child.prior_p * math.sqrt(parent.visit_count) / (1 + child.visit_count)
+        prior_score = (
+            c_puct
+            * child.prior_p
+            * math.sqrt(parent.visit_count)
+            / (1 + child.visit_count)
+        )
 
         return value_score + prior_score
 
-    
     # TODO: has problems
     def _uct_score(self, parent: Node, child: Node) -> float:
         """
@@ -1354,8 +1368,9 @@ class SearchTree:
         """
         value_score = child.value
 
-        return value_score + self._pb_c_init * math.sqrt(math.log(parent.visit_count)) / (child.visit_count + 0.000001)
-
+        return value_score + self._pb_c_init * math.sqrt(
+            math.log(parent.visit_count)
+        ) / (child.visit_count + 0.000001)
 
     def reset_prior(self, node: Node) -> None:
         """
