@@ -1,11 +1,12 @@
 import json
 import tree
+
+from argparse import ArgumentParser
 from datetime import datetime
 from functools import partial
 from pathlib import Path
 from tqdm import tqdm
 from typing import Any, Callable, Dict, List, Optional, Union
-
 
 import jsonlines
 import numpy as np
@@ -13,17 +14,16 @@ import ray
 from ray.util.actor_pool import ActorPool
 from reason.evaluation.methods import *
 
-
-from config import get_args
-from reason.inference.lm_call import LMCallingConfig, VLLMRemoteCaller
-from reason.inference.rm_call import (
+from reason.infer.lm_call import LMCallingConfig, VLLMRemoteCaller
+from reason.infer.rm_call import (
     RMRemoteCaller,
     DummyRewardModelCaller,
     RewardModelBaseConfig,
     RemoteRewardModelConfig,
 )
-from reason.evaluation.evaluator import SolutionOutput, Task, RemoteMathEvaluator
-from reason.evaluation.utils import setup_seed, jsonl_to_json
+
+from reason.evaluation.evaluator import Task, RemoteMathEvaluator
+from utils import setup_seed, jsonl_to_json, str2
 
 
 def parallel_evaluate_test_dataset(
@@ -49,20 +49,13 @@ def parallel_evaluate_test_dataset(
         print(f"Resumed {cnt} questions from {args.resume_dir}")
         total_cnt = len(test_ds)
         test_ds = [
-            problem_inst
-            for problem_inst in test_ds
-            if problem_inst["question"] not in answered_questions
+            problem_inst for problem_inst in test_ds if problem_inst["question"] not in answered_questions
         ]
         new_cnt = len(test_ds)
-        print(
-            f"After resuming, there are {new_cnt}/{total_cnt} new questions to answer."
-        )
+        print(f"After resuming, there are {new_cnt}/{total_cnt} new questions to answer.")
 
     actor_pool = ActorPool(
-        [
-            RemoteMathEvaluator.remote(task, lm_call, rm_call)
-            for _ in range(args.num_worker)
-        ]
+        [RemoteMathEvaluator.remote(task, lm_call, rm_call) for _ in range(args.num_worker)]
     )
     res_q = actor_pool.map_unordered(
         lambda p, x: p.evaluate_problem.remote(x, solver_fn),
@@ -92,7 +85,36 @@ def parallel_evaluate_test_dataset(
 
 
 if __name__ == "__main__":
-    args = get_args()
+    parser = ArgumentParser()
+
+    parser.add_argument("--LM", type=str, required=True)
+    parser.add_argument("--RM", type=str, default="dummy")
+    parser.add_argument("--controller_addr", type=str, default="http://0.0.0.0:28778")
+    # task config
+    parser.add_argument("--task_name", type=str, default="gsm8k")
+    parser.add_argument("--test", type=str2bool, default=True)
+    parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--dataset", type=str, default="HuggingFaceH4/MATH-500")
+    # method config
+    parser.add_argument("--method", type=str, required=True)
+    parser.add_argument("--num_sequence", type=int, default=1)
+    parser.add_argument("--simulate_num", type=int, default=1)
+    # LM gen config
+    parser.add_argument("--temperature", type=float, default=0.0)
+    parser.add_argument("--top_p", type=float, default=1)
+    parser.add_argument("--top_k", type=int, default=-1)
+    parser.add_argument("--max_new_tokens", type=int, default=256)
+    # Tree construction config
+    parser.add_argument("--tree_max_depth", type=int, default=None)
+    parser.add_argument("--tree_max_width", type=int, default=None)
+    # ckpg config
+    parser.add_argument("--save_dir", type=str, default=None)
+    parser.add_argument("--resume_dir", type=str, default=None)
+    # parallel config
+    parser.add_argument("--local", action="store_true", default=False)
+    parser.add_argument("--num_worker", type=int, default=32)
+
+    args = parser.parse_args()
     setup_seed(args.seed)
 
     if args.local:
@@ -106,9 +128,7 @@ if __name__ == "__main__":
         prm_format_str = "{question} {answer}"
     elif "qwen2.5-math-prm" in args.RM.lower():
         prm_step_tag = "<extra_0>"
-        prm_format_str = (
-            "{question}<this is qwen2.5-math-prm seperation &&&&& >{answer}"
-        )
+        prm_format_str = "{question}<this is qwen2.5-math-prm seperation &&&&& >{answer}"
     else:
         # assume qwen
         prm_step_tag = "\n\n\n\n\n "
@@ -141,11 +161,7 @@ if __name__ == "__main__":
         )
         rm_call = RMRemoteCaller(rm_config)
 
-    task = Task(
-        task_name=args.task_name,
-        dataset_id=args.dataset,
-        is_few_shot=args.is_few_shot,
-    )
+    task = Task(task_name=args.task_name, dataset_id=args.dataset)
 
     cfg_dict_record = dict()
     # XXX: qwen-2.5 requires add more stop words
@@ -161,21 +177,7 @@ if __name__ == "__main__":
     )
     cfg_dict_record["gen_config"] = gen_config.__dict__
 
-    if args.method == "cot":
-        method_config = CoTConfig(args.task_name)
-        solver_fn = partial(cot, method_config, gen_config, task)
-    elif args.method == "best_of_n":
-        method_config = BestOfNConfig(
-            args.task_name,
-            num_sequence=args.num_sequence,
-        )
-        solver_fn = partial(
-            best_of_n,
-            method_config,
-            gen_config,
-            task,
-        )
-    elif args.method == "beam_search":
+    if args.method == "beam_search":
         method_config = BeamSearchConfig(
             task_name=args.task_name,
             tree_max_depth=args.tree_max_depth,
@@ -193,7 +195,6 @@ if __name__ == "__main__":
             task_name=args.task_name,
             tree_max_width=args.tree_max_width,
             tree_max_depth=args.tree_max_depth,
-            select_by_prior=False,
             num_path=args.num_sequence,
         )
         solver_fn = partial(
@@ -202,46 +203,6 @@ if __name__ == "__main__":
             gen_config,
             task,
         )
-    elif args.method == "mcts":
-        method_config = MCTSConfig(
-            task_name=args.task_name,
-            tree_max_width=args.tree_max_width,
-            tree_max_depth=args.tree_max_depth,
-            select_by_prior=False,
-            num_path=args.num_sequence,
-            simulate_num=args.simulate_num,
-        )
-        solver_fn = partial(
-            mcts,
-            method_config,
-            gen_config,
-            task,
-        )
-    elif args.method == "rstar_mcts":
-        method_config = RStarMCTSConfig(
-            task_name=args.task_name,
-            tree_max_width=args.tree_max_width,
-            tree_max_depth=args.tree_max_depth,
-            select_by_prior=False,
-            num_path=args.num_sequence,
-        )
-        solver_fn = partial(
-            rstar_mcts,
-            method_config,
-            gen_config,
-            task,
-        )
-    elif args.method == "mcts_beam_search":
-        method_config = MCTSBeamSearchConfig(
-            task_name=args.task_name,
-            tree_max_width=args.tree_max_width,
-            tree_max_depth=args.tree_max_depth,
-            select_by_prior=False,
-            num_path=args.num_sequence,  # TODO: add optional argument in script
-            # beam_size=config.num_sequence,  # TODO: add optional argument in script
-            simulate_num=args.simulate_num,
-        )
-        solver_fn = partial(mcts_beam_search, method_config, gen_config, task)
     else:
         raise ValueError(f"Unknown method: {args.method}")
     cfg_dict_record["method"] = args.method

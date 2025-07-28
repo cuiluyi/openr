@@ -10,10 +10,10 @@ import ray
 from math_verify import parse, verify
 
 
-from envs import get_default_query_str_builder, get_env_datasets
+from envs import get_env_datasets
 from envs.base_env import INVALID_ANS
-from reason.inference.lm_call import LanguageModelCallingFunction
-from reason.inference.rm_call import RewardModelCallingFunction
+from reason.infer.lm_call import LanguageModelCallingFunction
+from reason.infer.rm_call import RewardModelCallingFunction
 from reason.reranking.vote_utils import (
     MAJORITY_VOTE,
     PRM_MIN_MAX,
@@ -25,7 +25,7 @@ from reason.reranking.vote_utils import (
 
 
 class Task:
-    def __init__(self, task_name: str, dataset_id: str, is_few_shot: bool = False):
+    def __init__(self, task_name: str, dataset_id: str):
         SUPPORTED_TASKS = ["MATH", "rstar", "Online"]
         if task_name not in SUPPORTED_TASKS:
             raise NotImplementedError(f"Task {task_name} is not supported")
@@ -36,20 +36,11 @@ class Task:
         self.extract_groundtruth = task_module.extract_groundtruth
         self.judge_correct = task_module.judge_correct
 
-        self._is_few_shot = is_few_shot
         self.env_fn = task_module.Env
 
         if task_name != "Online":
             self.dataset_id = dataset_id
-            self._train_ds, self._test_ds = get_env_datasets(
-                self.task_name, self.dataset_id
-            )
-
-    def prompt_fn(self, problem_input: str):
-        return get_default_query_str_builder(self.task_name)(
-            problem_input,
-            is_few_shot=self._is_few_shot,
-        )
+            self._train_ds, self._test_ds = get_env_datasets(self.task_name, self.dataset_id)
 
     @property
     def test_ds(self):
@@ -133,13 +124,13 @@ class MathEvaluator:
             self.lm_call,
             self.rm_call,
         )
-            
+
         result, output = self.analyze_output(
             problem_inst,
             solution.solutions,
             solution.values,
         )
-        
+
         total_completion_token = 0
         for i, o in enumerate(output):
             o["completion_tokens"] = solution.completion_tokens[i]

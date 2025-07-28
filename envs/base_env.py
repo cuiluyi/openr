@@ -2,14 +2,12 @@ import abc
 from typing import List, Dict, Any, Optional, Tuple, Union, Callable, Type
 import numpy as np
 import copy
-import pdb
-import torch
+
 from distributed.utils import print_with_rank
 from transformers import PreTrainedTokenizer
-from reason.inference.lm_call import LMCallingConfig, ConcatedLMGenResult
+from reason.infer.lm_call import LMCallingConfig, ConcatedLMGenResult
 
-# from envs.diversity_filter import DiversityFilter
-from envs.correct_filter import CorrectFilter
+from utils.prompt import build_query_str
 
 INVALID_ANS = "[invalid]"
 
@@ -43,37 +41,7 @@ class BaseEnv(abc.ABC):
         raise NotImplementedError
 
     @staticmethod
-    def build_query_str(
-        cot_task_desc: Optional[str],
-        cot_examples: Optional[str],
-        problem_format_str: str,
-        problem_input: str,
-        is_few_shot: bool = False,
-    ):
-        """a wrap function that wrap the problem text with certrain format
-        e.g. prompt_str = "Input: " + join_numbers(" ", xs) + "\nSteps:\n"
-        >>> query_str = Game24Env.build_query_str("1 1 1 1")
-        >>> print(query_str)
-        >>> Use numbers and basic arithmetic operations (+ - * /) to obtain 24. Each step, you are only allowed to choose two of the remaining numbers to obtain a new number.
-        Input: 1 1 1 1
-        Steps:
-
-        >>>
-        """
-
-        ret = ""
-        if cot_task_desc:
-            ret += cot_task_desc + "\n"
-        if is_few_shot:
-            ret += cot_examples + "\n"
-        ret += problem_format_str.format(question=problem_input)
-
-        return ret
-
-    @staticmethod
-    def build_response_str(
-        answer_str: str, tokenizer: PreTrainedTokenizer, add_eos_token: bool
-    ):
+    def build_response_str(answer_str: str, tokenizer: PreTrainedTokenizer, add_eos_token: bool):
         raise NotImplementedError
 
 
@@ -98,9 +66,6 @@ class CoTEnv(BaseEnv):
         config,
         math_problems,
         llm_gen_fn,
-        task_desc_str: str,
-        cot_example_str: str,
-        problem_format_str: str,
         reset=True,
         reward_model_fn: Optional[Callable] = None,
     ):
@@ -112,22 +77,7 @@ class CoTEnv(BaseEnv):
         self.values = []
         self.math_problem = None
         self._legal_actions = None
-        self.is_few_shot = config.get("is_few_shot", False)
-
-        self._task_desc_str = task_desc_str
-        self._cot_example_str = cot_example_str
-        self._problem_format_str = problem_format_str
         self._stop_str = config.get("stop_str", None)
-
-        prefixes = []
-        if self._task_desc_str is not None:
-            prefixes.append(self._task_desc_str)
-        if self.is_few_shot:
-            prefixes.append(self._cot_example_str)
-        if len(prefixes) > 0:
-            self.task_prefix = "\n".join(prefixes)
-        else:
-            self.task_prefix = None
 
         self.reward_model_fn = reward_model_fn
 
@@ -139,22 +89,14 @@ class CoTEnv(BaseEnv):
         self.set_problem(idx=0)
         self.action_history = []
         self.values = []
-        self._init_query = self.build_query_str(
-            cot_examples=self._cot_example_str,
-            cot_task_desc=self._task_desc_str,
-            problem_format_str=self._problem_format_str,
-            problem_input=self.math_problem["question"],
-            is_few_shot=self.is_few_shot,
-        )
+        self._init_query = build_query_str(problem_input=self.math_problem["question"])
         api_completion_token = 0
         if update_legal_action:
             cnt = 0
             while cnt < 5:
                 cnt += 1
                 try:
-                    self._legal_actions, api_completion_token = (
-                        self.update_legal_actions()
-                    )
+                    self._legal_actions, api_completion_token = self.update_legal_actions()
                     break
                 except NoLegalActionException as e:
                     if cnt == 5:
@@ -174,9 +116,7 @@ class CoTEnv(BaseEnv):
             while cnt < 5:
                 cnt += 1
                 try:
-                    self._legal_actions, api_completion_token = (
-                        self.update_legal_actions()
-                    )
+                    self._legal_actions, api_completion_token = self.update_legal_actions()
                     info["api_completion_token"] = api_completion_token
                     break
                 except NoLegalActionException as e:
@@ -197,9 +137,7 @@ class CoTEnv(BaseEnv):
 
     def get_state(self):
         # not join about sep_str here because we let vllm return with sep_str
-        ret = self._init_query + "".join(
-            item for item in self.action_history if item is not None
-        )
+        ret = self._init_query + "".join(item for item in self.action_history if item is not None)
         return ret
 
     def post_process_act(self, action: str):
@@ -207,32 +145,6 @@ class CoTEnv(BaseEnv):
         return action
 
     def update_legal_actions(self):
-        # # diversity_filter = DiversityFilter()
-        # correct_filter = CorrectFilter(self, self.reward_model_fn)
-
-        # try_num = 10
-        # for i in range(try_num):
-        #     result: ConcatedLMGenResult = self.llm_gen_fn(
-        #         input_str=self.get_state(),
-        #         config=LMCallingConfig(
-        #             n=self.config["max_actions"],
-        #             stop_str=self.sep,
-        #             include_stop_str_in_output=True,
-        #             **self.config["generation_config"]
-        #         ),
-        #     )
-        #     if isinstance(result.finish_reason, str):
-        #         result.finish_reason = [result.finish_reason]
-
-        #     # result = diversity_filter.filter(result)
-        #     result = correct_filter.filter(result)
-        #     if result is not None:
-        #         break
-        #     if i == try_num - 1 and result is None:
-        #         result = correct_filter.max_step
-        #         # if correct_filter.max_prm_value < 0.8:
-        #         #     raise NoLegalActionException("No possible action have been generated.")
-
         result: ConcatedLMGenResult = self.llm_gen_fn(
             input_str=self.get_state(),
             config=LMCallingConfig(
@@ -277,14 +189,10 @@ class CoTEnv(BaseEnv):
             print_with_rank("gen_result: {}".format(result))
             raise NoLegalActionException("No possible action have been generated.")
 
-        # from .utils import entropy_from_logprobs
-        # relative_entropy = entropy_from_logprobs(prob_list)
-        
         prob_list = np.exp(prob_list)
         prob_list = np.array(prob_list)
         # normalize probability
         prob_list = prob_list / np.sum(prob_list)
-        
 
         _legal_actions = [
             {
@@ -351,9 +259,6 @@ class CoTEnv(BaseEnv):
             config=self.config,
             math_problems=self.math_problems,
             llm_gen_fn=self.llm_gen_fn,
-            task_desc_str=self._task_desc_str,
-            cot_example_str=self._cot_example_str,
-            problem_format_str=self._problem_format_str,
             reset=False,
             reward_model_fn=self.reward_model_fn,
         )

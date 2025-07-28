@@ -1,45 +1,18 @@
-import copy
-import re
-from typing import List, Optional, Callable
+from typing import Optional, Callable
 from math_verify import parse, verify
-import numpy as np
-from envs.base_env import CoTEnv, NoLegalActionException, INVALID_ANS
-from .prompt import COT_EXAMPLES, COT_TASK_DESC, PROBLEM_FORMAT_STR, SEP
-# from .verify_utils import extract_answer as extract_fn, grade_answer
-from .parse_utils_qwen import extract_answer as extract_fn, parse_ground_truth
-from .grader import math_equal
 
-ANS_RE = None 
-STOP_STR = None
-
-
-def extract_answer(answer_str: str) -> str:
-    return extract_fn(answer_str, data_name='math')
-
-
-def extract_groundtruth(groundtruth_str: str) -> str:
-    return parse_ground_truth(groundtruth_str, data_name='math')
-
-
-def judge_correct(
-    problem_str: str, extracted_groundtruth: Optional[str], answer: str
-) -> bool:
-    # return grade_answer(given_answer=answer, ground_truth=extracted_groundtruth)
-    result = math_equal(answer, extracted_groundtruth)
-    return result
+from envs.base_env import CoTEnv
+from utils import extract_answer
 
 
 class Env(CoTEnv):
-    sep = SEP
+    sep = "\n\n"
 
     def __init__(
         self,
         config: dict,
-        math_problems:dict,
+        math_problems: dict,
         llm_gen_fn: Callable,
-        task_desc_str: str = COT_TASK_DESC,
-        cot_example_str: str = COT_EXAMPLES,
-        problem_format_str: str = PROBLEM_FORMAT_STR,
         reset=True,
         reward_model_fn: Optional[Callable] = None,
     ):
@@ -47,9 +20,6 @@ class Env(CoTEnv):
             config,
             math_problems,
             llm_gen_fn,
-            task_desc_str,
-            cot_example_str,
-            problem_format_str,
             reset,
             reward_model_fn,
         )
@@ -57,11 +27,11 @@ class Env(CoTEnv):
     def post_process_act(self, action: str):
         if not action.endswith(self.sep):
             action = action.strip() + self.sep
-        
+
         return action
 
     def _is_correct(self, completion):
-        extracted_answer = parse(completion)
+        extracted_answer = extract_answer(completion)
         return verify(self.math_problem["answer"], extracted_answer)
 
     def get_reward(self):

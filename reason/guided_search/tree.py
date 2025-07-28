@@ -2,13 +2,10 @@
 The Node and MCTS class for AlphaZero.
 """
 
-#
-import copy
 import json
 import math
 
 import numpy as np
-import torch
 import torch.nn as nn
 from typing import List, Dict, Any, Optional, Tuple, Union, Callable, Type
 from distributed.utils import print_rank_0, print_with_rank
@@ -25,9 +22,7 @@ class Node(object):
         The node base class for tree_search.
     """
 
-    def __init__(
-        self, parent: "Node" = None, prior_p: float = 1.0, initial_value: float = 0.0
-    ) -> None:
+    def __init__(self, parent: "Node" = None, prior_p: float = 1.0, initial_value: float = 0.0) -> None:
         self._parent = parent
         self._children = {}
         self._visit_count = 0
@@ -100,7 +95,7 @@ class Node(object):
         Returns:
             - output (:obj:`Int`): The value of the leaf node.
         """
-        from reason.inference.lm_call import LMCallingConfig, ConcatedLMGenResult
+        from reason.infer.lm_call import LMCallingConfig, ConcatedLMGenResult
 
         terminated, truncated, _ = env.get_done_and_info()
 
@@ -181,9 +176,7 @@ class Node(object):
         if self.is_root():
             return "root"
         else:
-            return "child: value: {:.3f}, prior: {:.3f}".format(
-                self.last_action, self.value, self.prior_p
-            )
+            return "child: value: {:.3f}, prior: {:.3f}".format(self.last_action, self.value, self.prior_p)
 
 
 class LanguageNode(Node):
@@ -269,11 +262,7 @@ class SearchTree:
         self.visited_paths = None
 
         self.no_terminal_reward = self._cfg.get("no_terminal_reward", True)
-        self.mask_non_terminal_node_value = self._cfg.get(
-            "mask_non_terminal_node_value", False
-        )
-
-        self._init_critic_value = self._cfg.get("init_critic_value", True)
+        self.mask_non_terminal_node_value = self._cfg.get("mask_non_terminal_node_value", False)
 
         self._completion_tokens = 0
 
@@ -281,90 +270,11 @@ class SearchTree:
     def num_generated_token(self):
         return self._completion_tokens
 
-    def clear_node(self, node):
-        assert node is not None
-        node.clear()
-        for child in node.children.values():
-            self.clear_node(child)
-
-    def get_next_action(
-        self,
-        simulate_env: Type[CoTEnv],
-        reward_fn: Optional[Callable] = None,
-        temperature: int = 1.0,
-        sample: bool = True,
-        return_tree=False,
-    ) -> Tuple[int, List[float]]:
-        """
-        Overview:
-            calculate the move probabilities based on visit counts at the root node.
-        Arguments:
-            - simulate_env (:obj:`Class BaseGameEnv`): The class of simulate env.
-            - reward_fn (:obj:`Function`): The Callable to compute the state value.
-            - temperature (:obj:`Int`): Temperature is a parameter that controls the "softness" of the probability distribution.
-            - sample (:obj:`Bool`): The value of the node.
-        Returns:
-            - action (:obj:`Bool`): Select the action with the most visits as the final action.
-            - action_probs (:obj:`List`): The output probability of each action.
-        """
-        if self.root is None:
-            root = LanguageNode(text_state=simulate_env.get_state())
-            self._expand_leaf_node(root, simulate_env, reward_fn)
-            self.root = root
-        else:
-            root = self.root
-
-        if root.is_leaf():
-            # if root is leaf node, expand it
-            # We have updated the environment legal action when we test the node is leaf node
-            # So the expansion won't have bugs
-            self._expand_leaf_node(root, simulate_env, reward_fn)
-
-        if sample:
-            self._add_exploration_noise(root)
-
-        for n in range(self._num_simulations):
-            simulate_env_copy = simulate_env.copy()
-            simulate_env_copy.battle_mode = simulate_env_copy.mcts_mode
-            self._simulate(root, simulate_env_copy, reward_fn)
-
-        # for debugging
-        # print('after simulation')
-        # print('value= {}'.format([(k, v.value) for k,v in root.children.items()]))
-        # print('visit_count= {}'.format([(k, v.visit_count) for k,v in root.children.items()]))
-
-        action_visits = []
-        for action_dict in simulate_env.legal_actions:
-            action = action_dict["action"]
-            if action in root.children:
-                action_visits.append((action, root.children[action].visit_count))
-            else:
-                action_visits.append((action, 0))
-
-        actions, visits = zip(*action_visits)
-        action_probs = nn.functional.softmax(
-            1.0
-            / temperature
-            * np.log(torch.as_tensor(visits, dtype=torch.float32) + 1e-10),
-            dim=0,
-        ).numpy()
-        if sample:
-            action = np.random.choice(actions, p=action_probs)
-            self.reset_prior(root)
-        else:
-            action = actions[np.argmax(action_probs)]
-
-        self.root = root
-        if return_tree:
-            return action, action_probs, root
-        return action, action_probs
-
     def vanila_mcts(
         self,
         simulate_env: Type[CoTEnv],
         num_path: int,
         reward_model_fn: Optional[Callable] = None,
-        select_by_prior: bool = False,
     ) -> List[Dict]:
         api_call_completion_tokens = 0
         _, info = simulate_env.reset(update_legal_action=True)
@@ -389,14 +299,9 @@ class SearchTree:
                     # if node is visited, select the child with the highest UCB score
                     action, node = self._select_child(node, env_copy)
                 else:
-                    # choose rollout policy
-                    if select_by_prior:
-                        # select with prior probability
-                        action, node = self._select_by_prior(node, env_copy)
-                    else:
-                        # select with highest value, since visit_count = 0 in self.ucb
-                        #  will select node with highest value
-                        action, node = self._select_child(node, env_copy)
+                    # select with highest value, since visit_count = 0 in self.ucb
+                    #  will select node with highest value
+                    action, node = self._select_child(node, env_copy)
 
                 # sync terminated flag here
                 # XXX(ziyu): find a more clean way
@@ -404,9 +309,7 @@ class SearchTree:
                 assert node.last_action == action
                 env_copy._next_state_terminated[action] = node.terminated
 
-                _, _, terminated, truncated, info = env_copy.step(
-                    action, update_legal_action=node.is_leaf()
-                )
+                _, _, terminated, truncated, info = env_copy.step(action, update_legal_action=node.is_leaf())
 
                 done = terminated or truncated
 
@@ -419,10 +322,7 @@ class SearchTree:
                 if node.visit_count > 0:
                     leaf_value = node.value
                 else:
-                    if self._init_critic_value:
-                        leaf_value = node._initial_value
-                    else:
-                        leaf_value = reward_model_fn(env_copy.get_state()).item()
+                    leaf_value = node._initial_value
             node.update_recursive(leaf_value, env_copy.mcts_mode)
 
             traj_data = {
@@ -433,213 +333,6 @@ class SearchTree:
                 "tree_completion_tokens": self._completion_tokens,
             }
 
-            traj_list.append(traj_data)
-
-            # reset api_call_completion_tokens
-            api_call_completion_tokens = 0
-
-        return traj_list
-
-    # def mcts-dev0(
-    #     self,
-    #     simulate_env: Type[CoTEnv],
-    #     num_path: int,
-    #     reward_model_fn: Optional[Callable] = None,
-    #     select_by_prior: bool = False,
-    #     simulate_num: int = 1,
-    # ) -> List[Dict]:
-    #     api_call_completion_tokens = 0
-    #     _, info = simulate_env.reset(update_legal_action=True)
-    #     api_call_completion_tokens += info["api_completion_token"]
-    #     if self.root is None:
-    #         root = LanguageNode(text_state=simulate_env.get_state())
-    #         self._expand_leaf_node(root, simulate_env, reward_model_fn)
-    #         self.root = root
-
-    #     traj_list = []
-
-    #     # TODO(ziyu): split with 1. select 2. expand 3. rollout 4. backprop
-    #     #  for here is split the for loop with select and rollout
-    #     #  so that arbitrary rollout function can be used here.
-
-    #     for i_path in range(num_path):
-    #         simulate_node = self.root
-    #         while True:
-    #             for _ in range(simulate_num):
-    #                 node = simulate_node
-    #                 env_copy = simulate_env.copy()
-    #                 done = False
-    #                 while not done:
-    #                     if node.visit_count > 0:
-    #                         # if node is visited, select the child with the highest UCB score
-    #                         action, node = self._select_child(node, env_copy)
-    #                     else:
-    #                         # choose rollout policy
-    #                         if select_by_prior:
-    #                             # select with prior probability
-    #                             action, node = self._select_by_prior(node, env_copy)
-    #                         else:
-    #                             # select with highest value, since visit_count = 0 in self.ucb
-    #                             #  will select node with highest value
-    #                             action, node = self._select_child(node, env_copy)
-
-    #                     # sync terminated flag here
-    #                     # XXX(ziyu): find a more clean way
-    #                     env_copy._next_state_terminated = {}
-    #                     # assert node.last_action == action
-    #                     env_copy._next_state_terminated[action] = node.terminated
-
-    #                     _, _, terminated, truncated, info = env_copy.step(
-    #                         action, update_legal_action=node.is_leaf()
-    #                     )
-
-    #                     done = terminated or truncated
-
-    #                     if not done and node.is_leaf():
-    #                         self._expand_leaf_node(node, env_copy, reward_model_fn)
-
-    #                     # record api_tokens, if not expand, info["api_completion_token"] is 0
-    #                     api_call_completion_tokens += info["api_completion_token"]
-    #                 else:
-    #                     if node.visit_count > 0:
-    #                         leaf_value = node.value
-    #                     else:
-    #                         if self._init_critic_value:
-    #                             leaf_value = node._initial_value
-    #                         else:
-    #                             leaf_value = reward_model_fn(env_copy.get_state()).item()
-    #                 node.update_recursive(leaf_value, env_copy.mcts_mode)
-
-    #             # 多次模拟之后进行选择，并更新 simulate_node
-    #             action, simulate_node = self._select_child(simulate_node, simulate_env, criteria="visit_count")
-
-    #             simulate_env._next_state_terminated = {}
-    #             simulate_env._next_state_terminated[action] = simulate_node.terminated
-
-    #             _, _, terminated, truncated, info = simulate_env.step(
-    #                 action, update_legal_action=simulate_node.is_leaf()
-    #             )
-    #             api_call_completion_tokens += info["api_completion_token"]
-
-    #             flag = terminated or truncated
-    #             if flag:
-    #                 break
-
-    #         traj_data = {
-    #             "path_idx": i_path,
-    #             "text": simulate_env.answer,
-    #             "values": leaf_value,
-    #             "api_completion_tokens": api_call_completion_tokens,
-    #             "tree_completion_tokens": self._completion_tokens,
-    #         }
-    #         traj_list.append(traj_data)
-
-    #         # reset api_call_completion_tokens
-    #         api_call_completion_tokens = 0
-
-    #     return traj_list
-
-    def mcts(
-        self,
-        simulate_env: Type[CoTEnv],
-        num_path: int,
-        reward_model_fn: Optional[Callable] = None,
-        select_by_prior: bool = False,
-        simulate_num: int = 1,
-    ) -> List[Dict]:
-        api_call_completion_tokens = 0
-        _, info = simulate_env.reset(update_legal_action=True)
-        api_call_completion_tokens += info["api_completion_token"]
-        if self.root is None:
-            root = LanguageNode(text_state=simulate_env.get_state())
-            self._expand_leaf_node(root, simulate_env, reward_model_fn)
-            self.root = root
-
-        traj_list = []
-
-        for i_path in range(num_path):
-            simulate_node = self.root
-            done = False
-            while not done:
-                # execute multiple simulations
-                for _ in range(simulate_num):
-                    node = simulate_node
-                    env_copy = simulate_env.copy()
-                    # step1: select a leaf node
-                    while not node.is_leaf():
-                        if select_by_prior:
-                            # select with prior probability
-                            action, node = self._select_by_prior(node, env_copy)
-                        else:
-                            # select with highest value, since visit_count = 0 in self.ucb
-                            #  will select node with highest value
-                            action, node = self._select_child(node, env_copy)
-
-                        if not node.is_leaf():
-                            env_copy._next_state_terminated = {}
-                            env_copy._next_state_terminated[action] = node.terminated
-                            env_copy.step(action, update_legal_action=False)
-
-                    # step2: expand
-                    if node.visit_count > 0:
-                        env_copy._next_state_terminated = {}
-                        env_copy._next_state_terminated[action] = node.terminated
-                        _, _, terminated, truncated, info = env_copy.step(
-                            action, update_legal_action=True
-                        )
-
-                        if terminated or truncated:
-                            continue
-
-                        # record api_tokens, if not expand, info["api_completion_token"] is 0
-                        api_call_completion_tokens += info["api_completion_token"]
-                        self._expand_leaf_node(node, env_copy, reward_model_fn)
-
-                        action, node = self._select_child(node, env_copy)
-                        env_copy._next_state_terminated = {}
-                        env_copy._next_state_terminated[action] = node.terminated
-                        env_copy.step(action, update_legal_action=False)
-                    else:
-                        env_copy._next_state_terminated = {}
-                        env_copy._next_state_terminated[action] = node.terminated
-                        env_copy.step(action, update_legal_action=False)
-
-                    # step3: rollout
-                    leaf_value = node._rollout(env_copy, reward_model_fn)
-
-                    # step4: backup
-                    node.update_recursive(leaf_value, env_copy.mcts_mode)
-
-                if simulate_node.children == {}:
-                    break
-
-                # 多次模拟之后进行选择，并更新 simulate_node
-                action, simulate_node = self._select_child(
-                    simulate_node, simulate_env, criteria="visit_count"
-                )
-                # action, simulate_node = self._select_child(simulate_node, simulate_env, criteria="value")
-
-                simulate_env._next_state_terminated = {}
-                simulate_env._next_state_terminated[action] = simulate_node.terminated
-
-                _, _, terminated, truncated, info = simulate_env.step(
-                    action, update_legal_action=simulate_node.is_leaf()
-                )
-
-                done = terminated or truncated
-
-            lm_step_tag = simulate_env.llm_gen_fn.lm_step_tag
-            traj_data = {
-                "path_idx": i_path,
-                "text": (
-                    simulate_env.answer
-                    if simulate_env.answer.endswith(lm_step_tag)
-                    else simulate_env.answer + lm_step_tag
-                ),
-                "values": leaf_value,
-                "api_completion_tokens": api_call_completion_tokens,
-                "tree_completion_tokens": self._completion_tokens,
-            }
             traj_list.append(traj_data)
 
             # reset api_call_completion_tokens
@@ -734,364 +427,9 @@ class SearchTree:
         traj_list[-1]["api_completion_tokens"] = api_call_completion_tokens
         return traj_list
 
-    def mcts_beam_search_dev0(
-        self,
-        initial_env: Type[CoTEnv],
-        num_path: int,
-        reward_model_fn: Optional[Callable] = None,
-        select_by_prior: bool = False,
-        simulate_num: int = 6,
-    ) -> List[Dict]:
-        api_call_completion_tokens = 0
-        _, info = initial_env.reset(update_legal_action=True)
-        api_call_completion_tokens += info["api_completion_token"]
-        if self.root is None:
-            root = LanguageNode(text_state=initial_env.get_state())
-            self._expand_leaf_node(root, initial_env, reward_model_fn)
-            self.root = root
-
-        beam_size = num_path
-        simulate_nodes, simulate_envs = [self.root], [initial_env]
-        traj_list, top_k_nodes = [], []
-        finished = False
-        while True:
-            for simulate_node, simulate_env in zip(simulate_nodes, simulate_envs):
-                for _ in range(simulate_num):
-                    node = simulate_node
-                    env_copy = simulate_env.copy()
-                    done = False
-                    while not done:
-                        if node.visit_count > 0:
-                            # if node is visited, select the child with the highest UCB score
-                            action, node = self._select_child(node, env_copy)
-                        else:
-                            # choose rollout policy
-                            if select_by_prior:
-                                # select with prior probability
-                                action, node = self._select_by_prior(node, env_copy)
-                            else:
-                                # select with highest value, since visit_count = 0 in self.ucb
-                                #  will select node with highest value
-                                action, node = self._select_child(node, env_copy)
-
-                        # sync terminated flag here
-                        # XXX(ziyu): find a more clean way.
-                        env_copy._next_state_terminated = (
-                            {}
-                        )  # Maybe You can comment out this next line
-                        # assert node.last_action == action
-                        env_copy._next_state_terminated[action] = node.terminated
-
-                        _, _, terminated, truncated, info = env_copy.step(
-                            action, update_legal_action=node.is_leaf()
-                        )
-
-                        done = terminated or truncated
-
-                        if not done and node.is_leaf():
-                            self._expand_leaf_node(node, env_copy, reward_model_fn)
-
-                        # record api_tokens, if not expand, info["api_completion_token"] is 0
-                        api_call_completion_tokens += info["api_completion_token"]
-                    else:
-                        if node.visit_count > 0:
-                            leaf_value = node.value
-                        else:
-                            if self._init_critic_value:
-                                leaf_value = node._initial_value
-                            else:
-                                leaf_value = reward_model_fn(
-                                    env_copy.get_state()
-                                ).item()
-                    node.update_recursive(leaf_value, env_copy.mcts_mode)
-
-                # 多次模拟之后进行选择，并更新 simulate_node
-                selected_actions, selected_nodes, selected_scores = (
-                    self._select_batch_final_action(simulate_node, beam_size)
-                )
-
-                for action, node, score in zip(
-                    selected_actions, selected_nodes, selected_scores
-                ):
-                    env = simulate_env.copy()
-                    env._next_state_terminated = {}
-                    env._next_state_terminated[action] = node.terminated
-
-                    _, _, terminated, truncated, info = env.step(
-                        action, update_legal_action=node.is_leaf()
-                    )
-                    # if node.terminated:
-                    flag = terminated or truncated
-                    if flag:
-                        traj_data = {
-                            "path_idx": num_path - beam_size,
-                            "text": env.answer,
-                            "values": node.value,
-                            "api_completion_tokens": api_call_completion_tokens,
-                            "tree_completion_tokens": self._completion_tokens,
-                        }
-                        traj_list.append(traj_data)
-                        beam_size = beam_size - 1
-                        if beam_size == 0:
-                            finished = True
-                            break
-                        continue
-                    elif not flag and node.is_leaf():
-                        self._expand_leaf_node(node, env, reward_model_fn)
-                    # heapq.heappush(top_k_nodes, (-node.visit_count, node, env))
-                    heapq.heappush(top_k_nodes, (-score, node, env))
-                if finished:
-                    break
-
-            if finished or len(top_k_nodes) == 0:
-                break
-            simulate_nodes.clear()
-            simulate_envs.clear()
-            while top_k_nodes and len(simulate_nodes) < beam_size:
-                _, node, env = heapq.heappop(top_k_nodes)
-                simulate_nodes.append(node)
-                simulate_envs.append(env)
-        return traj_list
-
-    def mcts_beam_search(
-        self,
-        initial_env: Type[CoTEnv],
-        num_path: int,
-        reward_model_fn: Optional[Callable] = None,
-        select_by_prior: bool = False,
-        simulate_num: int = 6,
-    ) -> List[Dict]:
-        api_call_completion_tokens = 0
-        _, info = initial_env.reset(update_legal_action=True)
-        api_call_completion_tokens += info["api_completion_token"]
-        if self.root is None:
-            root = LanguageNode(text_state=initial_env.get_state())
-            self._expand_leaf_node(root, initial_env, reward_model_fn)
-            self.root = root
-
-        beam_size = num_path
-        simulate_nodes, simulate_envs = [self.root], [initial_env]
-        traj_list, top_k_nodes = [], []
-        finished = False
-        while True:
-            for simulate_node, simulate_env in zip(simulate_nodes, simulate_envs):
-                # execute multiple simulations
-                for _ in range(simulate_num):
-                    node = simulate_node
-                    env_copy = simulate_env.copy()
-                    # step1: select a leaf node
-                    while not node.is_leaf():
-                        if select_by_prior:
-                            # select with prior probability
-                            action, node = self._select_by_prior(node, env_copy)
-                        else:
-                            # select with highest value, since visit_count = 0 in self.ucb
-                            #  will select node with highest value
-                            action, node = self._select_child(node, env_copy)
-
-                        if not node.is_leaf():
-                            env_copy._next_state_terminated = {}
-                            env_copy._next_state_terminated[action] = node.terminated
-                            env_copy.step(action, update_legal_action=False)
-
-                    # step2: expand
-                    if node.visit_count > 0:
-                        env_copy._next_state_terminated = {}
-                        env_copy._next_state_terminated[action] = node.terminated
-                        _, _, terminated, truncated, info = env_copy.step(
-                            action, update_legal_action=True
-                        )
-
-                        if terminated or truncated:
-                            continue
-
-                        # record api_tokens, if not expand, info["api_completion_token"] is 0
-                        api_call_completion_tokens += info["api_completion_token"]
-                        self._expand_leaf_node(node, env_copy, reward_model_fn)
-
-                        action, node = self._select_child(node, env_copy)
-                        env_copy._next_state_terminated = {}
-                        env_copy._next_state_terminated[action] = node.terminated
-                        env_copy.step(action, update_legal_action=False)
-                    else:
-                        env_copy._next_state_terminated = {}
-                        env_copy._next_state_terminated[action] = node.terminated
-                        env_copy.step(action, update_legal_action=False)
-
-                    # step3: rollout
-                    leaf_value = node._rollout(env_copy, reward_model_fn)
-
-                    # step4: backup
-                    node.update_recursive(leaf_value, env_copy.mcts_mode)
-
-                if simulate_node.children == {}:
-                    break
-
-                # 多次模拟之后进行选择，并更新 simulate_node
-                selected_actions, selected_nodes, selected_scores = (
-                    self._select_batch_final_action(simulate_node, beam_size)
-                )
-
-                for action, node, score in zip(
-                    selected_actions, selected_nodes, selected_scores
-                ):
-                    env = simulate_env.copy()
-                    env._next_state_terminated = {}
-                    env._next_state_terminated[action] = node.terminated
-
-                    _, _, terminated, truncated, info = env.step(
-                        action, update_legal_action=False
-                    )
-                    flag = terminated or truncated
-                    # heapq.heappush(top_k_nodes, (-score, flag, node, env))
-                    heapq.heappush(top_k_nodes, (-score, flag, node, env))
-
-            simulate_nodes.clear()
-            simulate_envs.clear()
-
-            if len(top_k_nodes) == 0:
-                break
-            while top_k_nodes and len(simulate_nodes) < beam_size:
-                _, flag, node, env = heapq.heappop(top_k_nodes)
-                if flag:
-                    traj_data = {
-                        "path_idx": num_path - beam_size,
-                        "text": env.answer,
-                        "values": node.value,
-                        "api_completion_tokens": api_call_completion_tokens,
-                        "tree_completion_tokens": self._completion_tokens,
-                    }
-                    traj_list.append(traj_data)
-                    beam_size = beam_size - 1
-                    if beam_size == 0:
-                        finished = True
-                        break
-                else:
-                    simulate_nodes.append(node)
-                    simulate_envs.append(env)
-
-            if finished:
-                break
-        return traj_list
-
-    def _simulate(
-        self,
-        node: Node,
-        simulate_env: Type[CoTEnv],
-        reward_fn: Optional[Callable] = None,
-    ) -> None:
-        """
-        Overview:
-            Run a single playout from the root to the leaf, getting a value at the leaf and propagating it back through its parents.
-            State is modified in-place, so a deepcopy must be provided.
-        Arguments:
-            - node (:obj:`Class Node`): Current node when performing mcts search.
-            - simulate_env (:obj:`Class BaseGameEnv`): The class of simulate env.
-            - reward_fn (:obj:`Function`): The Callable to compute the action probs and state value.
-        """
-        # XXX: fix the bug temporally, better implementation is required.
-        winner = None
-        done = False
-        while not node.is_leaf():
-            action, node = self._select_child(node, simulate_env)
-            _, _, terminated, truncated, info = simulate_env.step(
-                action, update_legal_action=(node.is_leaf() and node.visit_count == 1)
-            )
-            done = terminated or truncated
-
-            # In original AlphaZero, the leaf node will be expanded once it is reached
-            # In our setting, computing legal action is computational inefficient
-            # Thus when we reach a leaf node, we will not directly expand it
-            # Until the next time, when this node's children are required to be selected
-            # In this case, node is leaf node and the visit count number of node is 1
-            # Then we expand it
-
-            if not done and node.is_leaf() and node.visit_count == 1:
-                # Once we expand the node, the node will not be leaf node any more
-                # And the while won't break
-                self._expand_leaf_node(node, simulate_env, reward_fn)
-
-            winner = info["winner"]
-        """
-        in ``self_play_mode``, the leaf_value is calculated from the perspective of player ``simulate_env.current_player``.
-        in ``play_with_bot_mode``, the leaf_value is calculated from the perspective of player 1.
-        """
-        if not done:
-            # leaf_value = self._expand_leaf_node(node, simulate_env,
-            #                                     reward_fn)
-
-            if not done and self.mask_non_terminal_node_value:
-                leaf_value = 0.0
-            else:
-                if not self._init_critic_value:
-                    leaf_value = reward_fn(simulate_env.get_state()).item()
-                else:
-                    leaf_value = node._initial_value
-        else:
-            if not self.no_terminal_reward:
-                if winner is not None:
-                    if winner == 1:
-                        self.answers.add(simulate_env.answer)
-                    else:
-                        self.wrong_answers.add(simulate_env.answer)
-
-                # if simulate_env.mcts_mode == 'self_play_mode':
-                #     if winner == -1:
-                #         leaf_value = 0
-                #     else:
-                #         leaf_value = 1 if simulate_env.current_player == winner else -1
-
-                if simulate_env.mcts_mode == "play_with_bot_mode":
-                    # in ``play_with_bot_mode``, the leaf_value should be transformed to the perspective of player 1.
-                    if "reward" in info.keys():
-                        leaf_value = info["reward"]
-                    else:
-                        if winner == -1:
-                            leaf_value = 0
-                        elif winner == 1:
-                            leaf_value = 1
-                        elif winner == 2:
-                            leaf_value = -1
-            else:
-                if node.visit_count > 0:
-                    # because leaf value has been calculated and backpropogated
-                    leaf_value = node.value
-                else:
-                    if self._init_critic_value:
-                        leaf_value = node._initial_value
-                    else:
-                        leaf_value = reward_fn(simulate_env.get_state()).item()
-
-        if done:
-            node.set_as_terminate_node()
-            if self.visited_paths is not None:
-                self.visited_paths.append(
-                    {
-                        "text": simulate_env.answer,
-                        "correct": winner == 1,
-                        "values": leaf_value,
-                    }
-                )
-
-        # Update value and visit count of nodes in this traversal.
-        if simulate_env.mcts_mode == "play_with_bot_mode":
-            node.update_recursive(leaf_value, simulate_env.mcts_mode)
-
-        elif simulate_env.mcts_mode == "self_play_mode":
-            # NOTE: e.g.
-            #       to_play: 1  ---------->  2  ---------->  1  ----------> 2
-            #         state: s1 ---------->  s2 ---------->  s3 ----------> s4
-            #                                     action    node
-            #                                            leaf_value
-            # leaf_value is calculated from the perspective of player 1, leaf_value = value_func(s3),
-            # but node.value should be the value of E[q(s2, action)], i.e. calculated from the perspective of player 2.
-            # thus we add the negative when call update_recursive().
-            node.update_recursive(-leaf_value, simulate_env.mcts_mode)
-
     def _select_child(
         self,
         node: LanguageNode,
-        simulate_env: Type[CoTEnv],
         criteria: str = "puct",
     ) -> Tuple[Union[int, float], Node]:
         """
@@ -1131,63 +469,6 @@ class SearchTree:
             child = node  # child==None, node is leaf node in play_with_bot_mode.
 
         return action, child
-
-    def _select_batch_final_action(
-        self,
-        node: LanguageNode,
-        beam_size: int,
-        criteria: str = "puct",
-    ) -> List[Tuple[str, LanguageNode]]:
-        """
-        Overview:
-            select the top-k children with the highest score.
-        Arguments:
-            - node (:obj:`Class Node`): Current node.
-            - beam_size (:obj:`Int`): The number of children to select.
-            - criteria (:obj:`Str`): The criteria to select the child node.
-        Returns:
-            - actions (:obj:`List`): choose the action with the highest score.
-            - childs (:obj:`List`): the child node reached by executing the action with the highest score.
-        """
-        # 处理空子节点情况
-        if not node.children:
-            return [(None, node)] if beam_size > 0 else []
-
-        # 使用堆结构高效选择top-k
-        heap = []
-        for action_tmp, child_tmp in node.children.items():
-            if criteria == "ucb":
-                score = self._ucb_score(node, child_tmp)
-            elif criteria == "uct":
-                score = self._uct_score(node, child_tmp)
-            elif criteria == "puct":
-                score = self._puct_score(node, child_tmp)
-            elif criteria == "visit_count":
-                score = child_tmp.visit_count
-            else:
-                score = child_tmp.value
-
-            heapq.heappush(heap, (-score, action_tmp, child_tmp))
-
-        # 提取前beam_size个元素
-        actions, childs, scores = [], [], []
-        while heap and len(actions) < beam_size:
-            neg_score, action_tmp, child_tmp = heapq.heappop(heap)
-            actions.append(action_tmp)
-            childs.append(child_tmp)
-            scores.append(-neg_score)
-
-        return actions, childs, scores
-
-    def _select_by_prior(self, node: Node, simulate_env):
-        data_tmp = [
-            (x_action, x_node.prior_p) for x_action, x_node in node.children.items()
-        ]
-        action_list, prior_list = list(zip(*data_tmp))
-        chosen_action = np.random.choice(action_list, p=np.array(prior_list))
-        chosen_node = node.children[chosen_action]
-
-        return chosen_action, chosen_node
 
     def _expand_leaf_node(
         self,
@@ -1278,12 +559,7 @@ class SearchTree:
         for i, action_dict in enumerate(simulate_env.legal_actions):
             action, prob = action_dict["action"], action_dict["prob"]
 
-            if self._init_critic_value:
-                child_value = child_values[i]
-            else:
-                # XXX(ziyu): consider turn off this branch, i.e. always assume
-                #  `self._init_critic=True`, since with LLM
-                child_value = 0.0
+            child_value = child_values[i]
 
             node.children[action] = LanguageNode(
                 parent=node,
@@ -1298,15 +574,11 @@ class SearchTree:
             if simulate_env._next_state_terminated[action]:
                 node.children[action].set_as_terminate_node()
         if len(node.children) == 0:
-            print_rank_0(
-                "Prune all current children at node {}".format(node.last_action)
-            )
+            print_rank_0("Prune all current children at node {}".format(node.last_action))
 
         # collect num tokens
         if not node.has_collected_token_num:
-            self._completion_tokens += sum(
-                c.num_generated_token for c in node.children.values()
-            )
+            self._completion_tokens += sum(c.num_generated_token for c in node.children.values())
             node.has_collected_token_num = True
         else:
             raise RuntimeError("Token number has been collected again.")
@@ -1326,9 +598,7 @@ class SearchTree:
         """
         value_score = child.value
 
-        return value_score + math.sqrt(
-            self.root.visit_count / (child.visit_count + 0.000001)
-        )
+        return value_score + math.sqrt(self.root.visit_count / (child.visit_count + 0.000001))
 
     def _puct_score(self, parent: Node, child: Node) -> float:
         """
@@ -1341,17 +611,9 @@ class SearchTree:
             - score (:obj:`Bool`): The UCB score.
         """
 
-        c_puct = (
-            math.log((parent.visit_count + self._pb_c_base + 1) / self._pb_c_base)
-            + self._pb_c_init
-        )
+        c_puct = math.log((parent.visit_count + self._pb_c_base + 1) / self._pb_c_base) + self._pb_c_init
         value_score = child.value
-        prior_score = (
-            c_puct
-            * child.prior_p
-            * math.sqrt(parent.visit_count)
-            / (1 + child.visit_count)
-        )
+        prior_score = c_puct * child.prior_p * math.sqrt(parent.visit_count) / (1 + child.visit_count)
 
         return value_score + prior_score
 
@@ -1368,81 +630,7 @@ class SearchTree:
         """
         value_score = child.value
 
-        return value_score + self._pb_c_init * math.sqrt(
-            math.log(parent.visit_count)
-        ) / (child.visit_count + 0.000001)
+        return value_score + self._pb_c_init * math.sqrt(math.log(parent.visit_count)) / (
+            child.visit_count + 0.000001
+        )
 
-    def reset_prior(self, node: Node) -> None:
-        """
-        Overview:
-            Reset prior probability
-        Arguments:
-            - node (:obj:`Class Node`): Current node.
-        """
-        for a in node.children.keys():
-            node.children[a].prior_p = node.children[a].prior_p_ori
-
-    def _add_exploration_noise(self, node: Node) -> None:
-        """
-        Overview:
-            Add exploration noise.
-        Arguments:
-            - node (:obj:`Class Node`): Current node.
-        """
-        # Get a list of actions corresponding to the child nodes.
-        actions = list(node.children.keys())
-        # Create a list of alpha values for Dirichlet noise.
-        alpha = [self._root_dirichlet_alpha] * len(actions)
-        # Generate Dirichlet noise using the alpha values.
-        noise = np.random.dirichlet(alpha)
-        # Compute the weight of the exploration noise.
-        frac = self._root_noise_weight
-        # Update the prior probability of each child node with the exploration noise.
-        for a, n in zip(actions, noise):
-            node.children[a].prior_p = node.children[a].prior_p * (1 - frac) + n * frac
-
-    @classmethod
-    def from_json(cls, cfg: dict, json_path: str, reset_visit_info: bool):
-        tree_json = json.load(open(json_path, "r"))
-
-        def build_tree(tree_dict: dict) -> Node:
-            node_info = tree_dict["info"]
-            current_node = LanguageNode(
-                text_state=node_info.get("text_state", None),
-                last_action=node_info.get("last_action", None),
-                prior_p=node_info["prior_p"],
-                prm_value=node_info.get("prm_value", None),
-                initial_value=node_info.get("initial_value", 0.0),
-            )
-
-            if not reset_visit_info:
-                current_node._visit_count = node_info["visit_cnt"]
-                current_node._value_sum = node_info["value"] * current_node.visit_count
-            if node_info.get("terminated", False):
-                current_node.set_as_terminate_node()
-
-            for name, child_dict in tree_dict["children"].items():
-                child_node = build_tree(child_dict)
-                current_node._children[name] = child_node
-                child_node._parent = current_node
-
-            return current_node
-
-        root_node = build_tree(tree_dict=tree_json)
-
-        obj = cls(cfg)
-        obj.root = root_node
-        return obj
-
-    def draw_tree(self):
-        # Not tested yet
-        root = self.root
-        assert root, "Root node is None"
-
-        def draw_node(node, depth):
-            print("|" + "-" * depth + str(node))
-            for child in node.children.values():
-                draw_node(child, depth + 1)
-
-        print(f"\n---------Expanded Tree---------")
-        draw_node(self.root)
