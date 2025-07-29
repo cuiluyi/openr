@@ -12,10 +12,7 @@ from reason.infer.methods import (
 )
 
 from reason.infer.lm_call import LMCallingConfig, VLLMRemoteCaller
-from reason.infer.rm_call import (
-    RMRemoteCaller,
-    RemoteRewardModelConfig,
-)
+from reason.infer.rm_call import RMRemoteCaller, RemoteRewardModelConfig
 from reason.config import parse_args
 from reason.eval.evaluate import parallel_evaluate_test_dataset
 from utils import setup_seed, jsonl_to_json, write_json
@@ -23,7 +20,8 @@ from utils.load_ds import get_train_test_dataset
 
 
 args = parse_args()
-setup_seed(args.seed)
+if args.seed is not None:
+    setup_seed(args.seed)
 
 if args.local:
     print("run in pure local mode for debug only")
@@ -38,7 +36,7 @@ if "mistral" in args.RM.lower():
     prm_format_str = "{question} {answer}"
 elif "qwen" in args.RM.lower():
     prm_step_tag = "<extra_0>"
-    prm_format_str = "{question}<this is qwen2.5-math-prm seperation &&&&& >{answer}"
+    prm_format_str = "{question}<｜question▁answer▁delimiter｜>{answer}"
 else:
     raise ValueError("Unsupported RM model type: {}".format(args.RM))
 rm_config = RemoteRewardModelConfig(
@@ -55,6 +53,8 @@ if "mistral" in args.LM.lower():
     lm_step_tag = "ки\n"
 elif "qwen" in args.LM.lower():
     lm_step_tag = "\n\n"
+elif "checkpoint" in args.LM.lower():
+    lm_step_tag = ["<｜end▁of▁system1｜>", "<｜end▁of▁system2｜>"]
 else:
     raise ValueError("Unsupported LM model type: {}".format(args.LM))
 lm_call = VLLMRemoteCaller(

@@ -108,10 +108,6 @@ class ModelWorker(BaseModelWorker):
             self.init_heart_beat()
 
     def generate_stream_gate(self, params):
-        if self.device == "npu":
-            import torch_npu
-
-            torch_npu.npu.set_device("npu:0")
         self.call_ct += 1
 
         params["logprobs"] = 1

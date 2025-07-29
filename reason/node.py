@@ -101,7 +101,6 @@ class Node(object):
         childrens = {}
         for name, child_node in self.children.items():
             childrens[name] = child_node.to_json()
-
         rets = {"children": childrens, "info": self.get_info()}
         return rets
 
@@ -132,38 +131,6 @@ class Node(object):
             if self.is_root():
                 return
             self._parent.update_recursive(leaf_value, mcts_mode)
-
-    def _rollout(
-        self,
-        env: Type[Env],
-        reward_model_fn: Optional[Callable] = None,
-    ) -> int:
-        """
-        Overview:
-            Perform a rollout from the current node.
-        Returns:
-            - output (:obj:`Int`): The value of the leaf node.
-        """
-        from reason.infer.lm_call import LMCallingConfig, ConcatedLMGenResult
-
-        terminated, truncated, _ = env.get_done_and_info()
-
-        if terminated or truncated:
-            prms: List[int] = reward_model_fn((env.question, env.answer))
-            return min(prms)
-        else:
-            result: ConcatedLMGenResult = env.llm_gen_fn(
-                input_str=env.get_state(),
-                config=LMCallingConfig(n=1, **env.config["generation_config"]),
-            )
-
-            steps: str = result.text[0]
-            prms: List[int] = reward_model_fn((env.question, env.answer + steps))
-
-            previous_steps_num = len(env.answer.split(env.llm_gen_fn.lm_step_tag)) - 1
-            value = min(prms[:previous_steps_num])
-            solution_reward = min(prms)
-            return 0.5 * (value + solution_reward)
 
 
 class LanguageNode(Node):

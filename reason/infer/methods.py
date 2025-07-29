@@ -11,9 +11,8 @@ from reason.infer.rm_call import RewardModelCallingFunction
 from reason.infer.lm_call import LMCallingConfig, LanguageModelCallingFunction
 
 
-
 @dataclass
-class TreeSearchConfig():
+class TreeSearchConfig:
     # construction config
     tree_max_width: int = 10
     tree_max_depth: int = 10
@@ -58,8 +57,8 @@ def beam_search(
                 "answer": parse(problem_inst["answer"]),
             }
         ],
-        llm_gen_fn=lm_call,
-        reward_model_fn=rm_call_fn,
+        lm_call=lm_call,
+        rm_call=rm_call_fn,
     )
 
     search_tree = SearchTree(cfg={})
@@ -67,7 +66,7 @@ def beam_search(
         simulate_env=env,
         beam_size=config.beam_size,
         max_step=config.tree_max_depth,
-        reward_model_fn=rm_call_fn,
+        rm_call=rm_call_fn,
     )
     return TreeSearchSolutionOutput(
         solutions=[t["text"] for t in traj_list],
@@ -115,8 +114,8 @@ def vanila_mcts(
                 "answer": parse(problem_inst["answer"]),
             }
         ],
-        llm_gen_fn=lm_call,
-        reward_model_fn=rm_call_fn,
+        lm_call=lm_call,
+        rm_call=rm_call_fn,
     )
 
     search_tree = SearchTree(
@@ -129,7 +128,7 @@ def vanila_mcts(
     traj_list = search_tree.vanila_mcts(
         simulate_env=env,
         num_path=config.num_path,
-        reward_model_fn=rm_call_fn,
+        rm_call=rm_call_fn,
     )
     return TreeSearchSolutionOutput(
         solutions=[t["text"] for t in traj_list],

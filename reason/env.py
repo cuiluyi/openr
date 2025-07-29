@@ -1,14 +1,18 @@
-import abc
 import copy
-import numpy as np
 
-from typing import List, Dict, Any, Optional, Tuple, Union, Callable, Type
+from typing import Optional, Callable
 from math_verify import parse, verify
 
-from utils import extract_answer
+from utils import extract_answer, softmax
 from utils.distributed import print_with_rank
 from utils.prompt import build_query_str
-from reason.infer.lm_call import LMCallingConfig, ConcatedLMGenResult
+from reason.infer.lm_call import LMCallingConfig
+from reason.infer.lm_call import ConcatedLMGenResult, merge_concated_results
+
+SYSTEM1_BEGIN_TAG = "<｜begin▁of▁system1｜>\n"
+SYSTEM2_BEGIN_TAG = "<｜begin▁of▁system2｜>\n"
+SYSTEM1_END_TAG = "\n<｜end▁of▁system1｜>"
+SYSTEM2_END_TAG = "\n<｜end▁of▁system2｜>"
 
 
 class NoLegalActionException(Exception):
@@ -28,28 +32,27 @@ class Env:
         self,
         config,
         math_problems,
-        llm_gen_fn,
+        lm_call,
         reset=True,
-        reward_model_fn: Optional[Callable] = None,
+        rm_call: Optional[Callable] = None,
     ):
         self.config = config
         self.mcts_mode = "play_with_bot_mode"
         self.math_problems = math_problems
-        self.llm_gen_fn = llm_gen_fn
+        self.lm_call = lm_call
         self.action_history = None
         self.values = []
         self.math_problem = None
         self._legal_actions = None
         self._stop_str = config.get("stop_str", None)
 
-        self.reward_model_fn = reward_model_fn
+        self.rm_call = rm_call
 
         if reset:
             self.reset(update_legal_action=True)
 
     def reset(self, update_legal_action=True):
-        # reset environment to problem idx
-        self.set_problem(idx=0)
+        self.set_problem(idx=0)  # reset environment to problem idx
         self.action_history = []
         self.values = []
         self._init_query = build_query_str(problem_input=self.math_problem["question"])
@@ -103,60 +106,61 @@ class Env:
         ret = self._init_query + "".join(item for item in self.action_history if item is not None)
         return ret
 
-    def post_process_act(self, action: str):
-        if not action.endswith(self.sep):
-            action = action.strip() + self.sep
-        return action
-
     def update_legal_actions(self):
-        result: ConcatedLMGenResult = self.llm_gen_fn(
-            input_str=self.get_state(),
+        fast_try_num = self.config["max_actions"] // 2
+        slow_try_num = self.config["max_actions"] - fast_try_num
+        # fast generation
+        fast_result: ConcatedLMGenResult = self.lm_call(
+            input_str=self.get_state() + SYSTEM1_BEGIN_TAG,
             config=LMCallingConfig(
-                n=self.config["max_actions"],
-                stop_str=self.sep,
+                n=fast_try_num,
+                stop_str=SYSTEM1_END_TAG,
                 include_stop_str_in_output=True,
                 **self.config["generation_config"]
             ),
         )
-        if isinstance(result.finish_reason, str):
-            result.finish_reason = [result.finish_reason]
+        fast_result.text = [SYSTEM1_BEGIN_TAG + text for text in fast_result.text]
+        # slow generation
+        slow_result: ConcatedLMGenResult = self.lm_call(
+            input_str=self.get_state() + SYSTEM2_BEGIN_TAG,
+            config=LMCallingConfig(
+                n=slow_try_num,
+                stop_str=SYSTEM2_END_TAG,
+                include_stop_str_in_output=True,
+                **self.config["generation_config"]
+            ),
+        )
+        slow_result.text = [SYSTEM2_BEGIN_TAG + text for text in slow_result.text]
 
-        texts = result.text
-        logps_avg_by_len = result.logp_avg_by_len
-        token_len = result.num_tokens
-        text_list, prob_list, num_token_list = [], [], []
-        finish_reason_list = []
+        result = merge_concated_results([fast_result, slow_result])
+
+        # process the result
+        text_list, logprob_list, num_token_list, finish_reason_list = [], [], [], []
         next_state_terminated = {}
 
-        for i in range(len(texts)):
+        for i in range(len(result)):
             # XXX: this process can be improve or moved to other place
             # this is a pre-judge of terminal flag or certain action, by
             # whether the text-generation is stop by the <eos> or stop_str
-
-            terminated = not texts[i].endswith(self.sep)
-
-            processed_act = self.post_process_act(texts[i])
+            terminated = not result.text[i].endswith((SYSTEM1_END_TAG, SYSTEM2_END_TAG))
+            
             if (
-                len(processed_act) > 0
-                and processed_act not in text_list
-                # only stop is valid, otherwise the output action is truncated actually
+                len(result.text[i]) > 0
+                and result.text[i] not in text_list
                 and result.finish_reason[i] == "stop"
             ):
-                text_list.append(processed_act)
-                prob_list.append(logps_avg_by_len[i])
-                num_token_list.append(token_len[i])
+                text_list.append(result.text[i])
+                logprob_list.append(result.logp_avg_by_len[i])
+                num_token_list.append(result.num_tokens[i])
                 finish_reason_list.append(result.finish_reason[i])
-                next_state_terminated[processed_act] = terminated
+                next_state_terminated[result.text[i]] = terminated
 
-        if len(prob_list) == 0:
+        if len(logprob_list) == 0:
             print_with_rank("state: {}".format(self.get_state()))
             print_with_rank("gen_result: {}".format(result))
             raise NoLegalActionException("No possible action have been generated.")
 
-        prob_list = np.exp(prob_list)
-        prob_list = np.array(prob_list)
-        # normalize probability
-        prob_list = prob_list / np.sum(prob_list)
+        prob_list = softmax(logprob_list)
 
         _legal_actions = [
             {
@@ -164,7 +168,6 @@ class Env:
                 "prob": prob,
                 "num_token": n_token,
                 "finish_reason": finish_reason,
-                # "weight": relative_entropy,
             }
             for action, prob, n_token, finish_reason in zip(
                 text_list,
@@ -234,9 +237,9 @@ class Env:
         env = self.__class__(
             config=self.config,
             math_problems=self.math_problems,
-            llm_gen_fn=self.llm_gen_fn,
+            lm_call=self.lm_call,
             reset=False,
-            reward_model_fn=self.reward_model_fn,
+            rm_call=self.rm_call,
         )
         env.math_problem = copy.deepcopy(self.math_problem)
         env._legal_actions = copy.deepcopy(self._legal_actions)

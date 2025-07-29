@@ -77,7 +77,7 @@ class VLLMWorker(BaseModelWorker):
         presence_penalty = float(params.get("presence_penalty", 0.0))
         frequency_penalty = float(params.get("frequency_penalty", 0.0))
         repetition_penalty = float(params.get("repetition_penalty", 1.0))
-        max_new_tokens = params.get("max_new_tokens", 256)
+        max_new_tokens = params.get("max_new_tokens", 2560)
         stop_str = params.get("stop", None)
         stop_token_ids = params.get("stop_token_ids", None) or []
         if self.tokenizer.eos_token_id is not None:
@@ -85,8 +85,10 @@ class VLLMWorker(BaseModelWorker):
         echo = params.get("echo", True)
         use_beam_search = params.get("use_beam_search", False)
         best_of = params.get("best_of", None)
-        include_stop_str_in_output = params.get("include_stop_str_in_output", False)
-        seed = params.get("seed", 42)
+        include_stop_str_in_output = params.get("include_stop_str_in_output", True) # default output stop_str
+        skip_special_tokens = params.get("skip_special_tokens", False) # default output special tokens
+        seed = params.get("seed", None)
+        logprobs = params.get("logprobs", 0) # default output logprobs
 
         # Handle stop_str
         stop = set()
@@ -95,9 +97,6 @@ class VLLMWorker(BaseModelWorker):
         elif isinstance(stop_str, list) and stop_str != []:
             stop.update(stop_str)
 
-        # for tid in stop_token_ids:
-        #     if tid is not None:
-        #         stop.add(self.tokenizer.decode(tid))
 
         # make sampling params in vllm
         top_p = max(top_p, 1e-5)
@@ -113,13 +112,14 @@ class VLLMWorker(BaseModelWorker):
             stop_token_ids=stop_token_ids,
             max_tokens=max_new_tokens,
             top_k=top_k,
+            seed=seed,
             presence_penalty=presence_penalty,
             frequency_penalty=frequency_penalty,
             repetition_penalty=repetition_penalty,
             best_of=best_of,
-            logprobs=1,
+            logprobs=logprobs,
             include_stop_str_in_output=include_stop_str_in_output,
-            seed=seed,
+            skip_special_tokens=skip_special_tokens,
         )
         results_generator = engine.generate(context, sampling_params, request_id)
 
@@ -143,11 +143,7 @@ class VLLMWorker(BaseModelWorker):
                 },
                 "cumulative_logprob": [output.cumulative_logprob for output in request_output.outputs],
                 "output_token_len": [len(output.token_ids) for output in request_output.outputs],
-                "finish_reason": (
-                    request_output.outputs[0].finish_reason
-                    if len(request_output.outputs) == 1
-                    else [output.finish_reason for output in request_output.outputs]
-                ),
+                "finish_reason": [output.finish_reason for output in request_output.outputs],
             }
             yield (json.dumps(ret) + "\0").encode()
 

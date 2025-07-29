@@ -53,14 +53,14 @@ class SearchTree:
         self,
         simulate_env: Type[Env],
         num_path: int,
-        reward_model_fn: Optional[Callable] = None,
+        rm_call: Optional[Callable] = None,
     ) -> List[Dict]:
         api_call_completion_tokens = 0
         _, info = simulate_env.reset(update_legal_action=True)
         api_call_completion_tokens += info["api_completion_token"]
         if self.root is None:
             root = LanguageNode(text_state=simulate_env.get_state())
-            self._expand_leaf_node(root, simulate_env, reward_model_fn)
+            self._expand_leaf_node(root, simulate_env, rm_call)
             self.root = root
 
         traj_list = []
@@ -97,7 +97,7 @@ class SearchTree:
                 done = terminated or truncated
 
                 if not done and node.is_leaf():
-                    self._expand_leaf_node(node, env_copy, reward_model_fn)
+                    self._expand_leaf_node(node, env_copy, rm_call)
 
                 # record api_tokens, if not expand, info["api_completion_token"] is 0
                 api_call_completion_tokens += info["api_completion_token"]
@@ -128,21 +128,21 @@ class SearchTree:
         simulate_env: Env,
         beam_size: int,
         max_step: int,
-        reward_model_fn: Optional[Callable] = None,
+        rm_call: Optional[Callable] = None,
     ) -> List[Dict]:
         """Beam Search implementation
         Args:
             simulate_env: The environment to simulate the search.
             beam_size: beam_size
             max_step: The maximum number of steps to search.
-            reward_model_fn: The reward model function to evaluate the state.
+            rm_call: The reward model function to evaluate the state.
         """
         api_call_completion_tokens = 0
         _, info = simulate_env.reset(update_legal_action=True)
         api_call_completion_tokens += info["api_completion_token"]
         if self.root is None:
             root = LanguageNode(text_state=simulate_env.get_state())
-            self._expand_leaf_node(root, simulate_env, reward_model_fn)
+            self._expand_leaf_node(root, simulate_env, rm_call)
             self.root = root
 
         end_nodes, top_k_nodes = [], [(-root._initial_value, root, simulate_env.copy())]
@@ -188,7 +188,7 @@ class SearchTree:
                 if terminated or truncated:
                     node.set_as_terminate_node()
                 else:
-                    self._expand_leaf_node(node, new_env, reward_model_fn)
+                    self._expand_leaf_node(node, new_env, rm_call)
 
             if len(end_nodes) == beam_size:
                 assert k == 0
@@ -256,22 +256,22 @@ class SearchTree:
         self,
         node: Node,
         simulate_env: Type[Env],
-        reward_fn: Optional[Callable] = None,
+        rm_call: Optional[Callable] = None,
     ) -> None:
         """
         Overview:
-            expand the node with the reward_fn.
+            expand the node with the rm_call.
         Arguments:
             - node (:obj:`Class Node`): current node when performing mcts search.
             - simulate_env (:obj:`Class BaseGameEnv`): the class of simulate env.
-            - reward_fn (:obj:`Function`): the Callable to compute the state value.
+            - rm_call (:obj:`Function`): the Callable to compute the state value.
         """
 
         text_state = simulate_env.get_state()
 
         assert len(simulate_env.legal_actions) > 0
 
-        prms: List[List[float]] = reward_fn(
+        prms: List[List[float]] = rm_call(
             [
                 (
                     simulate_env.question,

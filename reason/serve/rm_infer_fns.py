@@ -18,7 +18,7 @@ def make_step_rewards(logits, token_masks):
 @torch.inference_mode()
 def _qwen_math_prm_infer_fn(input_str: str, model, tokenizer, device):
     STEP_TAG = "<extra_0>"
-    question, answer = input_str.split("<this is qwen2.5-math-prm seperation &&&&& >")
+    question, answer = input_str.split("<｜question▁answer▁delimiter｜>")
 
     data = {
         "system": "Please reason step by step, and put your final answer within \\boxed{}.",
