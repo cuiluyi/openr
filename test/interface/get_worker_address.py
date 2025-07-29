@@ -5,7 +5,7 @@ controller_addr = "http://0.0.0.0:28777"
 # model_name = "s1-20250312_213742"
 # model_name = "Qwen2.5-Math-PRM-7B"
 # model_name = "math-shepherd-mistral-7b-prm"
-model_name = "Math-psa-7B"
+model_name = "DeepSeek-R1-Distill-Qwen-1.5B"
 # model_name = "s1-20250314_003214"
 
 response = requests.post(controller_addr + "/get_worker_address", json={"model": model_name})

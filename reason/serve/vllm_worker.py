@@ -17,7 +17,7 @@ from vllm.engine.arg_utils import AsyncEngineArgs
 from vllm.sampling_params import SamplingParams
 from vllm.utils import random_uuid
 
-from reason.llm_service.workers.base_model_worker import BaseModelWorker
+from reason.serve.base_model_worker import BaseModelWorker
 from fastchat.serve.model_worker import (
     logger,
     worker_id,
@@ -126,17 +126,13 @@ class VLLMWorker(BaseModelWorker):
         async for request_output in results_generator:
             prompt = request_output.prompt
             if echo:
-                text_outputs = [
-                    prompt + output.text for output in request_output.outputs
-                ]
+                text_outputs = [prompt + output.text for output in request_output.outputs]
             else:
                 text_outputs = [output.text for output in request_output.outputs]
             # text_outputs = " ".join(text_outputs)
             # Note: usage is not supported yet
             prompt_tokens = len(request_output.prompt_token_ids)
-            completion_tokens = sum(
-                len(output.token_ids) for output in request_output.outputs
-            )
+            completion_tokens = sum(len(output.token_ids) for output in request_output.outputs)
             ret = {
                 "text": text_outputs,
                 "error_code": 0,
@@ -145,12 +141,8 @@ class VLLMWorker(BaseModelWorker):
                     "completion_tokens": completion_tokens,
                     "total_tokens": prompt_tokens + completion_tokens,
                 },
-                "cumulative_logprob": [
-                    output.cumulative_logprob for output in request_output.outputs
-                ],
-                "output_token_len": [
-                    len(output.token_ids) for output in request_output.outputs
-                ],
+                "cumulative_logprob": [output.cumulative_logprob for output in request_output.outputs],
+                "output_token_len": [len(output.token_ids) for output in request_output.outputs],
                 "finish_reason": (
                     request_output.outputs[0].finish_reason
                     if len(request_output.outputs) == 1
@@ -234,9 +226,7 @@ if __name__ == "__main__":
     parser.add_argument("--host", type=str, default="localhost")
     parser.add_argument("--port", type=int, default=21002)
     parser.add_argument("--worker-address", type=str, default="http://localhost:21002")
-    parser.add_argument(
-        "--controller-address", type=str, default="http://localhost:21001"
-    )
+    parser.add_argument("--controller-address", type=str, default="http://localhost:21001")
     parser.add_argument("--model-path", type=str, default="lmsys/vicuna-7b-v1.5")
     parser.add_argument(
         "--model-names",
@@ -246,15 +236,12 @@ if __name__ == "__main__":
     parser.add_argument("--limit-worker-concurrency", type=int, default=1024)
     parser.add_argument("--no-register", action="store_true")
     parser.add_argument("--num-gpus", type=int, default=1)
-    parser.add_argument(
-        "--conv-template", type=str, default=None, help="Conversation prompt template."
-    )
+    parser.add_argument("--conv-template", type=str, default=None, help="Conversation prompt template.")
     parser.add_argument(
         "--trust_remote_code",
         action="store_false",
         default=True,
-        help="Trust remote code (e.g., from HuggingFace) when"
-        "downloading the model and tokenizer.",
+        help="Trust remote code (e.g., from HuggingFace) when" "downloading the model and tokenizer.",
     )
     parser.add_argument(
         "--gpu_memory_utilization",

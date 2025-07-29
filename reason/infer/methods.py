@@ -4,19 +4,16 @@ from typing import Dict
 
 from math_verify import parse, verify
 
-from reason.infer.lm_call import LMCallingConfig, LanguageModelCallingFunction
+from reason.env import Env
+from reason.eval.evaluator import TreeSearchSolutionOutput
+from reason.infer.tree import SearchTree
 from reason.infer.rm_call import RewardModelCallingFunction
-from reason.evaluation.evaluator import Task, TreeSearchSolutionOutput
-from reason.guided_search.tree import SearchTree
+from reason.infer.lm_call import LMCallingConfig, LanguageModelCallingFunction
 
-
-@dataclass
-class BasicConfig:
-    task_name: str
 
 
 @dataclass
-class TreeSearchConfig(BasicConfig):
+class TreeSearchConfig():
     # construction config
     tree_max_width: int = 10
     tree_max_depth: int = 10
@@ -38,13 +35,12 @@ class BeamSearchConfig(TreeSearchConfig):
 def beam_search(
     config: BeamSearchConfig,
     gen_config: LMCallingConfig,
-    task: Task,
     problem_inst: Dict[str, str],
     lm_call: LanguageModelCallingFunction,
     rm_call: RewardModelCallingFunction,
 ) -> TreeSearchSolutionOutput:
     rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
-    env = task.env_fn(
+    env = Env(
         config={
             "max_actions": config.tree_max_width,
             "max_length": config.tree_max_depth,
@@ -64,7 +60,6 @@ def beam_search(
         ],
         llm_gen_fn=lm_call,
         reward_model_fn=rm_call_fn,
-        # TODO(ziyu): set sep by lm_call.lm_step_tag
     )
 
     search_tree = SearchTree(cfg={})
@@ -83,15 +78,11 @@ def beam_search(
 
 
 @dataclass
-class MCTSBaseConfig(TreeSearchConfig):
+class VanilaMCTSConfig(TreeSearchConfig):
+    num_path: int = 1
     # PUCT hparams
     pb_c_base: float = 19652
     pb_c_init: float = 1.25
-
-
-@dataclass
-class VanilaMCTSConfig(MCTSBaseConfig):
-    num_path: int = 1
 
     def __post_init__(self):
         super().__post_init__()
@@ -101,13 +92,12 @@ class VanilaMCTSConfig(MCTSBaseConfig):
 def vanila_mcts(
     config: VanilaMCTSConfig,
     gen_config: LMCallingConfig,
-    task: Task,
     problem_inst: Dict[str, str],
     lm_call: LanguageModelCallingFunction,
     rm_call: RewardModelCallingFunction,
 ) -> TreeSearchSolutionOutput:
     rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
-    env = task.env_fn(
+    env = Env(
         config={
             "max_actions": config.tree_max_width,
             "max_length": config.tree_max_depth,
@@ -122,7 +112,7 @@ def vanila_mcts(
         math_problems=[
             {
                 "question": problem_inst["question"],
-                "answer": task.extract_groundtruth(problem_inst["answer"]),
+                "answer": parse(problem_inst["answer"]),
             }
         ],
         llm_gen_fn=lm_call,

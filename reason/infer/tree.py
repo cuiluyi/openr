@@ -2,236 +2,15 @@
 The Node and MCTS class for AlphaZero.
 """
 
-import json
 import math
-
-import numpy as np
-import torch.nn as nn
-from typing import List, Dict, Any, Optional, Tuple, Union, Callable, Type
-from distributed.utils import print_rank_0, print_with_rank
-from envs.base_env import CoTEnv
-import pdb
-from tqdm import tqdm
 import heapq
+import pprint
+
+from typing import List, Dict, Any, Optional, Tuple, Union, Callable, Type
 from loguru import logger
-
-
-class Node(object):
-    """
-    Overview:
-        The node base class for tree_search.
-    """
-
-    def __init__(self, parent: "Node" = None, prior_p: float = 1.0, initial_value: float = 0.0) -> None:
-        self._parent = parent
-        self._children = {}
-        self._visit_count = 0
-        self._value_sum = 0
-        self.prior_p = prior_p
-        self.prior_p_ori = prior_p
-
-        self._initial_value = initial_value
-        self._terminated = False
-
-    def __lt__(self, other):
-        return self._initial_value < other._initial_value
-
-    @property
-    def terminated(self):
-        return self._terminated
-
-    def set_as_terminate_node(self):
-        self._terminated = True
-
-    @property
-    def value(self) -> float:
-        """
-        Overview:
-            The value of the current node.
-        Returns:
-            - output (:obj:`Int`): Current value, used to compute ucb score.
-        """
-        if self._visit_count == 0:
-            # if not visited, return the initial value
-            return self._initial_value
-        return self._value_sum / self._visit_count
-
-    def update(self, value: float) -> None:
-        """
-        Overview:
-            Updata the current node information, such as visit_count and value_sum.
-        Arguments:
-            - value (:obj:`Int`): The value of the node.
-        """
-        self._visit_count += 1
-        self._value_sum += value
-
-    def update_recursive(self, leaf_value: float, mcts_mode: str) -> None:
-        """
-        Overview:
-            Update node information recursively.
-        Arguments:
-            - leaf_value (:obj:`Int`): The value of the node.
-        """
-        if mcts_mode == "self_play_mode":
-            self.update(leaf_value)
-            if self.is_root():
-                return
-            self._parent.update_recursive(-leaf_value, mcts_mode)
-        if mcts_mode == "play_with_bot_mode":
-            self.update(leaf_value)
-            if self.is_root():
-                return
-            self._parent.update_recursive(leaf_value, mcts_mode)
-
-    def _rollout(
-        self,
-        env: Type[CoTEnv],
-        reward_model_fn: Optional[Callable] = None,
-    ) -> int:
-        """
-        Overview:
-            Perform a rollout from the current node.
-        Returns:
-            - output (:obj:`Int`): The value of the leaf node.
-        """
-        from reason.infer.lm_call import LMCallingConfig, ConcatedLMGenResult
-
-        terminated, truncated, _ = env.get_done_and_info()
-
-        if terminated or truncated:
-            prms: List[int] = reward_model_fn((env.question, env.answer))
-            return min(prms)
-        else:
-            result: ConcatedLMGenResult = env.llm_gen_fn(
-                input_str=env.get_state(),
-                config=LMCallingConfig(n=1, **env.config["generation_config"]),
-            )
-
-            steps: str = result.text[0]
-            prms: List[int] = reward_model_fn((env.question, env.answer + steps))
-
-            previous_steps_num = len(env.answer.split(env.llm_gen_fn.lm_step_tag)) - 1
-            value = min(prms[:previous_steps_num])
-            solution_reward = min(prms)
-            return 0.5 * (value + solution_reward)
-
-    def is_leaf(self) -> Dict:
-        """
-        Overview:
-            Check if the current node is a leaf node or not.
-        Returns:
-            - output (:obj:`Dict`): Dict type children node.
-        """
-        return self._children == {}
-
-    def is_root(self) -> bool:
-        """
-        Overview:
-            Check if the current node is a root node or not.
-        Returns:
-            - output (:obj:`Bool`): Whether it is the parent node.
-        """
-        return self._parent is None
-
-    @property
-    def parent(self) -> None:
-        return self._parent
-
-    @property
-    def children(self) -> None:
-        return self._children
-
-    @property
-    def visit_count(self) -> None:
-        return self._visit_count
-
-    def get_info(self):
-        # return [
-        #     "visit_cnt: {}, value: {:.6f}, prior: {:.6f}".format(
-        #         self.visit_count, self.value, self.prior_p)
-        # ]
-        return {
-            "visit_cnt": self.visit_count,
-            "values": self.value,
-            "prior_p": float(self.prior_p_ori),
-            "initial_value": self._initial_value,
-            "terminated": self.terminated,
-        }
-
-    def clear(self):
-        self._visit_count = 0
-        self._value_sum = 0
-        self.prior_p = self.prior_p_ori
-
-    def to_json(self):
-        childrens = {}
-        for name, child_node in self.children.items():
-            childrens[name] = child_node.to_json()
-
-        rets = {"children": childrens, "info": self.get_info()}
-        return rets
-
-    def __str__(self) -> str:
-        if self.is_root():
-            return "root"
-        else:
-            return "child: value: {:.3f}, prior: {:.3f}".format(self.last_action, self.value, self.prior_p)
-
-
-class LanguageNode(Node):
-    text_state: Optional[str] = None
-    last_action: Optional[str] = None
-    num_generated_token: Optional[int] = None
-
-    def __init__(
-        self,
-        parent: Node = None,
-        prior_p: float = 1.0,
-        prm_value: Optional[float] = None,
-        text_state: Optional[str] = None,
-        last_action: Optional[str] = None,
-        initial_value: float = 0.0,
-        num_generated_token: Optional[int] = None,
-    ) -> None:
-        super().__init__(parent, prior_p, initial_value)
-        self.text_state = text_state
-        self.last_action = last_action
-        self.prm_value = prm_value
-
-        self.num_generated_token = num_generated_token
-        self.has_collected_token_num = False
-
-    def get_path(self):
-        ans = []
-        node = self
-        while not node.is_root():
-            ans.append(node.last_action)
-            node = node.parent
-        return "\n".join(reversed(ans))
-
-    def get_info(self):
-        info_dict = super().get_info()
-        if not self.is_root():
-            info_dict["last_action"] = self.last_action
-            info_dict["prm_value"] = self.prm_value
-        else:
-            info_dict["text_state"] = self.text_state
-        return info_dict
-
-    def __str__(self):
-        if self.is_root():
-            return "root: {}".format(self.text_state)
-        else:
-            return "action: {}, value: {:.3f}, prior: {:.3f}".format(
-                self.last_action, self.value, self.prior_p
-            )
-
-
-def get_root(node: Node):
-    while not node.is_root():
-        node = node.parent
-    return node
+from reason.env import Env
+from reason.node import Node, LanguageNode
+from utils.distributed import print_rank_0, print_with_rank
 
 
 class SearchTree:
@@ -272,7 +51,7 @@ class SearchTree:
 
     def vanila_mcts(
         self,
-        simulate_env: Type[CoTEnv],
+        simulate_env: Type[Env],
         num_path: int,
         reward_model_fn: Optional[Callable] = None,
     ) -> List[Dict]:
@@ -309,7 +88,11 @@ class SearchTree:
                 assert node.last_action == action
                 env_copy._next_state_terminated[action] = node.terminated
 
-                _, _, terminated, truncated, info = env_copy.step(action, update_legal_action=node.is_leaf())
+                _, _, terminated, truncated, info = env_copy.step(
+                    action,
+                    value=node._initial_value,
+                    update_legal_action=node.is_leaf(),
+                )
 
                 done = terminated or truncated
 
@@ -328,7 +111,7 @@ class SearchTree:
             traj_data = {
                 "path_idx": i_path,
                 "text": env_copy.answer,
-                "values": leaf_value,
+                "values": env_copy.values,
                 "api_completion_tokens": api_call_completion_tokens,
                 "tree_completion_tokens": self._completion_tokens,
             }
@@ -342,7 +125,7 @@ class SearchTree:
 
     def beam_search(
         self,
-        simulate_env: CoTEnv,
+        simulate_env: Env,
         beam_size: int,
         max_step: int,
         reward_model_fn: Optional[Callable] = None,
@@ -420,7 +203,6 @@ class SearchTree:
                     "values": e_env.values,
                     "api_completion_tokens": 0,
                     "tree_completion_tokens": 0,
-                    # num_generated_token is hard to compute for each single answer
                 }
             )
         traj_list[-1]["tree_completion_tokens"] = self._completion_tokens
@@ -473,9 +255,9 @@ class SearchTree:
     def _expand_leaf_node(
         self,
         node: Node,
-        simulate_env: Type[CoTEnv],
+        simulate_env: Type[Env],
         reward_fn: Optional[Callable] = None,
-    ) -> float:
+    ) -> None:
         """
         Overview:
             expand the node with the reward_fn.
@@ -483,77 +265,49 @@ class SearchTree:
             - node (:obj:`Class Node`): current node when performing mcts search.
             - simulate_env (:obj:`Class BaseGameEnv`): the class of simulate env.
             - reward_fn (:obj:`Function`): the Callable to compute the state value.
-        Returns:
-            - leaf_value (:obj:`Bool`): the leaf node's value.
-        """
-        """
-        action_probs_dict, leaf_value = reward_fn(simulate_env)
-        for action, prior_p in action_probs_dict.items():
-            if action in simulate_env.legal_actions:
-                node.children[action] = Node(parent=node, prior_p=prior_p)
         """
 
         text_state = simulate_env.get_state()
-        if not self._init_critic_value:
-            leaf_value = reward_fn(text_state)
 
-        else:
-            leaf_value = node._initial_value
-            assert len(simulate_env.legal_actions) > 0
+        assert len(simulate_env.legal_actions) > 0
 
-            # child_values = [x["prob"] for x in simulate_env.legal_actions]
+        prms: List[List[float]] = reward_fn(
+            [
+                (
+                    simulate_env.question,
+                    simulate_env.answer + x["action"],
+                )
+                for x in simulate_env.legal_actions
+            ]
+        )
 
-            prms = reward_fn(
-                [
-                    (
-                        simulate_env.question,
-                        simulate_env.answer + x["action"],
-                    )
-                    for x in simulate_env.legal_actions
-                ]
-            )
-            child_values = []
-            # PRM get last r as single reward
-            for act, rs in zip(simulate_env.legal_actions, prms):
-                if len(simulate_env.action_history) + 1 != len(rs):
-                    logger.warning(
-                        """
-                        PRM value length not match with action history.
-                        ==========================================
-                        PRM Length:        {}
-                        ActionHist Length: {}
-
-                        --- State ---------------------------------
-                        {}
-
-                        --- Action --------------------------------
-                        {}
-
-                        --- Rewards ------------------------------------
-                        {}
-                        ==========================================
-                        """.format(
-                            len(prms),
-                            len(simulate_env.action_history),
-                            text_state,
-                            act,
-                            rs,
-                        )
-                    )
-                    # raise RuntimeError("Tokenizer problems")
-                    child_values.append(0.0)
-                elif len(rs) == 0:
-                    logger.warning(
-                        f"Empty PRM value for: \nState: \n{text_state} \naction: \n{act}, will be set to 0.0"
-                    )
-                    child_values.append(0.0)
-                else:
-                    # prm-last
-                    child_values.append(rs[-1])
-                    # # prm-min
-                    # child_values.append(min(rs))
-                    # # prob-prm
-                    # child_values.append(act['prob'])
+        # PRM get last r as single reward
+        child_values = []
+        for act, rs in zip(simulate_env.legal_actions, prms):
+            if len(simulate_env.action_history) + 1 != len(rs):
+                log_message = (
+                    "PRM value length not match with action history.\n" + "=" * 80 + "\n"
+                    f"PRM Length:        {len(prms)}\n"
+                    f"ActionHist Length: {len(simulate_env.action_history)}\n\n"
+                    + "-" * 28
+                    + " State "
+                    + "-" * 43
+                    + "\n"
+                    f"{pprint.pformat(text_state)}\n" + "-" * 28 + " Action " + "-" * 42 + "\n"
+                    f"{pprint.pformat(act)}\n" + "-" * 28 + " Rewards " + "-" * 41 + "\n"
+                    f"{pprint.pformat(rs)}\n" + "=" * 80
+                )
+                logger.warning(log_message)
+                child_values.append(0.0)
+            elif len(rs) == 0:
+                logger.warning(
+                    f"Empty PRM value for: \nState: \n{text_state} \naction: \n{act}, will be set to 0.0"
+                )
+                child_values.append(0.0)
+            else:
+                child_values.append(rs[-1])  # prm-last
+                # child_values.append(min(rs))  # prm-min
+                # child_values.append(act["prob"])  # prob-prm
 
         assert len(node.children) == 0
         for i, action_dict in enumerate(simulate_env.legal_actions):
@@ -564,7 +318,6 @@ class SearchTree:
             node.children[action] = LanguageNode(
                 parent=node,
                 prior_p=prob,
-                #  prm_value=prm_value,
                 text_state=text_state,
                 last_action=action,
                 initial_value=child_value,
@@ -582,8 +335,6 @@ class SearchTree:
             node.has_collected_token_num = True
         else:
             raise RuntimeError("Token number has been collected again.")
-
-        return leaf_value
 
     # TODO: has problems
     def _ucb_score(self, parent: Node, child: Node) -> float:
@@ -633,4 +384,3 @@ class SearchTree:
         return value_score + self._pb_c_init * math.sqrt(math.log(parent.visit_count)) / (
             child.visit_count + 0.000001
         )
-

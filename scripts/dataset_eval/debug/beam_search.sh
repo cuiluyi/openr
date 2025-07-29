@@ -1,8 +1,7 @@
 python -m debugpy --listen 63655 --wait-for-client \
-    reason/evaluation/evaluate.py \
+    reason/main.py \
     --LM Qwen2.5-Math-1.5B-Instruct \
     --RM Qwen2.5-Math-PRM-7B \
-    --task_name MATH \
     --dataset HuggingFaceH4/MATH-500 \
     --temperature 0.7 \
     --top_p 0.95 \

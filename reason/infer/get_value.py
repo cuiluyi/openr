@@ -1,8 +1,4 @@
-import torch
 from typing import Union, List
-from transformers import AutoTokenizer
-import re
-import numpy as np
 import requests
 
 

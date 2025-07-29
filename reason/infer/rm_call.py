@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import List, Optional, Tuple, Union
-from reason.infer.value import _value_inference_fastchat
+from reason.infer.get_value import _value_inference_fastchat
 
 
 @dataclass

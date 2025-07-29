@@ -1,8 +1,7 @@
 python -m debugpy --listen 63655 --wait-for-client \
-    reason/evaluation/evaluate.py \
-    --LM DeepSeek-R1-Distill-Qwen-1.5B/ \
+    reason/main.py \
+    --LM DeepSeek-R1-Distill-Qwen-1.5B \
     --RM Qwen2.5-Math-PRM-7B \
-    --task_name MATH \
     --dataset HuggingFaceH4/MATH-500 \
     --temperature 0.8 \
     --top_p 1 \

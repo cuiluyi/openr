@@ -22,13 +22,13 @@ from fastchat.modules.awq import AWQConfig
 from fastchat.modules.exllama import ExllamaConfig
 from fastchat.modules.xfastertransformer import XftConfig
 from fastchat.modules.gptq import GptqConfig
-from reason.llm_service.workers.base_worker import BaseModelWorker, app
+from reason.serve.base_model_worker import BaseModelWorker, app
 from fastchat.utils import (
     build_logger,
     get_context_length,
     str_to_torch_dtype,
 )
-from prm.infer_fns import _qwen_math_infer_fn, _math_shepherd_infer_fn, _qwen_math_prm_infer_fn
+from reason.serve.rm_infer_fns import _qwen_math_infer_fn, _math_shepherd_infer_fn, _qwen_math_prm_infer_fn
 
 worker_id = str(uuid.uuid4())[:8]
 logger = build_logger("reward_model_worker", f"reward_model_worker_{worker_id}.log")
@@ -149,18 +149,14 @@ def create_model_worker():
     parser.add_argument("--host", type=str, default="localhost")
     parser.add_argument("--port", type=int, default=21002)
     parser.add_argument("--worker-address", type=str, default="http://localhost:21002")
-    parser.add_argument(
-        "--controller-address", type=str, default="http://localhost:21001"
-    )
+    parser.add_argument("--controller-address", type=str, default="http://localhost:21001")
     add_model_args(parser)
     parser.add_argument(
         "--model-names",
         type=lambda s: s.split(","),
         help="Optional display comma separated names",
     )
-    parser.add_argument(
-        "--conv-template", type=str, default=None, help="Conversation prompt template."
-    )
+    parser.add_argument("--conv-template", type=str, default=None, help="Conversation prompt template.")
     parser.add_argument("--embed-in-truncate", action="store_true")
     parser.add_argument(
         "--limit-worker-concurrency",
@@ -176,9 +172,7 @@ def create_model_worker():
         default=None,
         help="Overwrite the random seed for each generation.",
     )
-    parser.add_argument(
-        "--debug", type=bool, default=False, help="Print debugging messages"
-    )
+    parser.add_argument("--debug", type=bool, default=False, help="Print debugging messages")
     parser.add_argument(
         "--ssl",
         action="store_true",
@@ -191,9 +185,7 @@ def create_model_worker():
 
     if args.gpus:
         if len(args.gpus.split(",")) < args.num_gpus:
-            raise ValueError(
-                f"Larger --num-gpus ({args.num_gpus}) than --gpus {args.gpus}!"
-            )
+            raise ValueError(f"Larger --num-gpus ({args.num_gpus}) than --gpus {args.gpus}!")
         os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus
 
     gptq_config = GptqConfig(

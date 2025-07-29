@@ -1,20 +1,13 @@
-import importlib
-from datetime import datetime
-from dataclasses import dataclass
-from multiprocessing import Pool
-from typing import Any, Callable, Dict, Optional, List, Union, Tuple
-
-
-import numpy as np
 import ray
+import numpy as np
+
+from typing import Any, Callable, Dict, Optional, List, Tuple
+from dataclasses import dataclass
 from math_verify import parse, verify
 
-
-from envs import get_env_datasets
-from envs.base_env import INVALID_ANS
 from reason.infer.lm_call import LanguageModelCallingFunction
 from reason.infer.rm_call import RewardModelCallingFunction
-from reason.reranking.vote_utils import (
+from utils.answer_vote import (
     MAJORITY_VOTE,
     PRM_MIN_MAX,
     PRM_MIN_VOTE,
@@ -22,33 +15,6 @@ from reason.reranking.vote_utils import (
     PRM_LAST_MAX,
     AGG_FN_MAP,
 )
-
-
-class Task:
-    def __init__(self, task_name: str, dataset_id: str):
-        SUPPORTED_TASKS = ["MATH", "rstar", "Online"]
-        if task_name not in SUPPORTED_TASKS:
-            raise NotImplementedError(f"Task {task_name} is not supported")
-
-        self.task_name = "MATH" if task_name == "Online" else task_name
-        task_module = importlib.import_module(f"envs.{self.task_name}")
-        self.extract_answer = task_module.extract_answer
-        self.extract_groundtruth = task_module.extract_groundtruth
-        self.judge_correct = task_module.judge_correct
-
-        self.env_fn = task_module.Env
-
-        if task_name != "Online":
-            self.dataset_id = dataset_id
-            self._train_ds, self._test_ds = get_env_datasets(self.task_name, self.dataset_id)
-
-    @property
-    def test_ds(self):
-        return self._test_ds
-
-    @property
-    def train_ds(self):
-        return self._train_ds
 
 
 CHOSEN_AGGR_METHODS = [
@@ -67,21 +33,16 @@ def judge_ans(
     aggration_mode: str,
     normalize=False,
 ):
-    valid_ans_list, valid_v_list = [], []
-    for i, ans in enumerate(ans_list):
-        if ans != INVALID_ANS:
-            valid_ans_list.append(ans)
-            valid_v_list.append(v_list[i])
-    if len(valid_ans_list) == 0:
+    if len(ans_list) == 0:
         return 0
 
     if "orm" in aggration_mode and normalize:
         # score_normalization: this is only necessary for [-1, 1] values
-        valid_v_list = np.array(valid_v_list)
-        valid_v_list -= valid_v_list.min()
-        valid_v_list /= valid_v_list.max() + 1e-3
-        valid_v_list = valid_v_list.tolist()
-    aggregated_ans = AGG_FN_MAP[aggration_mode](valid_ans_list, valid_v_list)
+        v_list = np.array(v_list)
+        v_list -= v_list.min()
+        v_list /= v_list.max() + 1e-3
+        v_list = v_list.tolist()
+    aggregated_ans = AGG_FN_MAP[aggration_mode](ans_list, v_list)
 
     return 1 if verify(extracted_groundtruth, aggregated_ans) else 0
 
@@ -89,10 +50,6 @@ def judge_ans(
 @dataclass
 class SolutionOutput:
     solutions: List[str]
-    # Define the completion tokens for each solution
-    #  For best_of_n, it's a list of int, indicate how many tokens in each generation
-    #  for beam search, it's a list of zeros, except the last element indicates total tokens
-    #  for mcts, it's a list of int, indicate how many tokens comsumed between two paths
     completion_tokens: List[int]
     values: Optional[List[float]]
 
@@ -101,15 +58,13 @@ class SolutionOutput:
 class TreeSearchSolutionOutput(SolutionOutput):
     tree_completion_tokens: List[int]
 
-
+@ray.remote
 class MathEvaluator:
     def __init__(
         self,
-        task: Task,
         lm_call: LanguageModelCallingFunction,
         rm_call: RewardModelCallingFunction,
     ):
-        self._task = task
         self.lm_call = lm_call
         self.rm_call = rm_call
 
@@ -118,7 +73,6 @@ class MathEvaluator:
         problem_inst: Dict[str, str],
         solver_fn: Callable,
     ) -> List[str]:
-        # try:
         solution: SolutionOutput = solver_fn(
             problem_inst,
             self.lm_call,
@@ -142,8 +96,6 @@ class MathEvaluator:
             total_completion_token += solution.completion_tokens[i]
         result["total_completion_tokens"] = total_completion_token
         return problem_inst, result, output
-        # except Exception as e:
-        #     return problem_inst, {"error": str(e)}, []
 
     def analyze_output(
         self,
@@ -173,14 +125,3 @@ class MathEvaluator:
             for agg_method in CHOSEN_AGGR_METHODS
         }
         return res, output_list
-
-
-@ray.remote
-class RemoteMathEvaluator(MathEvaluator):
-    def __init__(
-        self,
-        task: str,
-        lm_call: LanguageModelCallingFunction,
-        rm_call: RewardModelCallingFunction,
-    ):
-        super().__init__(task, lm_call, rm_call)

@@ -1,15 +1,14 @@
 import abc
-from typing import List, Dict, Any, Optional, Tuple, Union, Callable, Type
-import numpy as np
 import copy
+import numpy as np
 
-from distributed.utils import print_with_rank
-from transformers import PreTrainedTokenizer
-from reason.infer.lm_call import LMCallingConfig, ConcatedLMGenResult
+from typing import List, Dict, Any, Optional, Tuple, Union, Callable, Type
+from math_verify import parse, verify
 
+from utils import extract_answer
+from utils.distributed import print_with_rank
 from utils.prompt import build_query_str
-
-INVALID_ANS = "[invalid]"
+from reason.infer.lm_call import LMCallingConfig, ConcatedLMGenResult
 
 
 class NoLegalActionException(Exception):
@@ -20,46 +19,10 @@ class ResetException(Exception):
     pass
 
 
-class BaseEnv(abc.ABC):
-    """Basic environment to use for MCTS"""
-
-    @abc.abstractmethod
-    def reset(self, update_legal_action: bool):
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def step(self):
-        raise NotImplementedError
-
-    @property
-    @abc.abstractmethod
-    def legal_actions(self):
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def copy(self):
-        raise NotImplementedError
-
-    @staticmethod
-    def build_response_str(answer_str: str, tokenizer: PreTrainedTokenizer, add_eos_token: bool):
-        raise NotImplementedError
-
-
-class CoTEnv(BaseEnv):
+class Env:
     """The basic environment for solving natural language problems using CoT"""
 
-    sep: str
-
-    @property
-    def stop_str(self):
-        return self._stop_str
-
-    def _is_correct(self, completion) -> bool:
-        raise NotImplementedError
-
-    def get_reward(self):
-        """To implement based on learned reward model"""
-        raise NotImplementedError
+    sep: str = "\n\n"
 
     def __init__(
         self,
@@ -141,7 +104,8 @@ class CoTEnv(BaseEnv):
         return ret
 
     def post_process_act(self, action: str):
-        # This step may change the token count
+        if not action.endswith(self.sep):
+            action = action.strip() + self.sep
         return action
 
     def update_legal_actions(self):
@@ -214,6 +178,18 @@ class CoTEnv(BaseEnv):
 
     def set_problem(self, idx):
         self.math_problem = self.math_problems[idx]
+
+    def _is_correct(self, completion):
+        extracted_answer = extract_answer(completion)
+        return verify(self.math_problem["answer"], extracted_answer)
+
+    def get_reward(self):
+        """To implement based on learned reward model"""
+        return 0
+
+    @property
+    def stop_str(self):
+        return self._stop_str
 
     @property
     def query(self):

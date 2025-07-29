@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import List, Optional, Union
-from reason.infer.text_generation import ConcatedLMGenResult, _generate_fastchat
+from reason.infer.gen_text import ConcatedLMGenResult, _generate_fastchat
 
 
 @dataclass

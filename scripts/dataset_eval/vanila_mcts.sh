@@ -1,7 +1,6 @@
-python reason/evaluation/evaluate.py \
+python reason/main.py \
     --LM Qwen2.5-Math-1.5B-Instruct \
     --RM Qwen2.5-Math-PRM-7B \
-    --task_name MATH \
     --dataset HuggingFaceH4/MATH-500 \
     --temperature 0.8 \
     --top_p 1 \
