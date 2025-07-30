@@ -6,7 +6,7 @@ def parse_args():
 
     parser.add_argument("--LM", type=str, required=True)
     parser.add_argument("--RM", type=str, default="dummy")
-    parser.add_argument("--controller_addr", type=str, default="http://0.0.0.0:28778")
+    parser.add_argument("--controller_addr", type=str, default="http://0.0.0.0:28777")
     # dataset config
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--dataset", type=str, default="HuggingFaceH4/MATH-500")
