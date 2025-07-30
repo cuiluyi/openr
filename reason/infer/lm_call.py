@@ -61,11 +61,7 @@ def _generate_fastchat(
 ) -> ConcatedLMGenResult:
 
     headers = {"User-Agent": "FastChat Client"}
-    print(repr(controller_addr))
-    print(repr(model_name))
     ret = requests.post(controller_addr + "/get_worker_address", json={"model": model_name})
-    print("Response status code:", ret.status_code)
-    print("Response content:", ret.text)
     worker_addr = ret.json()["address"]
     if not worker_addr:
         raise ValueError("Language Model name {} does not exist.".format(model_name))
