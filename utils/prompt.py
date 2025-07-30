@@ -17,9 +17,9 @@ def build_query_str(
     ]
 
     tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
-    ret = tokenizer.apply_chat_template(
+    prompt = tokenizer.apply_chat_template(
         messages,
         tokenize=False,
         add_generation_prompt=True,
-    )
-    return ret
+    ).removesuffix("<think>\n")
+    return prompt

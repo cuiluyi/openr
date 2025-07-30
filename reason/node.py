@@ -83,26 +83,10 @@ class Node(object):
     def set_as_terminate_node(self):
         self._terminated = True
 
-    def get_info(self):
-        return {
-            "visit_cnt": self.visit_count,
-            "values": self.value,
-            "prior_p": float(self.prior_p_ori),
-            "initial_value": self._initial_value,
-            "terminated": self.terminated,
-        }
-
     def clear(self):
         self._visit_count = 0
         self._value_sum = 0
         self.prior_p = self.prior_p_ori
-
-    def to_json(self):
-        childrens = {}
-        for name, child_node in self.children.items():
-            childrens[name] = child_node.to_json()
-        rets = {"children": childrens, "info": self.get_info()}
-        return rets
 
     def update(self, value: float) -> None:
         """
@@ -163,15 +147,6 @@ class LanguageNode(Node):
             ans.append(node.last_action)
             node = node.parent
         return "\n".join(reversed(ans))
-
-    def get_info(self):
-        info_dict = super().get_info()
-        if not self.is_root():
-            info_dict["last_action"] = self.last_action
-            info_dict["prm_value"] = self.prm_value
-        else:
-            info_dict["text_state"] = self.text_state
-        return info_dict
 
     def __str__(self):
         if self.is_root():

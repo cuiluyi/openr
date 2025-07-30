@@ -4,6 +4,8 @@ import requests
 from dataclasses import dataclass
 from typing import List, Optional, Tuple, Union
 
+from reason.env import SUFFIX
+
 
 def _value_inference_fastchat(
     model_name: str,
@@ -62,7 +64,7 @@ class RewardModelCallingFunction:
             pattern = "|".join(re.escape(d) for d in lm_step_tag)
             splits = re.split(pattern, answer)
         # add a whitespace to avoid tokenization issue
-        response = f" {self.step_tag}".join([s for s in splits if s != ""])
+        response = f" {self.step_tag}".join([s for s in splits if s != "" and s.strip() != SUFFIX])
         response += f" {self.step_tag}"
         return response
 

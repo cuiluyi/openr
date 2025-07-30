@@ -6,13 +6,19 @@ from math_verify import parse, verify
 from utils import extract_answer, softmax
 from utils.distributed import print_with_rank
 from utils.prompt import build_query_str
+from utils.text_processe import (
+    has_valid_content,
+    split_string,
+    SYSTEM1_BEGIN_TAG,
+    SYSTEM2_BEGIN_TAG,
+    SYSTEM1_END_TAG,
+    SYSTEM2_END_TAG,
+    SUFFIX,
+)
 from reason.infer.lm_call import LMCallingConfig
 from reason.infer.lm_call import ConcatedLMGenResult, merge_concated_results
 
-SYSTEM1_BEGIN_TAG = "<｜begin▁of▁system1｜>\n"
-SYSTEM2_BEGIN_TAG = "<｜begin▁of▁system2｜>\n"
-SYSTEM1_END_TAG = "\n<｜end▁of▁system1｜>"
-SYSTEM2_END_TAG = "\n<｜end▁of▁system2｜>"
+MAX_RETRIES = 5
 
 
 class NoLegalActionException(Exception):
@@ -40,70 +46,60 @@ class Env:
         self.mcts_mode = "play_with_bot_mode"
         self.math_problems = math_problems
         self.lm_call = lm_call
+        self.rm_call = rm_call
+        self.reason_finished = False
+        self.legal_actions = None
         self.action_history = None
         self.values = []
         self.math_problem = None
-        self._legal_actions = None
-        self._stop_str = config.get("stop_str", None)
-
-        self.rm_call = rm_call
+        self.stop_str = config.get("stop_str", None)
 
         if reset:
             self.reset(update_legal_action=True)
 
     def reset(self, update_legal_action=True):
         self.set_problem(idx=0)  # reset environment to problem idx
-        self.action_history = []
         self.values = []
-        self._init_query = build_query_str(problem_input=self.math_problem["question"])
-        api_completion_token = 0
+        self.action_history = []
+        self.init_query = build_query_str(problem_input=self.math_problem["question"])
+
         if update_legal_action:
-            cnt = 0
-            while cnt < 5:
-                cnt += 1
+            for try_id in range(MAX_RETRIES):
                 try:
-                    self._legal_actions, api_completion_token = self.update_legal_actions()
+                    self.legal_actions, api_completion_token = self.update_legal_actions()
                     break
-                except NoLegalActionException as e:
-                    if cnt == 5:
+                except NoLegalActionException:
+                    if try_id == MAX_RETRIES - 1:
                         raise ResetException
-        info = {"api_completion_token": api_completion_token}
-        return self.get_state(), info
+
+        return api_completion_token
 
     def step(self, action, value=0, update_legal_action=True):
         self.action_history.append(action)
         self.values.append(value)
-        state = self.get_state()
-        reward = self.get_reward()
-        terminated, truncated, info = self.get_done_and_info()
+
         # update legal actions
-        if not (terminated or truncated) and update_legal_action:
-            cnt = 0
-            while cnt < 5:
-                cnt += 1
+        self.update_reason_finished()
+
+        if not self.reason_finished and update_legal_action:
+            for try_id in range(MAX_RETRIES):
                 try:
-                    self._legal_actions, api_completion_token = self.update_legal_actions()
-                    info["api_completion_token"] = api_completion_token
+                    self.legal_actions, api_completion_token = self.update_legal_actions()
                     break
-                except NoLegalActionException as e:
-                    if cnt == 5:
-                        terminated = True
-                        reward = 0
-                        self._legal_actions = None
-                        info["winner"] = 2
-                        info["api_completion_token"] = 0
-                    else:
-                        pass
+                except NoLegalActionException:
+                    if try_id == MAX_RETRIES - 1:
+                        self.reason_finished = True
+                        self.legal_actions = None
+                        api_completion_token = 0
+
         else:
-            self._legal_actions = None
-            if info["winner"] == 1:
-                reward = 1.0
-            info["api_completion_token"] = 0
-        return state, reward, terminated, truncated, info
+            self.legal_actions = None
+            api_completion_token = 0
+        return api_completion_token
 
     def get_state(self):
         # not join about sep_str here because we let vllm return with sep_str
-        ret = self._init_query + "".join(item for item in self.action_history if item is not None)
+        ret = self.init_query + "".join(item for item in self.action_history if item is not None)
         return ret
 
     def update_legal_actions(self):
@@ -114,7 +110,7 @@ class Env:
             input_str=self.get_state() + SYSTEM1_BEGIN_TAG,
             config=LMCallingConfig(
                 n=fast_try_num,
-                stop_str=SYSTEM1_END_TAG,
+                stop_str=[SYSTEM1_BEGIN_TAG, SYSTEM2_BEGIN_TAG],
                 include_stop_str_in_output=True,
                 **self.config["generation_config"]
             ),
@@ -125,7 +121,7 @@ class Env:
             input_str=self.get_state() + SYSTEM2_BEGIN_TAG,
             config=LMCallingConfig(
                 n=slow_try_num,
-                stop_str=SYSTEM2_END_TAG,
+                stop_str=[SYSTEM1_BEGIN_TAG, SYSTEM2_BEGIN_TAG],
                 include_stop_str_in_output=True,
                 **self.config["generation_config"]
             ),
@@ -142,18 +138,19 @@ class Env:
             # XXX: this process can be improve or moved to other place
             # this is a pre-judge of terminal flag or certain action, by
             # whether the text-generation is stop by the <eos> or stop_str
-            terminated = not result.text[i].endswith((SYSTEM1_END_TAG, SYSTEM2_END_TAG))
-            
-            if (
-                len(result.text[i]) > 0
-                and result.text[i] not in text_list
-                and result.finish_reason[i] == "stop"
-            ):
-                text_list.append(result.text[i])
+            if result.finish_reason[i] != "stop" or len(result.text[i]) == 0:
+                continue
+
+            processed_text = self.post_process_act(result.text[i])
+            if not has_valid_content(processed_text):
+                continue
+
+            if processed_text not in text_list:
+                text_list.append(processed_text)
                 logprob_list.append(result.logp_avg_by_len[i])
                 num_token_list.append(result.num_tokens[i])
                 finish_reason_list.append(result.finish_reason[i])
-                next_state_terminated[result.text[i]] = terminated
+                next_state_terminated[processed_text] = processed_text.endswith(SUFFIX)
 
         if len(logprob_list) == 0:
             print_with_rank("state: {}".format(self.get_state()))
@@ -162,7 +159,7 @@ class Env:
 
         prob_list = softmax(logprob_list)
 
-        _legal_actions = [
+        legal_actions = [
             {
                 "action": action,
                 "prob": prob,
@@ -176,8 +173,36 @@ class Env:
                 finish_reason_list,
             )
         ]
-        self._next_state_terminated = next_state_terminated
-        return _legal_actions, result.completion_tokens
+        self.next_state_terminated = next_state_terminated
+        return legal_actions, result.completion_tokens
+
+    def post_process_act(self, action: str):
+        step, sep, other = split_string(action, [SYSTEM1_END_TAG, SYSTEM2_END_TAG])
+        if action.startswith(SYSTEM1_BEGIN_TAG):
+            if sep:
+                action = step + SYSTEM1_END_TAG
+            else:
+                if action.endswith(SUFFIX):
+                    return action.removesuffix(SUFFIX) + SYSTEM1_END_TAG + SUFFIX
+                else:
+                    action = action.removesuffix(SYSTEM1_BEGIN_TAG)
+                    action = action.removesuffix(SYSTEM2_BEGIN_TAG)
+                    return action + SYSTEM1_END_TAG
+        else:
+            assert action.startswith(SYSTEM2_BEGIN_TAG)
+            if sep:
+                action = step + SYSTEM2_END_TAG
+            else:
+                if action.endswith(SUFFIX):
+                    return action.removesuffix(SUFFIX) + SYSTEM2_END_TAG + SUFFIX
+                else:
+                    action = action.removesuffix(SYSTEM1_BEGIN_TAG)
+                    action = action.removesuffix(SYSTEM2_BEGIN_TAG)
+                    return action + SYSTEM2_END_TAG
+
+        if other.strip() == SUFFIX:
+            action = action + SUFFIX
+        return action
 
     def set_problem(self, idx):
         self.math_problem = self.math_problems[idx]
@@ -191,14 +216,6 @@ class Env:
         return 0
 
     @property
-    def stop_str(self):
-        return self._stop_str
-
-    @property
-    def query(self):
-        return self._init_query
-
-    @property
     def question(self) -> str:
         return self.math_problem["question"]
 
@@ -206,32 +223,18 @@ class Env:
     def answer(self):
         return "".join(self.action_history)
 
-    def get_done_and_info(self):
-        info = {"winner": 0}
-        try:
-            # done when reaches maximum length or LLM generates stop words
-            if self.stop_str is not None and self.stop_str in self.action_history[-1]:
-                terminated = True
-            elif self._next_state_terminated[self.action_history[-1]]:
-                terminated = True
-            elif self.sep not in self.action_history[-1]:
-                # This is because the output is stopped by eos
-                terminated = True
-            else:
-                terminated = False
-        except Exception as e:
-            print(self)
+    def update_reason_finished(self):
+        assert self.action_history, "action_history should not be empty"
+        if self.stop_str is not None and self.stop_str in self.action_history[-1]:
+            terminated = True
+        elif self.next_state_terminated[self.action_history[-1]]:
+            terminated = True
+        else:
+            terminated = False
 
-        truncated = len(self.action_history) >= self.config["max_length"]
-        assert len(self.action_history) <= self.config["max_length"]
-        if terminated or truncated:
-            # if self._is_correct(self.action_history[-1]):
-            #     info["winner"] = 1
-            # else:
-            #     info["winner"] = 2
-            info["winner"] = 0
-            return terminated, truncated, info
-        return terminated, truncated, info
+        # check if the current state is truncated
+        truncated = len(self.action_history) >= self.config["max_steps"]
+        self.reason_finished = terminated or truncated
 
     def copy(self):
         env = self.__class__(
@@ -242,13 +245,10 @@ class Env:
             rm_call=self.rm_call,
         )
         env.math_problem = copy.deepcopy(self.math_problem)
-        env._legal_actions = copy.deepcopy(self._legal_actions)
         env.action_history = copy.deepcopy(self.action_history)
         env.values = copy.deepcopy(self.values)
-        env._init_query = copy.deepcopy(self._init_query)
-        env._next_state_terminated = copy.deepcopy(self._next_state_terminated)
+        env.reason_finished = copy.deepcopy(self.reason_finished)
+        env.legal_actions = copy.deepcopy(self.legal_actions)
+        env.init_query = copy.deepcopy(self.init_query)
+        env.next_state_terminated = copy.deepcopy(self.next_state_terminated)
         return env
-
-    @property
-    def legal_actions(self):
-        return self._legal_actions

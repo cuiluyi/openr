@@ -58,6 +58,7 @@ class SolutionOutput:
 class TreeSearchSolutionOutput(SolutionOutput):
     tree_completion_tokens: List[int]
 
+
 @ray.remote
 class MathEvaluator:
     def __init__(
@@ -73,17 +74,9 @@ class MathEvaluator:
         problem_inst: Dict[str, str],
         solver_fn: Callable,
     ) -> List[str]:
-        solution: SolutionOutput = solver_fn(
-            problem_inst,
-            self.lm_call,
-            self.rm_call,
-        )
+        solution: SolutionOutput = solver_fn(problem_inst, self.lm_call, self.rm_call)
 
-        result, output = self.analyze_output(
-            problem_inst,
-            solution.solutions,
-            solution.values,
-        )
+        result, output = self.analyze_output(problem_inst, solution.solutions, solution.values)
 
         total_completion_token = 0
         for i, o in enumerate(output):

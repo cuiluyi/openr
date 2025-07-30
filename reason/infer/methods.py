@@ -42,7 +42,7 @@ def beam_search(
     env = Env(
         config={
             "max_actions": config.tree_max_width,
-            "max_length": config.tree_max_depth,
+            "max_steps": config.tree_max_depth,
             "stop_str": "The answer is ",
             "generation_config": {
                 "max_new_tokens": gen_config.max_new_tokens,
@@ -99,7 +99,7 @@ def vanila_mcts(
     env = Env(
         config={
             "max_actions": config.tree_max_width,
-            "max_length": config.tree_max_depth,
+            "max_steps": config.tree_max_depth,
             "stop_str": "The answer is ",
             "generation_config": {
                 "max_new_tokens": gen_config.max_new_tokens,

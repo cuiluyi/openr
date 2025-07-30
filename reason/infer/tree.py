@@ -56,8 +56,8 @@ class SearchTree:
         rm_call: Optional[Callable] = None,
     ) -> List[Dict]:
         api_call_completion_tokens = 0
-        _, info = simulate_env.reset(update_legal_action=True)
-        api_call_completion_tokens += info["api_completion_token"]
+        api_completion_token = simulate_env.reset(update_legal_action=True)
+        api_call_completion_tokens += api_completion_token
         if self.root is None:
             root = LanguageNode(text_state=simulate_env.get_state())
             self._expand_leaf_node(root, simulate_env, rm_call)
@@ -84,23 +84,20 @@ class SearchTree:
 
                 # sync terminated flag here
                 # XXX(ziyu): find a more clean way
-                env_copy._next_state_terminated = {}
+                env_copy.next_state_terminated = {}
                 assert node.last_action == action
-                env_copy._next_state_terminated[action] = node.terminated
+                env_copy.next_state_terminated[action] = node.terminated
 
-                _, _, terminated, truncated, info = env_copy.step(
+                api_completion_token = env_copy.step(
                     action,
                     value=node._initial_value,
                     update_legal_action=node.is_leaf(),
                 )
+                api_call_completion_tokens += api_completion_token
 
-                done = terminated or truncated
-
+                done = env_copy.reason_finished
                 if not done and node.is_leaf():
                     self._expand_leaf_node(node, env_copy, rm_call)
-
-                # record api_tokens, if not expand, info["api_completion_token"] is 0
-                api_call_completion_tokens += info["api_completion_token"]
             else:
                 if node.visit_count > 0:
                     leaf_value = node.value
@@ -138,8 +135,8 @@ class SearchTree:
             rm_call: The reward model function to evaluate the state.
         """
         api_call_completion_tokens = 0
-        _, info = simulate_env.reset(update_legal_action=True)
-        api_call_completion_tokens += info["api_completion_token"]
+        api_completion_token = simulate_env.reset(update_legal_action=True)
+        api_call_completion_tokens += api_completion_token
         if self.root is None:
             root = LanguageNode(text_state=simulate_env.get_state())
             self._expand_leaf_node(root, simulate_env, rm_call)
@@ -179,13 +176,15 @@ class SearchTree:
             # expand selected nodes
             # XXX(ziyu): this could be optimized by batch expand
             for value, node, new_env in top_k_nodes:
-                _, _, terminated, truncated, info = new_env.step(
+                api_completion_token = new_env.step(
                     node.last_action,
                     node._initial_value,
                     update_legal_action=True,
                 )
-                api_call_completion_tokens += info["api_completion_token"]
-                if terminated or truncated:
+                api_call_completion_tokens += api_completion_token
+
+                done = new_env.reason_finished
+                if done:
                     node.set_as_terminate_node()
                 else:
                     self._expand_leaf_node(node, new_env, rm_call)
@@ -324,7 +323,7 @@ class SearchTree:
                 num_generated_token=action_dict["num_token"],
             )
             # set terminal node here
-            if simulate_env._next_state_terminated[action]:
+            if simulate_env.next_state_terminated[action]:
                 node.children[action].set_as_terminate_node()
         if len(node.children) == 0:
             print_rank_0("Prune all current children at node {}".format(node.last_action))

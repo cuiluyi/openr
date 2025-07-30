@@ -6,10 +6,10 @@ python -m debugpy --listen 63655 --wait-for-client \
     --temperature 0.8 \
     --top_p 1 \
     --top_k -1 \
-    --max_new_tokens 2048 \
-    --num_sequence 4 \
-    --tree_max_width 4 \
-    --tree_max_depth 50 \
+    --max_new_tokens 5120 \
+    --num_sequence 6 \
+    --tree_max_width 6 \
+    --tree_max_depth 30 \
     --save_dir results \
     --method vanila_mcts \
     --num_worker 16 \
