@@ -28,11 +28,9 @@ class SearchTree:
         self._pb_c_base = self._cfg.get("pb_c_base", 19652)  # 19652
         self._pb_c_init = self._cfg.get("pb_c_init", 1.25)  # 1.25
 
-        # Root prior exploration noise.
-        self._root_dirichlet_alpha = self._cfg.get(
-            "root_dirichlet_alpha", 0.3
-        )  # 0.3  # for chess, 0.03 for Go and 0.15 for shogi.
-        self._root_noise_weight = self._cfg.get("root_noise_weight", 0.25)  # 0.25
+        # Root prior exploration noise: 0.3 for chess, 0.03 for Go and 0.15 for shogi.
+        self._root_dirichlet_alpha = self._cfg.get("root_dirichlet_alpha", 0.3)
+        self._root_noise_weight = self._cfg.get("root_noise_weight", 0.25)
 
         self.root = None
 
@@ -51,7 +49,7 @@ class SearchTree:
 
     def vanila_mcts(
         self,
-        simulate_env: Type[Env],
+        simulate_env: Env,
         num_path: int,
         rm_call: Optional[Callable] = None,
     ) -> List[Dict]:
@@ -74,15 +72,8 @@ class SearchTree:
             env_copy = simulate_env.copy()
             done = False
             while not done:
-                if node.visit_count > 0:
-                    # if node is visited, select the child with the highest UCB score
-                    action, node = self._select_child(node, env_copy)
-                else:
-                    # select with highest value, since visit_count = 0 in self.ucb
-                    #  will select node with highest value
-                    action, node = self._select_child(node, env_copy)
+                action, node = self._select_child(node, env_copy)
 
-                # sync terminated flag here
                 # XXX(ziyu): find a more clean way
                 env_copy.next_state_terminated = {}
                 assert node.last_action == action
@@ -98,12 +89,12 @@ class SearchTree:
                 done = env_copy.reason_finished
                 if not done and node.is_leaf():
                     self._expand_leaf_node(node, env_copy, rm_call)
+
+            if node.visit_count > 0:
+                leaf_value = node.value
             else:
-                if node.visit_count > 0:
-                    leaf_value = node.value
-                else:
-                    leaf_value = node._initial_value
-            node.update_recursive(leaf_value, env_copy.mcts_mode)
+                leaf_value = node._initial_value
+            node.update_recursive(leaf_value)
 
             traj_data = {
                 "path_idx": i_path,
@@ -112,7 +103,6 @@ class SearchTree:
                 "api_completion_tokens": api_call_completion_tokens,
                 "tree_completion_tokens": self._completion_tokens,
             }
-
             traj_list.append(traj_data)
 
             # reset api_call_completion_tokens
@@ -254,7 +244,7 @@ class SearchTree:
     def _expand_leaf_node(
         self,
         node: Node,
-        simulate_env: Type[Env],
+        simulate_env: Env,
         rm_call: Optional[Callable] = None,
     ) -> None:
         """

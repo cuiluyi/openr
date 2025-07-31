@@ -44,7 +44,6 @@ class Env:
         rm_call: Optional[Callable] = None,
     ):
         self.config = config
-        self.mcts_mode = "play_with_bot_mode"
         self.math_problems = math_problems
         self.lm_call = lm_call
         self.rm_call = rm_call

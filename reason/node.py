@@ -98,23 +98,17 @@ class Node(object):
         self._visit_count += 1
         self._value_sum += value
 
-    def update_recursive(self, leaf_value: float, mcts_mode: str) -> None:
+    def update_recursive(self, leaf_value: float) -> None:
         """
         Overview:
             Update node information recursively.
         Arguments:
             - leaf_value (:obj:`Int`): The value of the node.
         """
-        if mcts_mode == "self_play_mode":
-            self.update(leaf_value)
-            if self.is_root():
-                return
-            self._parent.update_recursive(-leaf_value, mcts_mode)
-        if mcts_mode == "play_with_bot_mode":
-            self.update(leaf_value)
-            if self.is_root():
-                return
-            self._parent.update_recursive(leaf_value, mcts_mode)
+        self.update(leaf_value)
+        if self.is_root():
+            return
+        self._parent.update_recursive(leaf_value)
 
 
 class LanguageNode(Node):
