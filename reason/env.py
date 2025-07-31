@@ -3,7 +3,8 @@ import copy
 from typing import Optional, Callable
 from math_verify import parse, verify
 
-from utils import extract_answer, softmax
+from utils import softmax
+from utils.parse_answer import extract_answer, verify_answer
 from utils.distributed import print_with_rank
 from utils.prompt import build_query_str
 from utils.text_processe import (
@@ -208,7 +209,8 @@ class Env:
         self.math_problem = self.math_problems[idx]
 
     def _is_correct(self, completion):
-        extracted_answer = extract_answer(completion)
+        # extracted_answer = extract_answer(completion)
+        extracted_answer = parse(completion)
         return verify(self.math_problem["answer"], extracted_answer)
 
     def get_reward(self):

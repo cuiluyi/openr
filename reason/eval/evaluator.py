@@ -74,21 +74,24 @@ class MathEvaluator:
         problem_inst: Dict[str, str],
         solver_fn: Callable,
     ) -> List[str]:
-        solution: SolutionOutput = solver_fn(problem_inst, self.lm_call, self.rm_call)
+        try:
+            solution: SolutionOutput = solver_fn(problem_inst, self.lm_call, self.rm_call)
 
-        result, output = self.analyze_output(problem_inst, solution.solutions, solution.values)
+            result, output = self.analyze_output(problem_inst, solution.solutions, solution.values)
 
-        total_completion_token = 0
-        for i, o in enumerate(output):
-            o["completion_tokens"] = solution.completion_tokens[i]
-            if isinstance(solution, TreeSearchSolutionOutput):
-                o["tree_completion_tokens"] = solution.tree_completion_tokens[i]
-
-            # We define the completion_tokens as the tokens comsumed between two generated
-            #  answers, therefore we need to take sum here.
-            total_completion_token += solution.completion_tokens[i]
-        result["total_completion_tokens"] = total_completion_token
-        return problem_inst, result, output
+            total_completion_token = 0
+            for i, o in enumerate(output):
+                o["completion_tokens"] = solution.completion_tokens[i]
+                if isinstance(solution, TreeSearchSolutionOutput):
+                    o["tree_completion_tokens"] = solution.tree_completion_tokens[i]
+                # We define the completion_tokens as the tokens comsumed between two generated
+                #  answers, therefore we need to take sum here.
+                total_completion_token += solution.completion_tokens[i]
+            result["total_completion_tokens"] = total_completion_token
+            return problem_inst, result, output
+        except Exception as e:
+            print(f"Error evaluating problem {problem_inst['question']}: {e}")
+            return problem_inst, None, None
 
     def analyze_output(
         self,
@@ -97,16 +100,18 @@ class MathEvaluator:
         values_list: List[List[float]],
     ) -> Tuple[Dict[str, int], List[Dict[str, Any]]]:
         parsed_groundtruth = parse(problem_inst["answer"])
-
-        output_list = [
-            {
-                "path_idx": i,
-                "text": answer,
-                "value": values,
-            }
-            for i, (answer, values) in enumerate(zip(gen_answers, values_list))
-        ]
-        parsed_ans_list = [parse(txt) for txt in gen_answers]
+        output_list, parsed_ans_list = [], []
+        for i, (answer, values) in enumerate(zip(gen_answers, values_list)):
+            parsed_answer = parse(answer)
+            parsed_ans_list.append(parsed_answer)
+            output_list.append(
+                {
+                    "path_idx": i,
+                    "text": answer,
+                    "value": values,
+                    "acc": float(verify(parsed_groundtruth, parsed_answer)),
+                }
+            )
 
         res = {
             agg_method: judge_ans(

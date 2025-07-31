@@ -36,7 +36,9 @@ def parallel_evaluate_test_dataset(
         print(f"Resumed {cnt} questions from {args.resume_dir}")
         total_cnt = len(dataset)
         dataset = [
-            problem_inst for problem_inst in dataset if problem_inst["question"] not in answered_questions
+            item
+            for item in dataset
+            if (item.get("question") or item.get("problem")) not in answered_questions
         ]
         new_cnt = len(dataset)
         print(f"After resuming, there are {new_cnt}/{total_cnt} new questions to answer.")
@@ -50,6 +52,11 @@ def parallel_evaluate_test_dataset(
     # in any order as they complete. Every worker has a new searching tree as we reset the tree in solver_fn
     for item in tqdm(res_q, total=len(dataset)):
         problem_inst, result, output = item
+
+        # exceptions are handled in the MathEvaluator
+        if result is None and output is None:
+            continue
+
         results.append(result)
         if record_writer:
             obj = {

@@ -1,6 +1,6 @@
 python -m debugpy --listen 63655 --wait-for-client \
     reason/main.py \
-    --LM checkpoint-200 \
+    --LM checkpoint-400 \
     --RM Qwen2.5-Math-PRM-7B \
     --dataset HuggingFaceH4/MATH-500 \
     --temperature 0.8 \
@@ -9,7 +9,7 @@ python -m debugpy --listen 63655 --wait-for-client \
     --max_new_tokens 5120 \
     --num_sequence 6 \
     --tree_max_width 6 \
-    --tree_max_depth 30 \
+    --tree_max_depth 20 \
     --save_dir results \
     --method vanila_mcts \
     --num_worker 16 \

@@ -103,7 +103,7 @@ if args.local or args.save_dir is None:
     save_dir, record_writer = None, None
 else:
     datetime_str = datetime.now().strftime("%Y%m%d_%H%M%S")
-    save_dir = Path(args.save_dir) / args.method / datetime_str
+    save_dir = Path(args.save_dir) / args.method / args.dataset.split("/")[-1] / datetime_str
     save_dir.mkdir(parents=True)
     record_writer = jsonlines.open(save_dir / f"record.jsonl", mode="w")
     write_json(cfg_dict_record, save_dir / "config.json")

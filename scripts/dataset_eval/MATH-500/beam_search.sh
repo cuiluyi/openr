@@ -1,5 +1,4 @@
-python -m debugpy --listen 63655 --wait-for-client \
-    reason/main.py \
+python reason/main.py \
     --LM Qwen2.5-Math-1.5B-Instruct \
     --RM Qwen2.5-Math-PRM-7B \
     --dataset HuggingFaceH4/MATH-500 \
@@ -12,8 +11,7 @@ python -m debugpy --listen 63655 --wait-for-client \
     --tree_max_depth 20 \
     --save_dir results \
     --method beam_search \
-    --num_worker 16 \
-    --controller_addr http://0.0.0.0:28777 \
-    --local
+    --num_worker 32 \
+    --controller_addr http://0.0.0.0:28777
 
 # --LM "Qwen2.5-Math-1.5B-Instruct&s1-20250312_213742&s1-20250314_003214" \

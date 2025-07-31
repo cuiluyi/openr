@@ -7,7 +7,7 @@ controller_addr = "http://0.0.0.0:28777"
 # model_name = "s1-20250314_003214"
 # model_name = "DeepSeek-R1-Distill-Qwen-1.5B"
 # model_name = "Qwen2.5-Math-1.5B-Instruct"
-model_name = "checkpoint-200"
+model_name = "checkpoint-400"
 
 prompt = "<｜begin▁of▁sentence｜>Please reason step by step, and put your final answer within \\boxed{}.<｜User｜>The expression $2\\cdot 3 \\cdot 4\\cdot 5+1$ is equal to 121, since multiplication is carried out before addition. However, we can obtain values other than 121 for this expression if we are allowed to change it by inserting parentheses. For example, we can obtain 144 by writing \\[\n(2\\cdot (3\\cdot 4)) \\cdot (5+1) = 144.\n\\]In total, how many values can be obtained from the expression $2\\cdot 3\\cdot 4 \\cdot 5 + 1$ by inserting parentheses? (Note that rearranging terms is not allowed, only inserting parentheses).<｜Assistant｜>"
 
