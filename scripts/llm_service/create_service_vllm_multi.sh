@@ -28,7 +28,7 @@ LOGDIR=logs/fastchat
 tmux start-server
 tmux new-session -s FastChat -n controller -d
 tmux send-keys "export LOGDIR=${LOGDIR}" Enter
-tmux send-keys "$PYTHON_EXECUTABLE -m fastchat.serve.controller --port ${CONTROLER_PORT} --host $HOST_ADDR" Enter
+tmux send-keys "$PYTHON_EXECUTABLE -m reason.serve.controller --port ${CONTROLER_PORT} --host $HOST_ADDR" Enter
 
 NUM_LM_WORKER=3
 NUM_RM_WORKER=3
