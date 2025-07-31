@@ -306,7 +306,7 @@ class SearchTree:
 
             node.children[action] = LanguageNode(
                 parent=node,
-                prior_p=prob,
+                prob=prob,
                 text_state=text_state,
                 last_action=action,
                 initial_value=child_value,
@@ -353,7 +353,7 @@ class SearchTree:
 
         c_puct = math.log((parent.visit_count + self._pb_c_base + 1) / self._pb_c_base) + self._pb_c_init
         value_score = child.value
-        prior_score = c_puct * child.prior_p * math.sqrt(parent.visit_count) / (1 + child.visit_count)
+        prior_score = c_puct * child.prob * math.sqrt(parent.visit_count) / (1 + child.visit_count)
 
         return value_score + prior_score
 

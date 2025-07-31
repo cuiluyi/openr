@@ -11,16 +11,14 @@ class Node(object):
     def __init__(
         self,
         parent: "Node" = None,
-        prior_p: float = 1.0,
+        prob: float = 1.0,
         initial_value: float = 0.0,
     ) -> None:
         self._parent = parent
         self._children = {}
         self._visit_count = 0
         self._value_sum = 0
-        self.prior_p = prior_p
-        self.prior_p_ori = prior_p
-
+        self.prob = prob
         self._initial_value = initial_value
         self._terminated = False
 
@@ -31,7 +29,7 @@ class Node(object):
         if self.is_root():
             return "root"
         else:
-            return "child: value: {:.3f}, prior: {:.3f}".format(self.last_action, self.value, self.prior_p)
+            return "child: value: {:.3f}, prior: {:.3f}".format(self.last_action, self.value, self.prob)
 
     @property
     def terminated(self):
@@ -83,11 +81,6 @@ class Node(object):
     def set_as_terminate_node(self):
         self._terminated = True
 
-    def clear(self):
-        self._visit_count = 0
-        self._value_sum = 0
-        self.prior_p = self.prior_p_ori
-
     def update(self, value: float) -> None:
         """
         Overview:
@@ -119,14 +112,14 @@ class LanguageNode(Node):
     def __init__(
         self,
         parent: Node = None,
-        prior_p: float = 1.0,
+        prob: float = 1.0,
         prm_value: Optional[float] = None,
         text_state: Optional[str] = None,
         last_action: Optional[str] = None,
         initial_value: float = 0.0,
         num_generated_token: Optional[int] = None,
     ) -> None:
-        super().__init__(parent, prior_p, initial_value)
+        super().__init__(parent, prob, initial_value)
         self.text_state = text_state
         self.last_action = last_action
         self.prm_value = prm_value
@@ -146,9 +139,7 @@ class LanguageNode(Node):
         if self.is_root():
             return "root: {}".format(self.text_state)
         else:
-            return "action: {}, value: {:.3f}, prior: {:.3f}".format(
-                self.last_action, self.value, self.prior_p
-            )
+            return "action: {}, value: {:.3f}, prob: {:.3f}".format(self.last_action, self.value, self.prob)
 
 
 def get_root(node: Node):
