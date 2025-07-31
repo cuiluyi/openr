@@ -57,7 +57,7 @@ class SearchTree:
         api_completion_token = simulate_env.reset(update_legal_action=True)
         api_call_completion_tokens += api_completion_token
         if self.root is None:
-            root = LanguageNode(text_state=simulate_env.get_state())
+            root = LanguageNode(state=simulate_env.get_state())
             self._expand_leaf_node(root, simulate_env, rm_call)
             self.root = root
 
@@ -76,7 +76,7 @@ class SearchTree:
 
                 # XXX(ziyu): find a more clean way
                 env_copy.next_state_terminated = {}
-                assert node.last_action == action
+                assert node.action == action
                 env_copy.next_state_terminated[action] = node.terminated
 
                 api_completion_token = env_copy.step(
@@ -128,7 +128,7 @@ class SearchTree:
         api_completion_token = simulate_env.reset(update_legal_action=True)
         api_call_completion_tokens += api_completion_token
         if self.root is None:
-            root = LanguageNode(text_state=simulate_env.get_state())
+            root = LanguageNode(state=simulate_env.get_state())
             self._expand_leaf_node(root, simulate_env, rm_call)
             self.root = root
 
@@ -167,7 +167,7 @@ class SearchTree:
             # XXX(ziyu): this could be optimized by batch expand
             for value, node, new_env in top_k_nodes:
                 api_completion_token = new_env.step(
-                    node.last_action,
+                    node.action,
                     node._initial_value,
                     update_legal_action=True,
                 )
@@ -256,7 +256,7 @@ class SearchTree:
             - rm_call (:obj:`Function`): the Callable to compute the state value.
         """
 
-        text_state = simulate_env.get_state()
+        state = simulate_env.get_state()
 
         assert len(simulate_env.legal_actions) > 0
 
@@ -282,7 +282,7 @@ class SearchTree:
                     + " State "
                     + "-" * 43
                     + "\n"
-                    f"{pprint.pformat(text_state)}\n" + "-" * 28 + " Action " + "-" * 42 + "\n"
+                    f"{pprint.pformat(state)}\n" + "-" * 28 + " Action " + "-" * 42 + "\n"
                     f"{pprint.pformat(act)}\n" + "-" * 28 + " Rewards " + "-" * 41 + "\n"
                     f"{pprint.pformat(rs)}\n" + "=" * 80
                 )
@@ -290,7 +290,7 @@ class SearchTree:
                 child_values.append(0.0)
             elif len(rs) == 0:
                 logger.warning(
-                    f"Empty PRM value for: \nState: \n{text_state} \naction: \n{act}, will be set to 0.0"
+                    f"Empty PRM value for: \nState: \n{state} \naction: \n{act}, will be set to 0.0"
                 )
                 child_values.append(0.0)
             else:
@@ -307,8 +307,8 @@ class SearchTree:
             node.children[action] = LanguageNode(
                 parent=node,
                 prob=prob,
-                text_state=text_state,
-                last_action=action,
+                state=state,
+                action=action,
                 initial_value=child_value,
                 num_generated_token=action_dict["num_token"],
             )
@@ -316,7 +316,7 @@ class SearchTree:
             if simulate_env.next_state_terminated[action]:
                 node.children[action].set_as_terminate_node()
         if len(node.children) == 0:
-            print_rank_0("Prune all current children at node {}".format(node.last_action))
+            print_rank_0("Prune all current children at node {}".format(node.action))
 
         # collect num tokens
         if not node.has_collected_token_num:
