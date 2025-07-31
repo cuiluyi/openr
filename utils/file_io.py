@@ -22,12 +22,9 @@ def read_jsonl(file_path):
 
 
 def write_jsonl(data, output_file, mode="w"):
-    cnt = 0
     with open(output_file, mode) as outfile:
         for item in data:
             outfile.write(json.dumps(item) + "\n")
-            cnt += len(item["answer"])
-        print("Write {} items into {}".format(cnt, output_file))
 
 
 def jsonl_to_json(jsonl_file, json_file):

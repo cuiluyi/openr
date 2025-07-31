@@ -27,18 +27,16 @@ def extract_answer(completion: str):
 
 
 def verify_answer(completion: str, solution: str, **kwargs) -> Optional[float]:
-    gold_parsed = parse(
-        solution,
-        extraction_mode="first_match",
-    )
-    if len(gold_parsed) != 0:
+    gold = parse(solution, extraction_mode="first_match")
+    
+    if len(gold) != 0:
         # We require the answer to be provided in correct latex (no malformed operators)
-        answer_parsed = extract_answer(completion)
+        answer = extract_answer(completion)
         # Compute binary rewards if verifiable, `None` otherwise to skip this example
         try:
-            reward = float(verify(gold_parsed, answer_parsed))
+            reward = float(verify(gold, answer))
         except Exception as e:
-            print(f"verify failed: {e}, answer: {answer_parsed}, gold: {gold_parsed}")
+            print(f"verify failed: {e}, answer: {answer}, gold: {gold}")
             reward = float(0)
     else:
         # If the gold solution is not parseable, we assign `None` to skip this example

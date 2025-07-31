@@ -51,7 +51,7 @@ def parallel_evaluate_test_dataset(
     # Distributes tasks from the dataset dataset across the worker pool asynchronously and collects results
     # in any order as they complete. Every worker has a new searching tree as we reset the tree in solver_fn
     for item in tqdm(res_q, total=len(dataset)):
-        problem_inst, result, output = item
+        input_inst, result, output = item
 
         # exceptions are handled in the MathEvaluator
         if result is None and output is None:
@@ -60,8 +60,8 @@ def parallel_evaluate_test_dataset(
         results.append(result)
         if record_writer:
             obj = {
-                "question": problem_inst["question"],
-                "groundtruth": problem_inst["answer"],
+                "question": input_inst["question"],
+                "groundtruth": input_inst["gold"],
                 "result": result,
                 "output": output,
             }

@@ -6,8 +6,8 @@ python reason/main.py \
     --top_p 1 \
     --top_k -1 \
     --max_new_tokens 5120 \
-    --num_sequence 8 \
-    --tree_max_width 8 \
+    --num_sequence 4 \
+    --tree_max_width 4 \
     --tree_max_depth 20 \
     --save_dir results \
     --method vanila_mcts \

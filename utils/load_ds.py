@@ -16,7 +16,7 @@ class JsonlMathDataset(Dataset):
 
     def __getitem__(self, index):
         x = self.data[index]
-        return {"question": x["problem"], "answer": x["solution"]}
+        return {"question": x["problem"], "gold": x["solution"]}
 
 
 def get_train_test_dataset(
@@ -32,12 +32,12 @@ def get_train_test_dataset(
     def map_fields(item):
         return {
             "question": item.get("question") or item.get("problem"),
-            "answer": item.get("solution") or item.get("answer"),
+            "gold": item.get("solution") or item.get("answer"),
         }
 
     def get_remove_columns():
         original_columns = dataset.column_names
-        return [col for col in original_columns if col not in ["question", "answer"]]
+        return [col for col in original_columns if col not in ["question", "gold"]]
 
     dataset = dataset.map(
         map_fields,

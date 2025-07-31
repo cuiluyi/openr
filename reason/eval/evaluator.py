@@ -1,7 +1,7 @@
 import ray
 import numpy as np
 
-from typing import Any, Callable, Dict, Optional, List, Tuple
+from typing import Any, Callable, Dict, Optional, List, Tuple, NewType
 from dataclasses import dataclass
 from math_verify import parse, verify
 
@@ -25,26 +25,20 @@ CHOSEN_AGGR_METHODS = [
     PRM_LAST_VOTE,
 ]
 
+ParsedAnswer = NewType("ParsedAnswer", List[Any])
+
 
 def judge_ans(
-    extracted_groundtruth: str,
-    ans_list: List[str],
-    v_list: List[float],
+    parsed_gold: ParsedAnswer,
+    parsed_ans_list: List[ParsedAnswer],
+    v_list: List[List[float]],
     aggration_mode: str,
-    normalize=False,
 ):
-    if len(ans_list) == 0:
+    if len(parsed_ans_list) == 0:
         return 0
+    aggregated_ans = AGG_FN_MAP[aggration_mode](parsed_ans_list, v_list)
 
-    if "orm" in aggration_mode and normalize:
-        # score_normalization: this is only necessary for [-1, 1] values
-        v_list = np.array(v_list)
-        v_list -= v_list.min()
-        v_list /= v_list.max() + 1e-3
-        v_list = v_list.tolist()
-    aggregated_ans = AGG_FN_MAP[aggration_mode](ans_list, v_list)
-
-    return 1 if verify(extracted_groundtruth, aggregated_ans) else 0
+    return int(verify(parsed_gold, aggregated_ans))
 
 
 @dataclass
@@ -71,13 +65,13 @@ class MathEvaluator:
 
     def evaluate_problem(
         self,
-        problem_inst: Dict[str, str],
+        input_inst: Dict[str, str],
         solver_fn: Callable,
     ) -> List[str]:
         try:
-            solution: SolutionOutput = solver_fn(problem_inst, self.lm_call, self.rm_call)
+            solution: SolutionOutput = solver_fn(input_inst, self.lm_call, self.rm_call)
 
-            result, output = self.analyze_output(problem_inst, solution.solutions, solution.values)
+            result, output = self.analyze_output(input_inst, solution.solutions, solution.values)
 
             total_completion_token = 0
             for i, o in enumerate(output):
@@ -88,38 +82,33 @@ class MathEvaluator:
                 #  answers, therefore we need to take sum here.
                 total_completion_token += solution.completion_tokens[i]
             result["total_completion_tokens"] = total_completion_token
-            return problem_inst, result, output
+            return input_inst, result, output
         except Exception as e:
-            print(f"Error evaluating problem {problem_inst['question']}: {e}")
-            return problem_inst, None, None
+            print(f"Error evaluating problem {input_inst['question']}: {e}")
+            return input_inst, None, None
 
     def analyze_output(
         self,
-        problem_inst: Dict[str, str],
+        input_inst: Dict[str, str],
         gen_answers: List[str],
         values_list: List[List[float]],
     ) -> Tuple[Dict[str, int], List[Dict[str, Any]]]:
-        parsed_groundtruth = parse(problem_inst["answer"])
+        parsed_gold = parse(input_inst["gold"])
         output_list, parsed_ans_list = [], []
-        for i, (answer, values) in enumerate(zip(gen_answers, values_list)):
-            parsed_answer = parse(answer)
+        for i, (output, values) in enumerate(zip(gen_answers, values_list)):
+            parsed_answer = parse(output)
             parsed_ans_list.append(parsed_answer)
             output_list.append(
                 {
                     "path_idx": i,
-                    "text": answer,
+                    "text": output,
                     "value": values,
-                    "acc": float(verify(parsed_groundtruth, parsed_answer)),
+                    "acc": int(verify(parsed_gold, parsed_answer)),
                 }
             )
 
         res = {
-            agg_method: judge_ans(
-                parsed_groundtruth,
-                parsed_ans_list,
-                values_list,
-                agg_method,
-            )
+            agg_method: judge_ans(parsed_gold, parsed_ans_list, values_list, agg_method)
             for agg_method in CHOSEN_AGGR_METHODS
         }
         return res, output_list

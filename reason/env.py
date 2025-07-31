@@ -1,6 +1,6 @@
 import copy
 
-from typing import Optional, Callable
+from typing import Optional, Callable, Dict, Any
 from math_verify import parse, verify
 
 from utils import softmax
@@ -37,31 +37,29 @@ class Env:
 
     def __init__(
         self,
-        config,
-        math_problems,
-        lm_call,
-        reset=True,
+        config: Dict[str, Any],
+        input_inst: Dict[str, str],
+        lm_call: Callable,
+        reset: bool = True,
         rm_call: Optional[Callable] = None,
     ):
         self.config = config
-        self.math_problems = math_problems
         self.lm_call = lm_call
         self.rm_call = rm_call
+        self.input_inst = input_inst
         self.reason_finished = False
         self.legal_actions = None
         self.action_history = None
         self.values = []
-        self.math_problem = None
         self.stop_str = config.get("stop_str", None)
 
         if reset:
             self.reset(update_legal_action=True)
 
     def reset(self, update_legal_action=True):
-        self.set_problem(idx=0)  # reset environment to problem idx
         self.values = []
         self.action_history = []
-        self.init_query = build_query_str(problem_input=self.math_problem["question"])
+        self.init_query = build_query_str(problem_input=self.input_inst["question"])
 
         if update_legal_action:
             for try_id in range(MAX_RETRIES):
@@ -204,13 +202,11 @@ class Env:
             action = action + SUFFIX
         return action
 
-    def set_problem(self, idx):
-        self.math_problem = self.math_problems[idx]
-
     def _is_correct(self, completion):
-        # extracted_answer = extract_answer(completion)
-        extracted_answer = parse(completion)
-        return verify(self.math_problem["answer"], extracted_answer)
+        # parsed_answer = extract_answer(completion)
+        parsed_answer = parse(completion)
+        parsed_gold = parse(self.input_inst["gold"])
+        return verify(parsed_gold, parsed_answer)
 
     def get_reward(self):
         """To implement based on learned reward model"""
@@ -218,7 +214,7 @@ class Env:
 
     @property
     def question(self) -> str:
-        return self.math_problem["question"]
+        return self.input_inst["question"]
 
     @property
     def answer(self):
@@ -240,12 +236,11 @@ class Env:
     def copy(self):
         env = self.__class__(
             config=self.config,
-            math_problems=self.math_problems,
             lm_call=self.lm_call,
+            input_inst=self.input_inst,
             reset=False,
             rm_call=self.rm_call,
         )
-        env.math_problem = copy.deepcopy(self.math_problem)
         env.action_history = copy.deepcopy(self.action_history)
         env.values = copy.deepcopy(self.values)
         env.reason_finished = copy.deepcopy(self.reason_finished)

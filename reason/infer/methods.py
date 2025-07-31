@@ -34,7 +34,7 @@ class BeamSearchConfig(TreeSearchConfig):
 def beam_search(
     config: BeamSearchConfig,
     gen_config: LMCallingConfig,
-    problem_inst: Dict[str, str],
+    input_inst: Dict[str, str],
     lm_call: LanguageModelCallingFunction,
     rm_call: RewardModelCallingFunction,
 ) -> TreeSearchSolutionOutput:
@@ -51,12 +51,7 @@ def beam_search(
                 "top_k": gen_config.top_k,
             },
         },
-        math_problems=[
-            {
-                "question": problem_inst["question"],
-                "answer": parse(problem_inst["answer"]),
-            }
-        ],
+        input_inst=input_inst,
         lm_call=lm_call,
         rm_call=rm_call_fn,
     )
@@ -91,7 +86,7 @@ class VanilaMCTSConfig(TreeSearchConfig):
 def vanila_mcts(
     config: VanilaMCTSConfig,
     gen_config: LMCallingConfig,
-    problem_inst: Dict[str, str],
+    input_inst: Dict[str, str],
     lm_call: LanguageModelCallingFunction,
     rm_call: RewardModelCallingFunction,
 ) -> TreeSearchSolutionOutput:
@@ -108,12 +103,7 @@ def vanila_mcts(
                 "top_k": gen_config.top_k,
             },
         },
-        math_problems=[
-            {
-                "question": problem_inst["question"],
-                "answer": parse(problem_inst["answer"]),
-            }
-        ],
+        input_inst=input_inst,
         lm_call=lm_call,
         rm_call=rm_call_fn,
     )
