@@ -21,11 +21,12 @@ def parse_args():
     parser.add_argument("--top_p", type=float, default=1)
     parser.add_argument("--top_k", type=int, default=-1)
     parser.add_argument("--max_new_tokens", type=int, default=256)
+    parser.add_argument("--stop_str", type=str, default=None)
     # Tree construction config
-    parser.add_argument("--tree_max_depth", type=int, default=None)
-    parser.add_argument("--tree_max_width", type=int, default=None)
+    parser.add_argument("--max_steps", type=int, default=None)
+    parser.add_argument("--max_width", type=int, default=None)
     # ckpg config
-    parser.add_argument("--save_dir", type=str, default=None)
+    parser.add_argument("--save_dir", type=str, default="./results")
     parser.add_argument("--resume_dir", type=str, default=None)
     # parallel config
     parser.add_argument("--local", action="store_true", default=False)

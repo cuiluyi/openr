@@ -7,9 +7,9 @@ python -m debugpy --listen 63655 --wait-for-client \
     --top_p 1 \
     --top_k -1 \
     --max_new_tokens 5120 \
-    --num_sequence 6 \
-    --tree_max_width 6 \
-    --tree_max_depth 20 \
+    --num_sequence 4 \
+    --max_width 4 \
+    --max_steps 20 \
     --save_dir results \
     --method vanila_mcts \
     --num_worker 16 \

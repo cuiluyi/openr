@@ -3,7 +3,7 @@ import copy
 from typing import Optional, Callable, Dict, Any
 from math_verify import parse, verify
 
-from utils import softmax
+from utils import softmax, DataItem
 from utils.parse_answer import extract_answer, verify_answer
 from utils.distributed import print_with_rank
 from utils.prompt import build_query_str
@@ -38,7 +38,7 @@ class Env:
     def __init__(
         self,
         config: Dict[str, Any],
-        input_inst: Dict[str, str],
+        input_inst: DataItem,
         lm_call: Callable,
         reset: bool = True,
         rm_call: Optional[Callable] = None,
@@ -59,7 +59,7 @@ class Env:
     def reset(self, update_legal_action=True):
         self.values = []
         self.action_history = []
-        self.init_query = build_query_str(problem_input=self.input_inst["question"])
+        self.init_query = build_query_str(problem_input=self.input_inst.question)
 
         if update_legal_action:
             for try_id in range(MAX_RETRIES):
@@ -101,25 +101,28 @@ class Env:
         return ret
 
     def update_legal_actions(self):
-        fast_try_num = self.config["max_actions"] // 2
-        slow_try_num = self.config["max_actions"] - fast_try_num
+        fast_try_num = self.config["max_width"] // 2
+        slow_try_num = self.config["max_width"] - fast_try_num
         # fast generation
         fast_result: ConcatedLMGenResult = self.lm_call(
             input_str=self.get_state() + SYSTEM1_BEGIN_TAG,
             config=LMCallingConfig(
                 n=fast_try_num,
                 stop_str=[SYSTEM1_BEGIN_TAG, SYSTEM2_BEGIN_TAG],
+                # stop_str=self.stop_str,
                 include_stop_str_in_output=True,
                 **self.config["generation_config"]
             ),
         )
         fast_result.text = [SYSTEM1_BEGIN_TAG + text for text in fast_result.text]
+
         # slow generation
         slow_result: ConcatedLMGenResult = self.lm_call(
             input_str=self.get_state() + SYSTEM2_BEGIN_TAG,
             config=LMCallingConfig(
                 n=slow_try_num,
                 stop_str=[SYSTEM1_BEGIN_TAG, SYSTEM2_BEGIN_TAG],
+                # stop_str=self.stop_str,
                 include_stop_str_in_output=True,
                 **self.config["generation_config"]
             ),
@@ -205,7 +208,7 @@ class Env:
     def _is_correct(self, completion):
         # parsed_answer = extract_answer(completion)
         parsed_answer = parse(completion)
-        parsed_gold = parse(self.input_inst["gold"])
+        parsed_gold = parse(self.input_inst.gold)
         return verify(parsed_gold, parsed_answer)
 
     def get_reward(self):
@@ -214,7 +217,7 @@ class Env:
 
     @property
     def question(self) -> str:
-        return self.input_inst["question"]
+        return self.input_inst.question
 
     @property
     def answer(self):

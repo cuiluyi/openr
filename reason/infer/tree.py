@@ -5,11 +5,12 @@ The Node and MCTS class for AlphaZero.
 import math
 import heapq
 import pprint
+import jsonlines
 
 from typing import List, Dict, Any, Optional, Tuple, Union, Callable, Type
 from loguru import logger
 from reason.env import Env
-from reason.node import Node, LanguageNode
+from reason.node import Node
 from utils.distributed import print_rank_0, print_with_rank
 
 
@@ -19,28 +20,15 @@ class SearchTree:
         MCTS search process.
     """
 
-    def __init__(self, cfg) -> None:
-        self._cfg = cfg
-
-        self._num_simulations = self._cfg.get("num_simulations", 20)
-
+    def __init__(
+        self,
+        pb_c_base: int = 19652,
+        pb_c_init: float = 1.25,
+    ) -> None:
         # UCB formula
-        self._pb_c_base = self._cfg.get("pb_c_base", 19652)  # 19652
-        self._pb_c_init = self._cfg.get("pb_c_init", 1.25)  # 1.25
-
-        # Root prior exploration noise: 0.3 for chess, 0.03 for Go and 0.15 for shogi.
-        self._root_dirichlet_alpha = self._cfg.get("root_dirichlet_alpha", 0.3)
-        self._root_noise_weight = self._cfg.get("root_noise_weight", 0.25)
-
+        self._pb_c_base = pb_c_base
+        self._pb_c_init = pb_c_init
         self.root = None
-
-        self.answers = set()
-        self.wrong_answers = set()
-        self.visited_paths = None
-
-        self.no_terminal_reward = self._cfg.get("no_terminal_reward", True)
-        self.mask_non_terminal_node_value = self._cfg.get("mask_non_terminal_node_value", False)
-
         self._completion_tokens = 0
 
     @property
@@ -57,7 +45,7 @@ class SearchTree:
         api_completion_token = simulate_env.reset(update_legal_action=True)
         api_call_completion_tokens += api_completion_token
         if self.root is None:
-            root = LanguageNode(state=simulate_env.get_state())
+            root = Node(state=simulate_env.get_state())
             self._expand_leaf_node(root, simulate_env, rm_call)
             self.root = root
 
@@ -72,7 +60,7 @@ class SearchTree:
             env_copy = simulate_env.copy()
             done = False
             while not done:
-                action, node = self._select_child(node, env_copy)
+                action, node = self._select_child(node)  # PUCT default
 
                 # XXX(ziyu): find a more clean way
                 env_copy.next_state_terminated = {}
@@ -81,7 +69,7 @@ class SearchTree:
 
                 api_completion_token = env_copy.step(
                     action,
-                    value=node._initial_value,
+                    value=node.initial_value,
                     update_legal_action=node.is_leaf(),
                 )
                 api_call_completion_tokens += api_completion_token
@@ -93,7 +81,7 @@ class SearchTree:
             if node.visit_count > 0:
                 leaf_value = node.value
             else:
-                leaf_value = node._initial_value
+                leaf_value = node.initial_value
             node.update_recursive(leaf_value)
 
             traj_data = {
@@ -107,6 +95,9 @@ class SearchTree:
 
             # reset api_call_completion_tokens
             api_call_completion_tokens = 0
+
+        # FIXME: this is for debugging purpose
+        # self.dfs_non_leaf_nodes(self.root, ...)
 
         return traj_list
 
@@ -128,19 +119,19 @@ class SearchTree:
         api_completion_token = simulate_env.reset(update_legal_action=True)
         api_call_completion_tokens += api_completion_token
         if self.root is None:
-            root = LanguageNode(state=simulate_env.get_state())
+            root = Node(state=simulate_env.get_state())
             self._expand_leaf_node(root, simulate_env, rm_call)
             self.root = root
 
-        end_nodes, top_k_nodes = [], [(-root._initial_value, root, simulate_env.copy())]
+        endnode_envs, top_k_nodes = [], [(-root.initial_value, root, simulate_env.copy())]
         k = beam_size
 
         for _ in range(max_step + 1):
             cur_nodes_to_search = top_k_nodes
             top_k_nodes = []
-            for cur_neg_v, cur_node, cur_env in cur_nodes_to_search:
+            for _, cur_node, cur_env in cur_nodes_to_search:
                 if cur_node.terminated:
-                    end_nodes.append((cur_neg_v, cur_node, cur_env))
+                    endnode_envs.append(cur_env)
                     k -= 1
                 elif k > 0:
                     # select at most topk children add push to heap
@@ -149,10 +140,7 @@ class SearchTree:
                     ), "in beam search you should expand this non-terminal node at first."
 
                     top_k_children = sorted(
-                        [
-                            (action, child, child._initial_value)
-                            for action, child in cur_node.children.items()
-                        ],
+                        [(action, child, child.initial_value) for action, child in cur_node.children.items()],
                         key=lambda x: x[2],
                         reverse=True,
                     )[:k]
@@ -165,10 +153,10 @@ class SearchTree:
 
             # expand selected nodes
             # XXX(ziyu): this could be optimized by batch expand
-            for value, node, new_env in top_k_nodes:
+            for _, node, new_env in top_k_nodes:
                 api_completion_token = new_env.step(
                     node.action,
-                    node._initial_value,
+                    node.initial_value,
                     update_legal_action=True,
                 )
                 api_call_completion_tokens += api_completion_token
@@ -179,17 +167,17 @@ class SearchTree:
                 else:
                     self._expand_leaf_node(node, new_env, rm_call)
 
-            if len(end_nodes) == beam_size:
+            if len(endnode_envs) == beam_size:
                 assert k == 0
                 break
 
         traj_list = []
-        for i, (neg_e_v, e_node, e_env) in enumerate(end_nodes):
+        for i, endnode_env in enumerate(endnode_envs):
             traj_list.append(
                 {
                     "path_idx": i,
-                    "text": e_env.answer,
-                    "values": e_env.values,
+                    "text": endnode_env.answer,
+                    "values": endnode_env.values,
                     "api_completion_tokens": 0,
                     "tree_completion_tokens": 0,
                 }
@@ -198,11 +186,34 @@ class SearchTree:
         traj_list[-1]["api_completion_tokens"] = api_call_completion_tokens
         return traj_list
 
+    def dfs_non_leaf_nodes(
+        self,
+        node: Node,
+        writer: Optional[jsonlines.Writer],
+    ) -> None:
+        if node.is_leaf():
+            return
+
+        prompt = node.state + node.action
+
+        for child in node.children.values():
+            completition = child.action
+            writer.write(
+                {
+                    "prompt": prompt,
+                    "completition": completition,
+                    "prob": child.prob,
+                    "num_token": child.num_generated_token,
+                    "value": child.value,
+                }
+            )
+            self.dfs_non_leaf_nodes(child, writer)
+
     def _select_child(
         self,
-        node: LanguageNode,
+        node: Node,
         criteria: str = "puct",
-    ) -> Tuple[Union[int, float], Node]:
+    ) -> Tuple[Optional[str], Node]:
         """
         Overview:
             Select the child with the highest score.
@@ -215,31 +226,32 @@ class SearchTree:
             - child (:obj:`Node`): the child node reached by executing the action with the highest ucb score.
         """
 
-        action = None
-        child = None
-        best_score = -9999999
+        select_child_step = None
+        select_child_node = None
+        max_score = -9999999
 
-        for action_tmp, child_tmp in node.children.items():
+        for child_step, child_node in node.children.items():
             if criteria == "ucb":
-                score = self._ucb_score(node, child_tmp)
+                score = self._ucb_score(node, child_node)
             elif criteria == "uct":
-                score = self._uct_score(node, child_tmp)
+                score = self._uct_score(node, child_node)
             elif criteria == "puct":
-                score = self._puct_score(node, child_tmp)
+                score = self._puct_score(node, child_node)
             elif criteria == "visit_count":
-                score = child_tmp.visit_count
+                score = child_node.visit_count
             else:
-                score = child_tmp.value
+                score = child_node.value
 
-            if score > best_score:
-                best_score = score
-                action = action_tmp
-                child = child_tmp
+            if score > max_score:
+                max_score = score
+                select_child_step = child_step
+                select_child_node = child_node
 
-        if child is None:
-            child = node  # child==None, node is leaf node in play_with_bot_mode.
+        # child==None, node is leaf node
+        if select_child_node is None:
+            select_child_node = node
 
-        return action, child
+        return select_child_step, select_child_node
 
     def _expand_leaf_node(
         self,
@@ -304,7 +316,7 @@ class SearchTree:
 
             child_value = child_values[i]
 
-            node.children[action] = LanguageNode(
+            node.children[action] = Node(
                 parent=node,
                 prob=prob,
                 state=state,
@@ -320,7 +332,9 @@ class SearchTree:
 
         # collect num tokens
         if not node.has_collected_token_num:
-            self._completion_tokens += sum(c.num_generated_token for c in node.children.values())
+            self._completion_tokens += sum(
+                child_node.num_generated_token for child_node in node.children.values()
+            )
             node.has_collected_token_num = True
         else:
             raise RuntimeError("Token number has been collected again.")

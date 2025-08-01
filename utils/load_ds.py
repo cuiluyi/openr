@@ -1,46 +1,39 @@
-import jsonlines
+from dataclasses import dataclass
+from typing import List, Optional
+
 from datasets import load_dataset
-from torch.utils.data import Dataset
+from utils import read_jsonl
 
 
-class JsonlMathDataset(Dataset):
-    def __init__(self, data_path):
-        super().__init__()
-        self.data = []
-        with jsonlines.open(data_path, "r") as reader:
-            for obj in reader:
-                self.data.append(obj)
-
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, index):
-        x = self.data[index]
-        return {"question": x["problem"], "gold": x["solution"]}
+@dataclass
+class DataItem:
+    question: Optional[str] = None
+    gold: Optional[str] = None
 
 
 def get_train_test_dataset(
     dataset_name: str,
     dataset_split: str,
     dataset_subset: str,
-) -> Dataset:
+) -> List[DataItem]:
+    # Case 1: Load from a local .json or .jsonl file
     if dataset_name.endswith((".json", ".jsonl")):
-        return JsonlMathDataset(dataset_name)
+        raw_data = read_jsonl(dataset_name)
+        return [
+            DataItem(
+                question=item.get("question") or item.get("problem"),
+                gold=item.get("solution") or item.get("answer"),
+            )
+            for item in raw_data
+        ]
 
+    # Case 2: Load from HuggingFace dataset hub
     dataset = load_dataset(dataset_name, name=dataset_subset, split=dataset_split)
 
-    def map_fields(item):
-        return {
-            "question": item.get("question") or item.get("problem"),
-            "gold": item.get("solution") or item.get("answer"),
-        }
+    def extract_data_item(item) -> DataItem:
+        return DataItem(
+            question=item.get("question") or item.get("problem"),
+            gold=item.get("solution") or item.get("answer"),
+        )
 
-    def get_remove_columns():
-        original_columns = dataset.column_names
-        return [col for col in original_columns if col not in ["question", "gold"]]
-
-    dataset = dataset.map(
-        map_fields,
-        remove_columns=get_remove_columns(),
-    )
-    return dataset
+    return [extract_data_item(item) for item in dataset]

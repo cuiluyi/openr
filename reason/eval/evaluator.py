@@ -1,12 +1,13 @@
 import ray
 import numpy as np
 
-from typing import Any, Callable, Dict, Optional, List, Tuple, NewType
+from typing import Any, Callable, Dict, Optional, List, Tuple, TypeVar
 from dataclasses import dataclass
 from math_verify import parse, verify
 
 from reason.infer.lm_call import LanguageModelCallingFunction
 from reason.infer.rm_call import RewardModelCallingFunction
+from utils import DataItem
 from utils.answer_vote import (
     MAJORITY_VOTE,
     PRM_MIN_MAX,
@@ -25,7 +26,7 @@ CHOSEN_AGGR_METHODS = [
     PRM_LAST_VOTE,
 ]
 
-ParsedAnswer = NewType("ParsedAnswer", List[Any])
+ParsedAnswer = List[Any]
 
 
 def judge_ans(
@@ -65,7 +66,7 @@ class MathEvaluator:
 
     def evaluate_problem(
         self,
-        input_inst: Dict[str, str],
+        input_inst: DataItem,
         solver_fn: Callable,
     ) -> List[str]:
         try:
@@ -84,16 +85,16 @@ class MathEvaluator:
             result["total_completion_tokens"] = total_completion_token
             return input_inst, result, output
         except Exception as e:
-            print(f"Error evaluating problem {input_inst['question']}: {e}")
+            print(f"Error evaluating problem {input_inst.question}: {e}")
             return input_inst, None, None
 
     def analyze_output(
         self,
-        input_inst: Dict[str, str],
+        input_inst: DataItem,
         gen_answers: List[str],
         values_list: List[List[float]],
     ) -> Tuple[Dict[str, int], List[Dict[str, Any]]]:
-        parsed_gold = parse(input_inst["gold"])
+        parsed_gold = parse(input_inst.gold)
         output_list, parsed_ans_list = [], []
         for i, (output, values) in enumerate(zip(gen_answers, values_list)):
             parsed_answer = parse(output)

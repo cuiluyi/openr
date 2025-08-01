@@ -12,18 +12,31 @@ class Node(object):
         self,
         parent: "Node" = None,
         prob: float = 1.0,
+        state: Optional[str] = None,
+        action: Optional[str] = None,
         initial_value: float = 0.0,
+        num_generated_token: Optional[int] = None,
     ) -> None:
-        self._parent = parent
-        self._children = {}
-        self._visit_count = 0
-        self._value_sum = 0
-        self._initial_value = initial_value
-        self._terminated = False
-        self._prob = prob
+        self.parent = parent
+        self.prob = prob
+        self.state = state
+        self.action = action
+        self.initial_value = initial_value
+        self.num_generated_token = num_generated_token
+        self.has_collected_token_num = False
+        self.children = {}
+        self.visit_count = 0
+        self.value_sum = 0
+        self.terminated = False
 
     def __lt__(self, other):
-        return self._initial_value < other._initial_value
+        return self.initial_value < other.initial_value
+
+    def __str__(self):
+        if self.is_root():
+            return "root: {}".format(self.state)
+        else:
+            return "action: {}, value: {:.3f}, prob: {:.3f}".format(self.action, self.value, self.prob)
 
     @property
     def value(self) -> float:
@@ -33,30 +46,10 @@ class Node(object):
         Returns:
             - output (:obj:`Int`): Current value, used to compute ucb score.
         """
-        if self._visit_count == 0:
+        if self.visit_count == 0:
             # if not visited, return the initial value
-            return self._initial_value
-        return self._value_sum / self._visit_count
-
-    @property
-    def prob(self):
-        return self._prob
-
-    @property
-    def terminated(self):
-        return self._terminated
-
-    @property
-    def parent(self) -> None:
-        return self._parent
-
-    @property
-    def children(self) -> None:
-        return self._children
-
-    @property
-    def visit_count(self) -> None:
-        return self._visit_count
+            return self.initial_value
+        return self.value_sum / self.visit_count
 
     def is_leaf(self) -> Dict:
         """
@@ -65,7 +58,7 @@ class Node(object):
         Returns:
             - output (:obj:`Dict`): Dict type children node.
         """
-        return self._children == {}
+        return self.children == {}
 
     def is_root(self) -> bool:
         """
@@ -74,10 +67,24 @@ class Node(object):
         Returns:
             - output (:obj:`Bool`): Whether it is the parent node.
         """
-        return self._parent is None
+        return self.parent is None
+
+    def get_path(self) -> str:
+        ans = []
+        node = self
+        while not node.is_root():
+            ans.append(node.action)
+            node = node.parent
+        return "".join(reversed(ans))
+
+    def get_root(self) -> "Node":
+        node = self
+        while not node.is_root():
+            node = node.parent
+        return node
 
     def set_as_terminate_node(self):
-        self._terminated = True
+        self.terminated = True
 
     def update(self, value: float) -> None:
         """
@@ -86,8 +93,8 @@ class Node(object):
         Arguments:
             - value (:obj:`Int`): The value of the node.
         """
-        self._visit_count += 1
-        self._value_sum += value
+        self.visit_count += 1
+        self.value_sum += value
 
     def update_recursive(self, leaf_value: float) -> None:
         """
@@ -99,46 +106,4 @@ class Node(object):
         self.update(leaf_value)
         if self.is_root():
             return
-        self._parent.update_recursive(leaf_value)
-
-
-class LanguageNode(Node):
-    state: Optional[str] = None
-    action: Optional[str] = None
-    num_generated_token: Optional[int] = None
-
-    def __init__(
-        self,
-        parent: Node = None,
-        prob: float = 1.0,
-        state: Optional[str] = None,
-        action: Optional[str] = None,
-        initial_value: float = 0.0,
-        num_generated_token: Optional[int] = None,
-    ) -> None:
-        super().__init__(parent, prob, initial_value)
-        self.state = state
-        self.action = action
-
-        self.num_generated_token = num_generated_token
-        self.has_collected_token_num = False
-
-    def get_path(self) -> str:
-        ans = []
-        node = self
-        while not node.is_root():
-            ans.append(node.action)
-            node = node.parent
-        return "\n".join(reversed(ans))
-
-    def get_root(self) -> "LanguageNode":
-        node = self
-        while not node.is_root():
-            node = node.parent
-        return node
-    
-    def __str__(self):
-        if self.is_root():
-            return "root: {}".format(self.state)
-        else:
-            return "action: {}, value: {:.3f}, prob: {:.3f}".format(self.action, self.value, self._prob)
+        self.parent.update_recursive(leaf_value)

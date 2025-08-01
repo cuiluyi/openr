@@ -9,8 +9,8 @@ python reason/main.py \
     --top_k -1 \
     --max_new_tokens 2048 \
     --num_sequence 1 \
-    --tree_max_width 4 \
-    --tree_max_depth 20 \
+    --max_width 4 \
+    --max_steps 20 \
     --save_dir results \
     --method beam_search \
     --num_worker 32 \

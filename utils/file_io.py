@@ -1,6 +1,22 @@
 import json
 import jsonlines
 
+from typing import Dict
+
+
+def append_to_jsonl(file_path: str, data: Dict[str, str]):
+    """
+    Appends a dictionary as a new line to a JSONL file.
+
+    Args:
+        file_path (str): Path to the JSONL file.
+        data (dict): Data to append. Must be JSON-serializable.
+    """
+
+    with open(file_path, "a", encoding="utf-8") as f:
+        json_line = json.dumps(data, ensure_ascii=False)
+        f.write(json_line + "\n")
+
 
 def read_json(file_path):
     with open(file_path, "r", encoding="utf-8") as f:

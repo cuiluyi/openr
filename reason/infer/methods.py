@@ -1,9 +1,10 @@
-from dataclasses import dataclass
 import functools
-from typing import Dict
 
-from math_verify import parse, verify
+from typing import Dict, Optional
+from dataclasses import dataclass
+from jsonlines import Writer
 
+from utils import DataItem
 from reason.env import Env
 from reason.eval.evaluator import TreeSearchSolutionOutput
 from reason.infer.tree import SearchTree
@@ -14,12 +15,12 @@ from reason.infer.lm_call import LMCallingConfig, LanguageModelCallingFunction
 @dataclass
 class TreeSearchConfig:
     # construction config
-    tree_max_width: int = 10
-    tree_max_depth: int = 10
+    max_width: int = 10
+    max_steps: int = 10
 
     def __post_init__(self):
-        assert self.tree_max_width > 0, "Tree width must be greater than 0"
-        assert self.tree_max_depth > 0, "Tree depth must be greater than 0"
+        assert self.max_width > 0, "Tree width must be greater than 0"
+        assert self.max_steps > 0, "Tree depth must be greater than 0"
 
 
 @dataclass
@@ -34,16 +35,16 @@ class BeamSearchConfig(TreeSearchConfig):
 def beam_search(
     config: BeamSearchConfig,
     gen_config: LMCallingConfig,
-    input_inst: Dict[str, str],
+    input_inst: DataItem,
     lm_call: LanguageModelCallingFunction,
     rm_call: RewardModelCallingFunction,
 ) -> TreeSearchSolutionOutput:
     rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
     env = Env(
         config={
-            "max_actions": config.tree_max_width,
-            "max_steps": config.tree_max_depth,
-            "stop_str": "The answer is ",
+            "max_width": config.max_width,
+            "max_steps": config.max_steps,
+            "stop_str": gen_config.stop_str,
             "generation_config": {
                 "max_new_tokens": gen_config.max_new_tokens,
                 "temperature": gen_config.temperature,
@@ -56,11 +57,11 @@ def beam_search(
         rm_call=rm_call_fn,
     )
 
-    search_tree = SearchTree(cfg={})
+    search_tree = SearchTree()
     traj_list = search_tree.beam_search(
         simulate_env=env,
         beam_size=config.beam_size,
-        max_step=config.tree_max_depth,
+        max_step=config.max_steps,
         rm_call=rm_call_fn,
     )
     return TreeSearchSolutionOutput(
@@ -86,16 +87,16 @@ class VanilaMCTSConfig(TreeSearchConfig):
 def vanila_mcts(
     config: VanilaMCTSConfig,
     gen_config: LMCallingConfig,
-    input_inst: Dict[str, str],
+    input_inst: DataItem,
     lm_call: LanguageModelCallingFunction,
     rm_call: RewardModelCallingFunction,
 ) -> TreeSearchSolutionOutput:
     rm_call_fn = functools.partial(rm_call, lm_step_tag=lm_call.lm_step_tag)
     env = Env(
         config={
-            "max_actions": config.tree_max_width,
-            "max_steps": config.tree_max_depth,
-            "stop_str": "The answer is ",
+            "max_width": config.max_width,
+            "max_steps": config.max_steps,
+            "stop_str": gen_config.stop_str,
             "generation_config": {
                 "max_new_tokens": gen_config.max_new_tokens,
                 "temperature": gen_config.temperature,
@@ -109,10 +110,8 @@ def vanila_mcts(
     )
 
     search_tree = SearchTree(
-        cfg={
-            "pb_c_base": config.pb_c_base,
-            "pb_c_init": config.pb_c_init,
-        }
+        pb_c_base=config.pb_c_base,
+        pb_c_init=config.pb_c_init,
     )
 
     traj_list = search_tree.vanila_mcts(
