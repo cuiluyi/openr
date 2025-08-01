@@ -58,22 +58,24 @@ def beam_search(
     )
 
     search_tree = SearchTree()
-    traj_list = search_tree.beam_search(
+
+    traj_list, tree_step_data = search_tree.beam_search(
         simulate_env=env,
         beam_size=config.beam_size,
         max_step=config.max_steps,
         rm_call=rm_call_fn,
     )
-    return TreeSearchSolutionOutput(
+    solution = TreeSearchSolutionOutput(
         solutions=[t["text"] for t in traj_list],
         completion_tokens=[t["api_completion_tokens"] for t in traj_list],
         tree_completion_tokens=[t["tree_completion_tokens"] for t in traj_list],
         values=[t["values"] for t in traj_list],
     )
+    return solution, tree_step_data
 
 
 @dataclass
-class VanilaMCTSConfig(TreeSearchConfig):
+class VanillaMCTSConfig(TreeSearchConfig):
     num_path: int = 1
     # PUCT hparams
     pb_c_base: float = 19652
@@ -84,8 +86,8 @@ class VanilaMCTSConfig(TreeSearchConfig):
         assert self.num_path > 0
 
 
-def vanila_mcts(
-    config: VanilaMCTSConfig,
+def vanilla_mcts(
+    config: VanillaMCTSConfig,
     gen_config: LMCallingConfig,
     input_inst: DataItem,
     lm_call: LanguageModelCallingFunction,
@@ -114,14 +116,16 @@ def vanila_mcts(
         pb_c_init=config.pb_c_init,
     )
 
-    traj_list = search_tree.vanila_mcts(
+    traj_list, tree_step_data = search_tree.vanilla_mcts(
         simulate_env=env,
         num_path=config.num_path,
         rm_call=rm_call_fn,
     )
-    return TreeSearchSolutionOutput(
+
+    solution = TreeSearchSolutionOutput(
         solutions=[t["text"] for t in traj_list],
         completion_tokens=[t["api_completion_tokens"] for t in traj_list],
         tree_completion_tokens=[t["tree_completion_tokens"] for t in traj_list],
         values=[t["values"] for t in traj_list],
     )
+    return solution, tree_step_data

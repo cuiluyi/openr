@@ -35,12 +35,12 @@ class SearchTree:
     def num_generated_token(self):
         return self._completion_tokens
 
-    def vanila_mcts(
+    def vanilla_mcts(
         self,
         simulate_env: Env,
         num_path: int,
         rm_call: Optional[Callable] = None,
-    ) -> List[Dict]:
+    ) -> Tuple[List[Dict], List[Dict]]:
         api_call_completion_tokens = 0
         api_completion_token = simulate_env.reset(update_legal_action=True)
         api_call_completion_tokens += api_completion_token
@@ -96,10 +96,10 @@ class SearchTree:
             # reset api_call_completion_tokens
             api_call_completion_tokens = 0
 
-        # FIXME: this is for debugging purpose
-        # self.dfs_non_leaf_nodes(self.root, ...)
+        # collect step data
+        tree_step_data = self.dfs_non_leaf_nodes(self.root)
 
-        return traj_list
+        return traj_list, tree_step_data
 
     def beam_search(
         self,
@@ -107,7 +107,7 @@ class SearchTree:
         beam_size: int,
         max_step: int,
         rm_call: Optional[Callable] = None,
-    ) -> List[Dict]:
+    ) -> Tuple[List[Dict], List[Dict]]:
         """Beam Search implementation
         Args:
             simulate_env: The environment to simulate the search.
@@ -184,30 +184,39 @@ class SearchTree:
             )
         traj_list[-1]["tree_completion_tokens"] = self._completion_tokens
         traj_list[-1]["api_completion_tokens"] = api_call_completion_tokens
-        return traj_list
+
+        # collect step data
+        tree_step_data = self.dfs_non_leaf_nodes(self.root)
+
+        return traj_list, tree_step_data
 
     def dfs_non_leaf_nodes(
         self,
         node: Node,
-        writer: Optional[jsonlines.Writer],
-    ) -> None:
-        if node.is_leaf():
-            return
+    ) -> List[Dict]:
+        results = []
 
-        prompt = node.state + node.action
+        def dfs(node: Node):
+            if node.is_leaf():
+                return
 
-        for child in node.children.values():
-            completition = child.action
-            writer.write(
-                {
-                    "prompt": prompt,
-                    "completition": completition,
-                    "prob": child.prob,
-                    "num_token": child.num_generated_token,
-                    "value": child.value,
-                }
-            )
-            self.dfs_non_leaf_nodes(child, writer)
+            prompt = node.state + node.action
+
+            for child in node.children.values():
+                completion = child.action
+                results.append(
+                    {
+                        "prompt": prompt,
+                        "completion": completion,
+                        "prob": child.prob,
+                        "num_tokens": child.num_generated_token,
+                        "value": child.value,
+                    }
+                )
+                dfs(child)
+
+        dfs(node)
+        return results
 
     def _select_child(
         self,

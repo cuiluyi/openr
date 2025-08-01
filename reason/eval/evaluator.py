@@ -4,6 +4,7 @@ import numpy as np
 from typing import Any, Callable, Dict, Optional, List, Tuple, TypeVar
 from dataclasses import dataclass
 from math_verify import parse, verify
+from loguru import logger
 
 from reason.infer.lm_call import LanguageModelCallingFunction
 from reason.infer.rm_call import RewardModelCallingFunction
@@ -70,23 +71,23 @@ class MathEvaluator:
         solver_fn: Callable,
     ) -> List[str]:
         try:
-            solution: SolutionOutput = solver_fn(input_inst, self.lm_call, self.rm_call)
+            solution, tree_step_data = solver_fn(input_inst, self.lm_call, self.rm_call)
+            solution: SolutionOutput
 
             result, output = self.analyze_output(input_inst, solution.solutions, solution.values)
 
             total_completion_token = 0
             for i, o in enumerate(output):
                 o["completion_tokens"] = solution.completion_tokens[i]
-                if isinstance(solution, TreeSearchSolutionOutput):
-                    o["tree_completion_tokens"] = solution.tree_completion_tokens[i]
+                o["tree_completion_tokens"] = solution.tree_completion_tokens[i]
                 # We define the completion_tokens as the tokens comsumed between two generated
                 #  answers, therefore we need to take sum here.
                 total_completion_token += solution.completion_tokens[i]
             result["total_completion_tokens"] = total_completion_token
-            return input_inst, result, output
+            return input_inst, result, output, tree_step_data
         except Exception as e:
-            print(f"Error evaluating problem {input_inst.question}: {e}")
-            return input_inst, None, None
+            logger.error(f"Error evaluating problem {input_inst.question}: {e}")
+            return input_inst, None, None, None
 
     def analyze_output(
         self,

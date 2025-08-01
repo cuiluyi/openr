@@ -11,7 +11,7 @@ python -m debugpy --listen 63655 --wait-for-client \
     --max_width 4 \
     --max_steps 20 \
     --save_dir results \
-    --method vanila_mcts \
+    --method vanilla_mcts \
     --num_worker 16 \
     --controller_addr http://0.0.0.0:28777 \
     --local

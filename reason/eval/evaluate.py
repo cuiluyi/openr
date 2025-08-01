@@ -62,6 +62,7 @@ def parallel_evaluate_dataset(
     num_worker: int,
 ) -> List[Dict[str, Any]]:
     record_writer = jsonlines.open(save_dir / f"record.jsonl", mode="w")
+    tree_step_writer = jsonlines.open(save_dir / f"tree_step_data.jsonl", mode="w")
 
     results = []
     if resume_dir is not None:
@@ -73,7 +74,7 @@ def parallel_evaluate_dataset(
     # Distributes tasks from the dataset dataset across the worker pool asynchronously and collects results
     # in any order as they complete. Every worker has a new searching tree as we reset the tree in solver_fn
     for item in tqdm(res_q, total=len(dataset)):
-        input_inst, result, output = item
+        input_inst, result, output, tree_step_data = item
 
         if result is None and output is None:
             continue
@@ -86,8 +87,11 @@ def parallel_evaluate_dataset(
             "output": output,
         }
         record_writer.write(obj)
+        tree_step_writer.write(tree_step_data)
+
     avg_res = (tree.map_structure(lambda *xs: np.mean(xs), *results),)
 
     write_json(avg_res, save_dir / "avg_result.json")
     jsonl_to_json(save_dir / "record.jsonl", save_dir / "record.json")
     record_writer.close()
+    tree_step_writer.close()

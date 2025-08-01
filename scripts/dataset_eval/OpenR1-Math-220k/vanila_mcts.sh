@@ -12,7 +12,7 @@ python reason/main.py \
     --max_width 8 \
     --max_steps 20 \
     --save_dir results \
-    --method vanila_mcts \
+    --method vanilla_mcts \
     --num_worker 32 \
     --controller_addr http://0.0.0.0:28777
 

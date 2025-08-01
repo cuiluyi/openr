@@ -6,9 +6,9 @@ import ray
 from loguru import logger
 from reason.infer.methods import (
     BeamSearchConfig,
-    VanilaMCTSConfig,
+    VanillaMCTSConfig,
     beam_search,
-    vanila_mcts,
+    vanilla_mcts,
 )
 from reason.infer.lm_call import LMCallingConfig, VLLMRemoteCaller
 from reason.infer.rm_call import RMRemoteCaller, RemoteRewardModelConfig
@@ -83,13 +83,13 @@ if args.method == "beam_search":
         beam_size=args.num_sequence,
     )
     solver_fn = partial(beam_search, method_config, gen_config)
-elif args.method == "vanila_mcts":
-    method_config = VanilaMCTSConfig(
+elif args.method == "vanilla_mcts":
+    method_config = VanillaMCTSConfig(
         max_width=args.max_width,
         max_steps=args.max_steps,
         num_path=args.num_sequence,
     )
-    solver_fn = partial(vanila_mcts, method_config, gen_config)
+    solver_fn = partial(vanilla_mcts, method_config, gen_config)
 else:
     raise ValueError(f"Unknown method: {args.method}")
 cfg_dict_record["method"] = args.method
