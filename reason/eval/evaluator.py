@@ -1,10 +1,8 @@
 import ray
-import numpy as np
 
 from typing import Any, Callable, Dict, Optional, List, Tuple, TypeVar
 from dataclasses import dataclass
 from math_verify import parse, verify
-from loguru import logger
 
 from reason.infer.lm_call import LanguageModelCallingFunction
 from reason.infer.rm_call import RewardModelCallingFunction
@@ -86,7 +84,7 @@ class MathEvaluator:
             result["total_completion_tokens"] = total_completion_token
             return input_inst, result, output, tree_step_data
         except Exception as e:
-            # logger.error(f"Error evaluating problem {input_inst.question}: {e}")
+            print(f"Error evaluating problem {input_inst.question}: {e}")
             return input_inst, None, None, None
 
     def analyze_output(
