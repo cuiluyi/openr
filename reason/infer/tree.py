@@ -203,11 +203,10 @@ class SearchTree:
             prompt = node.state + node.action
 
             for child in node.children.values():
-                completion = child.action
                 results.append(
                     {
                         "prompt": prompt,
-                        "completion": completion,
+                        "completion": child.action,
                         "prob": child.prob,
                         "num_tokens": child.num_generated_token,
                         "value": child.value,

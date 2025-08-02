@@ -12,10 +12,10 @@ class Node(object):
         self,
         parent: "Node" = None,
         prob: float = 1.0,
-        state: Optional[str] = None,
-        action: Optional[str] = None,
+        state: Optional[str] = "",
+        action: Optional[str] = "",
         initial_value: float = 0.0,
-        num_generated_token: Optional[int] = None,
+        num_generated_token: Optional[int] = 0,
     ) -> None:
         self.parent = parent
         self.prob = prob

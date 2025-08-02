@@ -86,7 +86,7 @@ class MathEvaluator:
             result["total_completion_tokens"] = total_completion_token
             return input_inst, result, output, tree_step_data
         except Exception as e:
-            logger.error(f"Error evaluating problem {input_inst.question}: {e}")
+            # logger.error(f"Error evaluating problem {input_inst.question}: {e}")
             return input_inst, None, None, None
 
     def analyze_output(
