@@ -11,6 +11,7 @@ from typing import List, Dict, Any, Optional, Tuple, Union, Callable, Type
 from loguru import logger
 from reason.env import Env
 from reason.node import Node
+from utils import verify_answer, llm_verify_answer, parser_llm_verify
 from utils.distributed import print_rank_0, print_with_rank
 
 
@@ -78,11 +79,14 @@ class SearchTree:
                 if not done and node.is_leaf():
                     self._expand_leaf_node(node, env_copy, rm_call)
 
-            if node.visit_count > 0:
-                leaf_value = node.value
-            else:
-                leaf_value = node.initial_value
-            node.update_recursive(leaf_value)
+            question = env_copy.question
+            answer = env_copy.answer
+            gold = env_copy.gold
+            # leaf_value = verify_answer(answer, gold)
+            # leaf_value = llm_verify_answer(question, answer, gold)
+            leaf_value = parser_llm_verify(question, answer, gold)
+
+            node.update_recursive(float(leaf_value))
 
             traj_data = {
                 "path_idx": i_path,
@@ -210,6 +214,7 @@ class SearchTree:
                         "prob": child.prob,
                         "num_tokens": child.num_generated_token,
                         "value": child.value,
+                        # "value": child.initial_value or child.value,
                     }
                 )
                 dfs(child)
@@ -373,9 +378,13 @@ class SearchTree:
             - score (:obj:`Bool`): The UCB score.
         """
 
-        c_puct = math.log((parent.visit_count + self._pb_c_base + 1) / self._pb_c_base) + self._pb_c_init
+        # c_puct = math.log((parent.visit_count + self._pb_c_base + 1) / self._pb_c_base) + self._pb_c_init
+        c_puct = 2
         value_score = child.value
-        prior_score = c_puct * child.prob * math.sqrt(parent.visit_count) / (1 + child.visit_count)
+        if parent.visit_count == 0:
+            prior_score = 0
+        else:
+            prior_score = c_puct * child.prob * math.sqrt(parent.visit_count) / (1 + child.visit_count)
 
         return value_score + prior_score
 

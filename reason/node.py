@@ -46,10 +46,22 @@ class Node(object):
         Returns:
             - output (:obj:`Int`): Current value, used to compute ucb score.
         """
-        if self.visit_count == 0:
-            # if not visited, return the initial value
-            return self.initial_value
-        return self.value_sum / self.visit_count
+        # Option 1: return a weighted average of the initial value and the current value
+        EPSILON = 0.5
+        return (
+            EPSILON * self.initial_value + (1 - EPSILON) * self.value_sum / self.visit_count
+            if self.visit_count > 0
+            else self.initial_value
+        )
+        # # Option 2: if not visited, return 0
+        # if self.visit_count == 0:
+        #     return 0
+        # return self.value_sum / self.visit_count
+
+        # # Option 3: if not visited, return the initial value: PRM(s1, s2, ..., sn)
+        # if self.visit_count == 0:
+        #     return self.initial_value
+        # return self.value_sum / self.visit_count
 
     def is_leaf(self) -> Dict:
         """

@@ -205,19 +205,13 @@ class Env:
             action = action + SUFFIX
         return action
 
-    def _is_correct(self, completion):
-        # parsed_answer = extract_answer(completion)
-        parsed_answer = parse(completion)
-        parsed_gold = parse(self.input_inst.gold)
-        return verify(parsed_gold, parsed_answer)
-
-    def get_reward(self):
-        """To implement based on learned reward model"""
-        return 0
-
     @property
     def question(self) -> str:
         return self.input_inst.question
+
+    @property
+    def gold(self) -> str:
+        return self.input_inst.gold
 
     @property
     def answer(self):

@@ -20,16 +20,11 @@ def _qwen_math_prm_infer_fn(input_str: str, model, tokenizer, device):
     STEP_TAG = "<extra_0>"
     question, answer = input_str.split("<｜question▁answer▁delimiter｜>")
 
-    data = {
-        "system": "Please reason step by step, and put your final answer within \\boxed{}.",
-        "query": question,
-        "response": answer,
-    }
-
+    system_prompt = "Please reason step by step, and put your final answer within \\boxed{}."
     messages = [
-        {"role": "system", "content": data["system"]},
-        {"role": "user", "content": data["query"]},
-        {"role": "assistant", "content": data["response"]},
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": question},
+        {"role": "assistant", "content": answer},
     ]
 
     conversation_str = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=False)

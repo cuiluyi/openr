@@ -28,7 +28,11 @@ from fastchat.utils import (
     get_context_length,
     str_to_torch_dtype,
 )
-from reason.serve.rm_infer_fns import _qwen_math_infer_fn, _math_shepherd_infer_fn, _qwen_math_prm_infer_fn
+from reason.serve.rm_infer_fns import (
+    _qwen_math_infer_fn,
+    _math_shepherd_infer_fn,
+    _qwen_math_prm_infer_fn,
+)
 
 worker_id = str(uuid.uuid4())[:8]
 logger = build_logger("reward_model_worker", f"reward_model_worker_{worker_id}.log")
@@ -112,7 +116,10 @@ class ModelWorker(BaseModelWorker):
 
         infer_fn = get_infer_fn(model_path)
         self.infer_fn = functools.partial(
-            infer_fn, model=self.model, tokenizer=self.tokenizer, device=self.device
+            infer_fn,
+            model=self.model,
+            tokenizer=self.tokenizer,
+            device=self.device,
         )
 
     @torch.inference_mode()
