@@ -1,9 +1,8 @@
 from transformers import AutoTokenizer
+from constants import DEFAULT_TOKENIZER_PATH
 
-def build_query_str(
-    problem_input: str,
-    model_name: str = "/data/cuiluyi/resources/models/deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
-):
+
+def build_query_str(problem_input: str):
     # XXX: this is a hack to make the tokenizer work with the new vllm
     """
     Build the query string for the problem input.
@@ -16,7 +15,7 @@ def build_query_str(
         {"role": "user", "content": problem_input},
     ]
 
-    tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained(DEFAULT_TOKENIZER_PATH, trust_remote_code=True)
     prompt = tokenizer.apply_chat_template(
         messages,
         tokenize=False,

@@ -19,6 +19,8 @@ from utils import get_train_test_dataset
 
 
 args = parse_args()
+cfg_dict_record = vars(args)
+
 if args.seed is not None:
     setup_seed(args.seed)
 
@@ -26,8 +28,6 @@ if args.local:
     logger.info("run in pure local mode for debug only")
     args.num_worker = 1
     ray.init(local_mode=True)
-
-cfg_dict_record = dict()
 
 # setup reward model caller
 if "mistral" in args.RM.lower():
@@ -45,7 +45,6 @@ rm_config = RemoteRewardModelConfig(
     controller_addr=args.controller_addr,
 )
 rm_call = RMRemoteCaller(rm_config)
-cfg_dict_record["RM"] = args.RM
 
 # setup language model caller
 if "mistral" in args.LM.lower():
@@ -61,7 +60,6 @@ lm_call = VLLMRemoteCaller(
     args.controller_addr,
     lm_step_tag=lm_step_tag,
 )
-cfg_dict_record["LM"] = args.LM
 
 # setup generation config
 gen_config = LMCallingConfig(
@@ -73,7 +71,6 @@ gen_config = LMCallingConfig(
     seed=args.seed,
     stop_str=args.stop_str,
 )
-cfg_dict_record["gen_config"] = gen_config.__dict__
 
 # setup method config and solver function
 if args.method == "beam_search":
@@ -92,8 +89,6 @@ elif args.method == "vanilla_mcts":
     solver_fn = partial(vanilla_mcts, method_config, gen_config)
 else:
     raise ValueError(f"Unknown method: {args.method}")
-cfg_dict_record["method"] = args.method
-cfg_dict_record["method_config"] = method_config.__dict__
 
 # load dataset
 dataset = get_train_test_dataset(args.dataset, dataset_split=args.split, dataset_subset=args.subset)

@@ -1,6 +1,13 @@
 from .seed import setup_seed
 
-from .file_io import read_jsonl, write_jsonl, read_json, write_json, jsonl_to_json
+from .file_io import (
+    read_jsonl,
+    write_jsonl,
+    read_json,
+    write_json,
+    jsonl_to_json,
+    copy_file_to_dir,
+)
 
 from .softmax import softmax
 

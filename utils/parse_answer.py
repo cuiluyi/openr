@@ -2,6 +2,7 @@ from typing import Optional
 from openai import OpenAI
 from latex2sympy2_extended import NormalizationConfig
 from math_verify import LatexExtractionConfig, parse, verify
+from constants import BASE_URL, API_KEY, TEMPLATE, MODEL_NAME, RIGHT_TAG
 
 
 def extract_answer(completion: str):
@@ -37,46 +38,9 @@ def verify_answer(answer: str, gold: str) -> bool:
     return flag
 
 
-TEMPLATE = """You are a mathematical answer validator. You will be provided with a mathematical problem and you need to compare the answer in the reference solution, and the final answer in a model's solution to determine if they are equivalent, even if formatted differently.
-
-PROBLEM:
-
-{problem}
-
-REFERENCE SOLUTION:
-
-{answer}
-
-MODEL'S SOLUTION:
-
-{generation}
-
-Focus ONLY on comparing the final mathematical answer provided by the model while ignoring differences in:
-
-- Formatting (e.g., \\boxed{{}} vs plain text)
-- Multiple choice formatting (e.g., "A" vs full solution)
-- Order of coordinate pairs or solutions
-- Equivalent mathematical expressions or notation variations
-- If the model's answer is nonsense, return "Verdict: AMBIGUOUS"
-
-Start with a brief explanation of your comparison (2-3 sentences). Then output your final answer in one of the following formats:
-
-- "Verdict: EQUIVALENT"
-- "Verdict: DIFFERENT"
-- "Verdict: AMBIGUOUS"
-"""
-
-MODEL_NAME = "meta-llama/llama-3.3-70b-instruct"
-
-RIGHT_TAG = "Verdict: EQUIVALENT"
-
-
 def llm_verify_answer(problem: str, answer: str, gold: str) -> bool:
     prompt = TEMPLATE.format(problem=problem, answer=gold, generation=answer)
-    client = OpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key="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",
-    )
+    client = OpenAI(base_url=BASE_URL, api_key=API_KEY)
     completion = client.chat.completions.create(
         model=MODEL_NAME,
         messages=[{"role": "user", "content": prompt}],

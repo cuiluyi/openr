@@ -1,7 +1,9 @@
 import json
 import jsonlines
+import shutil
 
-from typing import Dict
+from pathlib import Path
+from typing import Dict, Union
 
 
 def append_to_jsonl(file_path: str, data: Dict[str, str]):
@@ -61,3 +63,23 @@ def json_to_jsonl(json_file, jsonl_file):
                 writer.write(item)
         else:
             writer.write(data)
+
+
+def copy_file_to_dir(src_file: Union[Path, str], dst_dir: Union[Path, str]) -> None:
+    """
+    Copy a file to the target directory.
+
+    Args:
+        src_file (str): Path to the source file (e.g., 'a/p/c.json').
+        dst_dir (str): Path to the target directory (e.g., 'd/q/').
+
+    Returns:
+        Path: Path to the copied file in the destination directory.
+    """
+    src = Path(src_file)
+    dst = Path(dst_dir)
+    dst.mkdir(parents=True, exist_ok=True)
+
+    # Copy file to destination
+    target_file = dst / src.name
+    shutil.copy2(src, target_file)  # copy2 preserves metadata
