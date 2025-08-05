@@ -22,7 +22,10 @@ def get_train_test_dataset(
         return [
             DataItem(
                 question=item.get("question") or item.get("problem") or item.get("Question"),
-                gold=item.get("solution") or item.get("answer") or item.get("Explanation"),
+                gold=item.get("solution")
+                or item.get("answer")
+                or item.get("Explanation")
+                or item.get("groud_truth_solution"),
             )
             for item in raw_data
         ]
@@ -30,14 +33,13 @@ def get_train_test_dataset(
     # Case 2: Load from HuggingFace dataset hub
     dataset = load_dataset(dataset_name, name=dataset_subset, split=dataset_split)
 
-    # NuminaMath-CoT source filtering
-    if "numinamath" in dataset_name.lower():
-        dataset = dataset.filter(lambda example: example["source"] == "amc_aime")
-
     def extract_data_item(item) -> DataItem:
         return DataItem(
             question=item.get("question") or item.get("problem") or item.get("Question"),
-            gold=item.get("solution") or item.get("answer") or item.get("Explanation"),
+            gold=item.get("solution")
+            or item.get("answer")
+            or item.get("Explanation")
+            or item.get("groud_truth_solution"),
         )
 
     return [extract_data_item(item) for item in dataset]

@@ -1,19 +1,18 @@
 python reason/main.py \
     --LM checkpoint-400 \
     --RM Qwen2.5-Math-PRM-7B \
-    --dataset /data/cuiluyi/resources/datasets/open-r1/OpenR1-Math-220k \
-    --subset all \
+    --dataset /data/cuiluyi/resources/datasets/AI-MO/NuminaMath-CoT \
     --split train \
     --temperature 0.8 \
     --top_p 1 \
     --top_k -1 \
     --max_new_tokens 5120 \
-    --num_sequence 8 \
+    --num_sequence 16 \
     --max_width 8 \
     --max_steps 20 \
     --save_dir results \
     --method vanilla_mcts \
-    --num_worker 32 \
+    --num_worker 256 \
     --controller_addr http://0.0.0.0:28777
 
 # --LM "Qwen2.5-Math-1.5B-Instruct&s1-20250312_213742&s1-20250314_003214" \

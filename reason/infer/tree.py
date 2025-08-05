@@ -84,9 +84,10 @@ class SearchTree:
             gold = env_copy.gold
             # leaf_value = verify_answer(answer, gold)
             # leaf_value = llm_verify_answer(question, answer, gold)
-            leaf_value = parser_llm_verify(question, answer, gold)
+            acc = parser_llm_verify(question, answer, gold)
 
-            node.update_recursive(float(leaf_value))
+            node.update_recursive(float(acc))
+            # node.update_recursive(node.initial_value)
 
             traj_data = {
                 "path_idx": i_path,
@@ -94,6 +95,7 @@ class SearchTree:
                 "values": env_copy.values,
                 "api_completion_tokens": api_call_completion_tokens,
                 "tree_completion_tokens": self._completion_tokens,
+                "acc": int(acc),
             }
             traj_list.append(traj_data)
 
@@ -197,7 +199,7 @@ class SearchTree:
     def dfs_non_leaf_nodes(
         self,
         node: Node,
-    ) -> List[Dict]:
+    ) -> List[List[Dict]]:
         results = []
 
         def dfs(node: Node):
@@ -206,18 +208,19 @@ class SearchTree:
 
             prompt = node.state + node.action
 
+            temp = {"prompt": prompt, "children": []}
             for child in node.children.values():
-                results.append(
+                temp["children"].append(
                     {
-                        "prompt": prompt,
                         "completion": child.action,
                         "prob": child.prob,
                         "num_tokens": child.num_generated_token,
                         "value": child.value,
-                        # "value": child.initial_value or child.value,
+                        "initial_value": child.initial_value,
                     }
                 )
                 dfs(child)
+            results.append(temp)
 
         dfs(node)
         return results
@@ -379,7 +382,7 @@ class SearchTree:
         """
 
         # c_puct = math.log((parent.visit_count + self._pb_c_base + 1) / self._pb_c_base) + self._pb_c_init
-        c_puct = 2
+        c_puct = 2 + math.log(parent.visit_count + 1)
         value_score = child.value
         if parent.visit_count == 0:
             prior_score = 0

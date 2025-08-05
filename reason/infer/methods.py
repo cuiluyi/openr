@@ -127,5 +127,6 @@ def vanilla_mcts(
         completion_tokens=[t["api_completion_tokens"] for t in traj_list],
         tree_completion_tokens=[t["tree_completion_tokens"] for t in traj_list],
         values=[t["values"] for t in traj_list],
+        accs=[t["acc"] for t in traj_list],
     )
     return solution, tree_step_data

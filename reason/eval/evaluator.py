@@ -45,7 +45,8 @@ def judge_ans(
 class SolutionOutput:
     solutions: List[str]
     completion_tokens: List[int]
-    values: Optional[List[float]]
+    values: List[List[float]]
+    accs: List[float]
 
 
 @dataclass
@@ -72,7 +73,7 @@ class MathEvaluator:
             solution, tree_step_data = solver_fn(input_inst, self.lm_call, self.rm_call)
             solution: SolutionOutput
 
-            result, output = self.analyze_output(input_inst, solution.solutions, solution.values)
+            result, output = self.analyze_output(input_inst, solution)
 
             total_completion_token = 0
             for i, o in enumerate(output):
@@ -90,12 +91,11 @@ class MathEvaluator:
     def analyze_output(
         self,
         input_inst: DataItem,
-        gen_answers: List[str],
-        values_list: List[List[float]],
+        solution: SolutionOutput,
     ) -> Tuple[Dict[str, int], List[Dict[str, Any]]]:
         parsed_gold = parse(input_inst.gold)
         output_list, parsed_ans_list = [], []
-        for i, (output, values) in enumerate(zip(gen_answers, values_list)):
+        for i, (output, values, acc) in enumerate(zip(solution.solutions, solution.values, solution.accs)):
             parsed_answer = parse(output)
             parsed_ans_list.append(parsed_answer)
             output_list.append(
@@ -103,12 +103,12 @@ class MathEvaluator:
                     "path_idx": i,
                     "text": output,
                     "value": values,
-                    "acc": int(verify(parsed_gold, parsed_answer)),
+                    "acc": acc,
                 }
             )
 
         res = {
-            agg_method: judge_ans(parsed_gold, parsed_ans_list, values_list, agg_method)
+            agg_method: judge_ans(parsed_gold, parsed_ans_list, solution.values, agg_method)
             for agg_method in CHOSEN_AGGR_METHODS
         }
         return res, output_list
