@@ -14,4 +14,4 @@ python reason/main.py \
     --method vanilla_mcts \
     --num_worker 256 \
     --controller_addr http://0.0.0.0:28777 \
-    --resume_dir /data/cuiluyi/openr/results/vanilla_mcts/amc_aime_distilled/20250805_150654
+    --resume_dir /data/cuiluyi/openr/results/vanilla_mcts/amc_aime_distilled/20250809_183645

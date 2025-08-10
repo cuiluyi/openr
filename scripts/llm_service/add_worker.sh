@@ -1,6 +1,6 @@
 # add reward model worker
 export LOGDIR=logs/fastchat
-CUDA_VISIBLE_DEVICES=6 /data/cuiluyi/anaconda3/envs/open_reasoner/bin/python -m reason.serve.reward_model_worker --model-path /data/cuiluyi/resources/models/Qwen/Qwen2.5-Math-PRM-7B --controller-address http://0.0.0.0:28777 --host 0.0.0.0 --port 30018 --worker-address http://0.0.0.0:30018
+CUDA_VISIBLE_DEVICES=7 /data/cuiluyi/anaconda3/envs/open_reasoner/bin/python -m reason.serve.reward_model_worker --model-path /data/cuiluyi/resources/models/Qwen/Qwen2.5-Math-PRM-7B --controller-address http://0.0.0.0:28777 --host 0.0.0.0 --port 30018 --worker-address http://0.0.0.0:30018
 
 # add language model worker
 export LOGDIR=logs/fastchat

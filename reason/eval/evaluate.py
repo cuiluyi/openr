@@ -8,7 +8,13 @@ import numpy as np
 from loguru import logger
 from ray.util.actor_pool import ActorPool
 
-from utils import write_json, jsonl_to_json, copy_file_to_dir, DataItem
+from utils import (
+    write_json,
+    jsonl_to_json,
+    copy_file_to_dir,
+    ensure_newline,
+    DataItem,
+)
 from reason.eval.evaluator import MathEvaluator
 
 
@@ -31,6 +37,11 @@ def resume_from_record(
     Returns:
         The resumed dataset and results.
     """
+    # fix the newline issue before opening the file
+    for file_name in ["record.jsonl", "tree_step_data.jsonl"]:
+        ensure_newline(resume_dir / file_name)
+
+    # Copy the record and tree step data files to the save directory
     copy_file_to_dir(resume_dir / "record.jsonl", save_dir)
     copy_file_to_dir(resume_dir / "tree_step_data.jsonl", save_dir)
 

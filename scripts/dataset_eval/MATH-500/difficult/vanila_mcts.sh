@@ -1,7 +1,7 @@
 python reason/main.py \
     --LM checkpoint-400 \
     --RM Qwen2.5-Math-PRM-7B \
-    --dataset /data/cuiluyi/openr/data/difficultity_data/Qwen2.5-1.5B-Instruct/wrong_data_MATH-openai-split_20250801_114144.jsonl \
+    --dataset /data/cuiluyi/openr/data/difficultity_data/Qwen2.5-1.5B-Instruct/right_data_MATH-openai-split \
     --temperature 0.8 \
     --top_p 1 \
     --top_k -1 \

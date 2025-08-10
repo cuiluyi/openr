@@ -3,7 +3,7 @@ import jsonlines
 import shutil
 
 from pathlib import Path
-from typing import Dict, Union
+from typing import Dict, List, Union
 
 
 def append_to_jsonl(file_path: str, data: Dict[str, str]):
@@ -83,3 +83,44 @@ def copy_file_to_dir(src_file: Union[Path, str], dst_dir: Union[Path, str]) -> N
     # Copy file to destination
     target_file = dst / src.name
     shutil.copy2(src, target_file)  # copy2 preserves metadata
+
+
+# ensure the last line of a file ends with a newline character
+def ensure_newline(file_path: Path) -> None:
+    if file_path.exists() and file_path.stat().st_size > 0:
+        with open(file_path, "rb+") as f:
+            f.seek(-1, 2)  # move to the last byte
+            last_char = f.read(1)
+            if last_char != b"\n":
+                f.write(b"\n")  # append missing newline character
+
+
+def merge_jsonl_files(input_files: List[Union[str, Path]], output_file: Union[str, Path]) -> None:
+    """
+    Merge multiple JSONL files into one JSONL file.
+
+    Args:
+        input_files (List[Union[str, Path]]): List of input JSONL file paths.
+        output_file (Union[str, Path]): Path to the output JSONL file.
+    """
+    output_path = Path(output_file)
+
+    with output_path.open("w", encoding="utf-8") as fout:
+        for file_path in input_files:
+            file_path = Path(file_path)
+            if not file_path.exists():
+                print(f"Warning: file {file_path} not found, skipped.")
+                continue
+
+            with file_path.open("r", encoding="utf-8") as fin:
+                for line in fin:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        # Ensure it's valid JSON before writing
+                        json.loads(line)
+                        fout.write(line + "\n")
+                    except json.JSONDecodeError:
+                        print(f"Warning: invalid JSON line in {file_path}, skipped.")
+    print(f"Merged {len(input_files)} files into {output_file}")

@@ -5,7 +5,7 @@ load_dotenv()
 
 # utils/parse_answer.py
 API_KEY = os.getenv("API_KEY")
-BASE_URL = "https://openrouter.ai/api/v1"
+BASE_URL = "https://integrate.api.nvidia.com/v1"
 TEMPLATE = """You are a mathematical answer validator. You will be provided with a mathematical problem and you need to compare the answer in the reference solution, and the final answer in a model's solution to determine if they are equivalent, even if formatted differently.
 
 PROBLEM:
@@ -34,7 +34,7 @@ Start with a brief explanation of your comparison (2-3 sentences). Then output y
 - "Verdict: DIFFERENT"
 - "Verdict: AMBIGUOUS"
 """
-MODEL_NAME = "meta-llama/llama-3.3-70b-instruct"
+MODEL_NAME = "meta/llama-3.3-70b-instruct"
 RIGHT_TAG = "Verdict: EQUIVALENT"
 
 

@@ -1,4 +1,4 @@
-from typing import Optional
+import time
 from openai import OpenAI
 from latex2sympy2_extended import NormalizationConfig
 from math_verify import LatexExtractionConfig, parse, verify
@@ -30,9 +30,9 @@ def extract_answer(completion: str):
 
 def verify_answer(answer: str, gold: str) -> bool:
     try:
-        gold_parsed = parse(gold)
-        answer_parsed = parse(answer)
-        flag = verify(gold_parsed, answer_parsed)
+        gold_parsed = parse(gold, timeout_seconds=None)
+        answer_parsed = parse(answer, timeout_seconds=None)
+        flag = verify(gold_parsed, answer_parsed, timeout_seconds=None)
     except Exception as e:
         flag = False
     return flag
@@ -41,11 +41,22 @@ def verify_answer(answer: str, gold: str) -> bool:
 def llm_verify_answer(problem: str, answer: str, gold: str) -> bool:
     prompt = TEMPLATE.format(problem=problem, answer=gold, generation=answer)
     client = OpenAI(base_url=BASE_URL, api_key=API_KEY)
-    completion = client.chat.completions.create(
-        model=MODEL_NAME,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return RIGHT_TAG in completion.choices[0].message.content
+
+    max_retries = 10
+    delay_seconds = 3
+
+    for attempt in range(max_retries):
+        try:
+            completion = client.chat.completions.create(
+                model=MODEL_NAME,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            return RIGHT_TAG in completion.choices[0].message.content
+        except Exception as e:
+            if attempt < max_retries - 1:
+                time.sleep(delay_seconds)
+            else:
+                raise e  # raise the last error if all retries failed
 
 
 def parser_llm_verify(problem: str, answer: str, gold: str) -> bool:
