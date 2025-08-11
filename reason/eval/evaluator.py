@@ -82,7 +82,7 @@ class MathEvaluator:
                 # We define the completion_tokens as the tokens comsumed between two generated
                 #  answers, therefore we need to take sum here.
                 total_completion_token += solution.completion_tokens[i]
-            result["total_completion_tokens"] = total_completion_token
+            # result["total_completion_tokens"] = total_completion_token
             return input_inst, result, output, tree_step_data
         except Exception as e:
             print(f"Error evaluating problem {input_inst.question}: {e}")
@@ -108,7 +108,7 @@ class MathEvaluator:
             )
 
         res = {
-            agg_method: judge_ans(parsed_gold, parsed_ans_list, solution.values, agg_method)
-            for agg_method in CHOSEN_AGGR_METHODS
+            # agg_method: judge_ans(parsed_gold, parsed_ans_list, solution.values, agg_method)
+            # for agg_method in CHOSEN_AGGR_METHODS
         }
         return res, output_list

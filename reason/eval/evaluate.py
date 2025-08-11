@@ -88,22 +88,17 @@ def parallel_evaluate_dataset(
     for item in tqdm(res_q, total=len(dataset)):
         input_inst, result, output, tree_step_data = item
 
-        if result is None and output is None:
+        if output is None:
             continue
 
-        results.append(result)
         obj = {
             "question": input_inst.question,
             "groundtruth": input_inst.gold,
-            "result": result,
             "output": output,
         }
         record_writer.write(obj)
         tree_step_writer.write(tree_step_data)
 
-    avg_res = (tree.map_structure(lambda *xs: np.mean(xs), *results),)
-
-    write_json(avg_res, save_dir / "avg_result.json")
     jsonl_to_json(save_dir / "record.jsonl", save_dir / "record.json")
     record_writer.close()
     tree_step_writer.close()

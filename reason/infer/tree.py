@@ -4,8 +4,7 @@ The Node and MCTS class for AlphaZero.
 
 import math
 import heapq
-import pprint
-import jsonlines
+import random
 
 from typing import List, Dict, Any, Optional, Tuple, Union, Callable, Type
 from loguru import logger
@@ -61,16 +60,15 @@ class SearchTree:
             env_copy = simulate_env.copy()
             done = False
             while not done:
-                action, node = self._select_child(node)  # PUCT default
+                node = self._select_child(node)  # PUCT default
 
                 # XXX(ziyu): find a more clean way
                 env_copy.next_state_terminated = {}
-                assert node.action == action
+                action = node.action
                 env_copy.next_state_terminated[action] = node.terminated
 
                 api_completion_token = env_copy.step(
                     action,
-                    value=node.initial_value,
                     update_legal_action=node.is_leaf(),
                 )
                 api_call_completion_tokens += api_completion_token
@@ -82,20 +80,18 @@ class SearchTree:
             question = env_copy.question
             answer = env_copy.answer
             gold = env_copy.gold
-            # leaf_value = verify_answer(answer, gold)
-            # leaf_value = llm_verify_answer(question, answer, gold)
-            acc = parser_llm_verify(question, answer, gold)
+            
+            leaf_value = 1.0 if parser_llm_verify(question, answer, gold) else -1.0
 
-            node.update_recursive(float(acc))
-            # node.update_recursive(node.initial_value)
+            node.update_recursive(leaf_value)
 
             traj_data = {
                 "path_idx": i_path,
                 "text": env_copy.answer,
-                "values": env_copy.values,
+                "values": node.get_values(),
                 "api_completion_tokens": api_call_completion_tokens,
                 "tree_completion_tokens": self._completion_tokens,
-                "acc": int(acc),
+                "acc": leaf_value,
             }
             traj_list.append(traj_data)
 
@@ -216,7 +212,7 @@ class SearchTree:
                         "prob": child.prob,
                         "num_tokens": child.num_generated_token,
                         "value": child.value,
-                        "initial_value": child.initial_value,
+                        "visit_count": child.visit_count
                     }
                 )
                 dfs(child)
@@ -229,7 +225,7 @@ class SearchTree:
         self,
         node: Node,
         criteria: str = "puct",
-    ) -> Tuple[Optional[str], Node]:
+    ) -> Node:
         """
         Overview:
             Select the child with the highest score.
@@ -238,36 +234,31 @@ class SearchTree:
             - simulate_env (:obj:`Class BaseGameEnv`): The class of simulate env.
             - criteria (:obj:`Str`): The criteria to select the child node.
         Returns:
-            - action (:obj:`Int`): choose the action with the highest ucb score.
             - child (:obj:`Node`): the child node reached by executing the action with the highest ucb score.
         """
+        best_childs = []
+        max_score = -float("inf")
 
-        select_child_step = None
-        select_child_node = None
-        max_score = -9999999
-
-        for child_step, child_node in node.children.items():
+        for _, child in node.children.items():
             if criteria == "ucb":
-                score = self._ucb_score(node, child_node)
+                score = self._ucb_score(node, child)
             elif criteria == "uct":
-                score = self._uct_score(node, child_node)
+                score = self._uct_score(node, child)
             elif criteria == "puct":
-                score = self._puct_score(node, child_node)
+                score = self._puct_score(node, child)
             elif criteria == "visit_count":
-                score = child_node.visit_count
+                score = child.visit_count
             else:
-                score = child_node.value
+                score = child.value
 
-            if score > max_score:
+            if score == max_score:
+                best_childs.append(child)
+            elif score > max_score:
+                best_childs = [child]
                 max_score = score
-                select_child_step = child_step
-                select_child_node = child_node
 
-        # child==None, node is leaf node
-        if select_child_node is None:
-            select_child_node = node
-
-        return select_child_step, select_child_node
+        return random.choice(best_childs) if best_childs else None
+        # return best_childs[0] if best_childs else None
 
     def _expand_leaf_node(
         self,
@@ -288,56 +279,15 @@ class SearchTree:
 
         assert len(simulate_env.legal_actions) > 0
 
-        prms: List[List[float]] = rm_call(
-            [
-                (
-                    simulate_env.question,
-                    simulate_env.answer + x["action"],
-                )
-                for x in simulate_env.legal_actions
-            ]
-        )
-
-        # PRM get last r as single reward
-        child_values = []
-        for act, rs in zip(simulate_env.legal_actions, prms):
-            if len(simulate_env.action_history) + 1 != len(rs):
-                log_message = (
-                    "PRM value length not match with action history.\n" + "=" * 80 + "\n"
-                    f"PRM Length:        {len(prms)}\n"
-                    f"ActionHist Length: {len(simulate_env.action_history)}\n\n"
-                    + "-" * 28
-                    + " State "
-                    + "-" * 43
-                    + "\n"
-                    f"{pprint.pformat(state)}\n" + "-" * 28 + " Action " + "-" * 42 + "\n"
-                    f"{pprint.pformat(act)}\n" + "-" * 28 + " Rewards " + "-" * 41 + "\n"
-                    f"{pprint.pformat(rs)}\n" + "=" * 80
-                )
-                logger.warning(log_message)
-                child_values.append(0.0)
-            elif len(rs) == 0:
-                logger.warning(
-                    f"Empty PRM value for: \nState: \n{state} \naction: \n{act}, will be set to 0.0"
-                )
-                child_values.append(0.0)
-            else:
-                child_values.append(rs[-1])  # prm-last
-                # child_values.append(min(rs))  # prm-min
-                # child_values.append(act["prob"])  # prob-prm
-
         assert len(node.children) == 0
         for i, action_dict in enumerate(simulate_env.legal_actions):
             action, prob = action_dict["action"], action_dict["prob"]
-
-            child_value = child_values[i]
 
             node.children[action] = Node(
                 parent=node,
                 prob=prob,
                 state=state,
                 action=action,
-                initial_value=child_value,
                 num_generated_token=action_dict["num_token"],
             )
             # set terminal node here
@@ -382,7 +332,7 @@ class SearchTree:
         """
 
         # c_puct = math.log((parent.visit_count + self._pb_c_base + 1) / self._pb_c_base) + self._pb_c_init
-        c_puct = 2 + math.log(parent.visit_count + 1)
+        c_puct = 2  # + math.log(parent.visit_count + 1)
         value_score = child.value
         if parent.visit_count == 0:
             prior_score = 0
@@ -402,8 +352,10 @@ class SearchTree:
         Returns:
             - score (:obj:`Bool`): The UCT score.
         """
+        c_puct = 2
         value_score = child.value
-
-        return value_score + self._pb_c_init * math.sqrt(math.log(parent.visit_count)) / (
-            child.visit_count + 0.000001
-        )
+        if parent.visit_count == 0 or child.visit_count == 0:
+            prior_score = 0
+        else:
+            prior_score = c_puct * math.sqrt(math.log(parent.visit_count)) / (child.visit_count)
+        return value_score + prior_score

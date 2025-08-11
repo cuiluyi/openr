@@ -1,17 +1,17 @@
 python reason/main.py \
     --LM checkpoint-400 \
     --RM Qwen2.5-Math-PRM-7B \
-    --dataset /data/cuiluyi/resources/datasets/camel-ai/amc_aime_distilled \
+    --dataset /data/cuiluyi/openr/data/difficulty_data/checkpoint-400/wrong_data_amc_aime_distilled.jsonl \
     --split train \
     --temperature 0.8 \
     --top_p 1 \
     --top_k -1 \
     --max_new_tokens 5120 \
-    --num_sequence 32 \
-    --max_width 5 \
+    --num_sequence 16 \
+    --max_width 4 \
     --max_steps 20 \
     --save_dir results \
     --method vanilla_mcts \
     --num_worker 256 \
     --controller_addr http://0.0.0.0:28777 \
-    --resume_dir /data/cuiluyi/openr/results/vanilla_mcts/amc_aime_distilled/20250809_183645
+    --resume_dir /data/cuiluyi/openr/results/vanilla_mcts/wrong_data_amc_aime_distilled/20250811_161841

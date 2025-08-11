@@ -154,8 +154,8 @@ class Env:
                 next_state_terminated[processed_text] = processed_text.endswith(SUFFIX)
 
         if len(logprob_list) == 0:
-            print_with_rank("state: {}".format(self.get_state()))
-            print_with_rank("gen_result: {}".format(result))
+            # print_with_rank("state: {}".format(self.get_state()))
+            # print_with_rank("gen_result: {}".format(result))
             raise NoLegalActionException("No possible action have been generated.")
 
         prob_list = softmax(logprob_list)
