@@ -12,7 +12,7 @@ OUTPUT_NAME="${OUTPUT_BASE}/${MODEL_NAME}/result_benchmark_${DATASET_TAG}_${TIME
 mkdir -p "$(dirname "$OUTPUT_NAME")"
 
 # Run benchmark
-python ./src/open_r1/benchmark.py \
+python ./train/benchmark.py \
     --model_name="$MODEL_PATH" \
     --dtype='bfloat16' \
     --num_gpus=4 \

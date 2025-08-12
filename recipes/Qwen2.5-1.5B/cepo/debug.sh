@@ -4,5 +4,5 @@ python -m debugpy \
     --config_file recipes/accelerate_configs/zero2.yaml \
     --num_processes 3 \
     --main_process_port 29501 \
-    src/open_r1/cepo.py \
+    train/cepo.py \
     --config recipes/Qwen2.5-1.5B/cepo/config_MATH.yaml
