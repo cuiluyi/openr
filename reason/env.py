@@ -1,8 +1,8 @@
 import copy
-
 from typing import Optional, Callable, Dict, Any
-from math_verify import parse, verify
 
+from reason.infer.lm_call import LMCallingConfig
+from reason.infer.lm_call import ConcatedLMGenResult, merge_concated_results
 from utils import softmax, DataItem
 from utils.parse_answer import extract_answer, verify_answer
 from utils.distributed import print_with_rank
@@ -16,8 +16,6 @@ from utils.text_processe import (
     SYSTEM2_END_TAG,
     SUFFIX,
 )
-from reason.infer.lm_call import LMCallingConfig
-from reason.infer.lm_call import ConcatedLMGenResult, merge_concated_results
 
 MAX_RETRIES = 5
 

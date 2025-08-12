@@ -9,20 +9,17 @@ import asyncio
 import json
 from typing import List
 
+import uvicorn
 from fastapi import FastAPI, Request, BackgroundTasks
 from fastapi.responses import StreamingResponse, JSONResponse
-import uvicorn
+from fastchat.serve.model_worker import logger, worker_id
+from fastchat.utils import get_context_length
 from vllm import AsyncLLMEngine
 from vllm.engine.arg_utils import AsyncEngineArgs
 from vllm.sampling_params import SamplingParams
 from vllm.utils import random_uuid
 
 from reason.serve.base_model_worker import BaseModelWorker
-from fastchat.serve.model_worker import (
-    logger,
-    worker_id,
-)
-from fastchat.utils import get_context_length
 
 
 app = FastAPI()
@@ -85,10 +82,14 @@ class VLLMWorker(BaseModelWorker):
         echo = params.get("echo", True)
         use_beam_search = params.get("use_beam_search", False)
         best_of = params.get("best_of", None)
-        include_stop_str_in_output = params.get("include_stop_str_in_output", True) # default output stop_str
-        skip_special_tokens = params.get("skip_special_tokens", False) # default output special tokens
+        include_stop_str_in_output = params.get(
+            "include_stop_str_in_output", True
+        )  # default output stop_str
+        skip_special_tokens = params.get(
+            "skip_special_tokens", False
+        )  # default output special tokens
         seed = params.get("seed", None)
-        logprobs = params.get("logprobs", 0) # default output logprobs
+        logprobs = params.get("logprobs", 0)  # default output logprobs
 
         # Handle stop_str
         stop = set()
@@ -96,7 +97,6 @@ class VLLMWorker(BaseModelWorker):
             stop.add(stop_str)
         elif isinstance(stop_str, list) and stop_str != []:
             stop.update(stop_str)
-
 
         # make sampling params in vllm
         top_p = max(top_p, 1e-5)
@@ -141,7 +141,9 @@ class VLLMWorker(BaseModelWorker):
                     "completion_tokens": completion_tokens,
                     "total_tokens": prompt_tokens + completion_tokens,
                 },
-                "cumulative_logprob": [output.cumulative_logprob for output in request_output.outputs],
+                "cumulative_logprob": [
+                    output.cumulative_logprob for output in request_output.outputs
+                ],
                 "output_token_len": [len(output.token_ids) for output in request_output.outputs],
                 "finish_reason": [output.finish_reason for output in request_output.outputs],
             }
@@ -232,12 +234,15 @@ if __name__ == "__main__":
     parser.add_argument("--limit-worker-concurrency", type=int, default=1024)
     parser.add_argument("--no-register", action="store_true")
     parser.add_argument("--num-gpus", type=int, default=1)
-    parser.add_argument("--conv-template", type=str, default=None, help="Conversation prompt template.")
+    parser.add_argument(
+        "--conv-template", type=str, default=None, help="Conversation prompt template."
+    )
     parser.add_argument(
         "--trust_remote_code",
         action="store_false",
         default=True,
-        help="Trust remote code (e.g., from HuggingFace) when" "downloading the model and tokenizer.",
+        help="Trust remote code (e.g., from HuggingFace) when"
+        "downloading the model and tokenizer.",
     )
     parser.add_argument(
         "--gpu_memory_utilization",

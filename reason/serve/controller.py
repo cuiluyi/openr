@@ -2,29 +2,29 @@
 A controller manages distributed workers.
 It sends worker addresses to clients.
 """
+
 import argparse
 import asyncio
 import dataclasses
-from enum import Enum, auto
 import json
 import logging
 import os
-import time
-from typing import List, Union
-import threading
-
-from fastapi import FastAPI, Request
-from fastapi.responses import StreamingResponse
-import numpy as np
 import requests
-import uvicorn
+import time
+import threading
+from enum import Enum, auto
+from typing import List, Union
 
+import numpy as np
+import uvicorn
+from fastapi import FastAPI, Request
 from fastchat.constants import (
     CONTROLLER_HEART_BEAT_EXPIRATION,
     WORKER_API_TIMEOUT,
     ErrorCode,
     SERVER_ERROR_MSG,
 )
+from fastapi.responses import StreamingResponse
 from fastchat.utils import build_logger
 
 
@@ -67,9 +67,7 @@ class Controller:
         self.worker_info = {}
         self.dispatch_method = DispatchMethod.from_str(dispatch_method)
 
-        self.heart_beat_thread = threading.Thread(
-            target=heart_beat_controller, args=(self,)
-        )
+        self.heart_beat_thread = threading.Thread(target=heart_beat_controller, args=(self,))
         self.heart_beat_thread.start()
 
     def register_worker(
@@ -122,9 +120,7 @@ class Controller:
         self.worker_info = {}
 
         for w_name, w_info in old_info.items():
-            if not self.register_worker(
-                w_name, w_info.check_heart_beat, None, w_info.multimodal
-            ):
+            if not self.register_worker(w_name, w_info.check_heart_beat, None, w_info.multimodal):
                 logger.info(f"Remove stale worker: {w_name}")
 
     def list_models(self):
@@ -199,9 +195,7 @@ class Controller:
             min_index = np.argmin(worker_qlen)
             w_name = worker_names[min_index]
             self.worker_info[w_name].queue_length += 1
-            logger.info(
-                f"names: {worker_names}, queue_lens: {worker_qlen}, ret: {w_name}"
-            )
+            logger.info(f"names: {worker_names}, queue_lens: {worker_qlen}, ret: {w_name}")
             return w_name
         else:
             raise ValueError(f"Invalid dispatch method: {self.dispatch_method}")

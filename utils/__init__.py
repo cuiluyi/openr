@@ -9,3 +9,12 @@ from .load_ds import DataItem, get_train_test_dataset
 from .tokens_num import get_tokens_num
 
 from .parse_answer import extract_answer, verify_answer, llm_verify_answer, parser_llm_verify
+
+
+from .import_utils import is_e2b_available
+
+from .model_utils import (
+    get_model,
+    get_tokenizer,
+    initialize_token_embeddings_from_descriptions,
+)

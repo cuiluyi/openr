@@ -14,7 +14,7 @@ MODEL_BASE=/data/cuiluyi
 # LANGUAGE_MODEL_NAME=peiyi9979/mistral-7b-sft
 # LANGUAGE_MODEL_NAME=Qwen/Qwen2.5-Math-1.5B-Instruct
 # LANGUAGE_MODEL_NAME=deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B
-LANGUAGE_MODEL_NAME=open-r1/ckpts/DeepSeek-R1-Distill-Qwen-1.5B/slow_fast_reason-sft-s1k-1.1_full/checkpoint-400
+LANGUAGE_MODEL_NAME=openr/ckpts/DeepSeek-R1-Distill-Qwen-1.5B/slow_fast_reason-sft-s1k-1.1_full/checkpoint-400
 
 # REWARD_MODEL_NAME=peiyi9979/math-shepherd-mistral-7b-prm
 # REWARD_MODEL_NAME=Qwen/Math-psa-7B

@@ -1,20 +1,21 @@
+import re
 from datetime import datetime
 from functools import partial
 from pathlib import Path
 
-import re
 import ray
 from loguru import logger
+
+from reason.config import parse_args
+from reason.eval.evaluate import parallel_evaluate_dataset
+from reason.infer.lm_call import LMCallingConfig, VLLMRemoteCaller
 from reason.infer.methods import (
     BeamSearchConfig,
     VanillaMCTSConfig,
     beam_search,
     vanilla_mcts,
 )
-from reason.infer.lm_call import LMCallingConfig, VLLMRemoteCaller
 from reason.infer.rm_call import RMRemoteCaller, RemoteRewardModelConfig
-from reason.config import parse_args
-from reason.eval.evaluate import parallel_evaluate_dataset
 from utils import setup_seed, write_json
 from utils import get_train_test_dataset
 
@@ -97,7 +98,7 @@ dataset = get_train_test_dataset(args.dataset, dataset_split=args.split, dataset
 # setup save directory and record writer
 datetime_str = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-args.dataset = re.sub(r'(?:\.jsonl|json)$', '', args.dataset)
+args.dataset = re.sub(r"(?:\.jsonl|json)$", "", args.dataset)
 save_dir = Path(args.save_dir) / args.method / args.dataset.split("/")[-1] / datetime_str
 
 save_dir.mkdir(parents=True)

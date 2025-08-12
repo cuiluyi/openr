@@ -1,4 +1,5 @@
 from typing import List, Dict, Optional, Callable, Type
+
 from reason.env import Env
 
 
@@ -36,7 +37,9 @@ class Node(object):
         if self.is_root():
             return "root: {}".format(self.state)
         else:
-            return "action: {}, value: {:.3f}, prob: {:.3f}".format(self.action, self.value, self.prob)
+            return "action: {}, value: {:.3f}, prob: {:.3f}".format(
+                self.action, self.value, self.prob
+            )
 
     @property
     def value(self) -> float:

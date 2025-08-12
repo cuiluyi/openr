@@ -7,13 +7,13 @@ import base64
 import gc
 import json
 import os
-from typing import List, Optional
 import uuid
+from typing import List, Optional
 
 import torch
 import torch.nn.functional as F
-from transformers import set_seed
 import uvicorn
+from transformers import set_seed
 
 from fastchat.constants import ErrorCode, SERVER_ERROR_MSG
 from fastchat.model.model_adapter import (
@@ -25,12 +25,14 @@ from fastchat.modules.awq import AWQConfig
 from fastchat.modules.exllama import ExllamaConfig
 from fastchat.modules.xfastertransformer import XftConfig
 from fastchat.modules.gptq import GptqConfig
-from reason.serve.base_model_worker import BaseModelWorker, app
 from fastchat.utils import (
     build_logger,
     get_context_length,
     str_to_torch_dtype,
 )
+
+from reason.serve.base_model_worker import BaseModelWorker, app
+
 
 worker_id = str(uuid.uuid4())[:8]
 logger = build_logger("model_worker", f"model_worker_{worker_id}.log")
@@ -216,7 +218,9 @@ class ModelWorker(BaseModelWorker):
                     max_length=self.context_len,
                 )
             else:
-                encoding = tokenizer.batch_encode_plus(params["input"], padding=True, return_tensors="pt")
+                encoding = tokenizer.batch_encode_plus(
+                    params["input"], padding=True, return_tensors="pt"
+                )
             input_ids = encoding["input_ids"].to(self.device)
             attention_mask = input_ids != tokenizer.pad_token_id
 
@@ -307,7 +311,9 @@ def create_model_worker():
         type=lambda s: s.split(","),
         help="Optional display comma separated names",
     )
-    parser.add_argument("--conv-template", type=str, default=None, help="Conversation prompt template.")
+    parser.add_argument(
+        "--conv-template", type=str, default=None, help="Conversation prompt template."
+    )
     parser.add_argument("--embed-in-truncate", action="store_true")
     parser.add_argument(
         "--limit-worker-concurrency",

@@ -4,8 +4,8 @@
 logs/
 ckpts/
 results/
-train/
 data/
+evals/
 test/*.*
 
 # Byte-compiled / optimized / DLL files

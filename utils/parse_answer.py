@@ -1,8 +1,28 @@
 import time
+
+from functools import wraps
+from typing import Callable, TypeVar, ParamSpec
 from openai import OpenAI
 from latex2sympy2_extended import NormalizationConfig
 from math_verify import LatexExtractionConfig, parse, verify
 from constants import BASE_URL, API_KEY, TEMPLATE, MODEL_NAME, RIGHT_TAG
+
+P = ParamSpec("P")
+R = TypeVar("R")
+
+
+def timing_decorator(func: Callable[P, R]) -> Callable[P, R]:
+    """Decorator that measures the execution time of a function."""
+
+    @wraps(func)
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+        start_time = time.perf_counter()
+        result = func(*args, **kwargs)
+        end_time = time.perf_counter()
+        print(f"[TIMER] Function '{func.__name__}' executed in {end_time - start_time:.6f} seconds")
+        return result
+
+    return wrapper
 
 
 def extract_answer(completion: str):
@@ -28,6 +48,7 @@ def extract_answer(completion: str):
     return answer_parsed
 
 
+@timing_decorator
 def verify_answer(answer: str, gold: str) -> bool:
     try:
         gold_parsed = parse(gold, timeout_seconds=None)
@@ -38,9 +59,12 @@ def verify_answer(answer: str, gold: str) -> bool:
     return flag
 
 
+client = OpenAI(base_url=BASE_URL, api_key=API_KEY)
+
+
+@timing_decorator
 def llm_verify_answer(problem: str, answer: str, gold: str) -> bool:
     prompt = TEMPLATE.format(problem=problem, answer=gold, generation=answer)
-    client = OpenAI(base_url=BASE_URL, api_key=API_KEY)
 
     max_retries = 10
     delay_seconds = 3
@@ -55,6 +79,7 @@ def llm_verify_answer(problem: str, answer: str, gold: str) -> bool:
         except Exception as e:
             if attempt < max_retries - 1:
                 time.sleep(delay_seconds)
+                print(f"Retrying due to error: {e}. Attempt {attempt + 1}/{max_retries}")
             else:
                 raise e  # raise the last error if all retries failed
 

@@ -1,12 +1,10 @@
-import tree
 from pathlib import Path
-from tqdm import tqdm
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Set
 
 import jsonlines
-import numpy as np
 from loguru import logger
 from ray.util.actor_pool import ActorPool
+from tqdm import tqdm
 
 from utils import (
     write_json,
@@ -16,11 +14,6 @@ from utils import (
     DataItem,
 )
 from reason.eval.evaluator import MathEvaluator
-
-
-import jsonlines
-from pathlib import Path
-from typing import List, Set, Optional
 
 
 def resume_from_record(
@@ -51,9 +44,7 @@ def resume_from_record(
     with jsonlines.open(resume_dir / "record.jsonl", "r") as reader:
         cnt = 0
         for obj in reader:
-            results.append(obj["result"])
             answered_questions.add(obj["question"])
-            # record_writer.write(obj)
             cnt += 1
 
     logger.info(f"Resumed {cnt} questions from {resume_dir}")

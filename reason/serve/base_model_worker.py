@@ -1,17 +1,15 @@
 import asyncio
+import requests
 import threading
 import time
 from typing import List
+from logging import Logger
 
 from fastapi import FastAPI, Request, BackgroundTasks
 from fastapi.responses import StreamingResponse, JSONResponse
-import requests
-
 from fastchat.constants import WORKER_HEART_BEAT_INTERVAL
 from fastchat.conversation import Conversation
 from fastchat.utils import pretty_print_semaphore, build_logger
-
-from logging import Logger
 
 worker = None
 logger = None
@@ -138,9 +136,7 @@ class BaseModelWorker:
             return 0
         else:
             return (
-                self.limit_worker_concurrency
-                - self.semaphore._value
-                + len(self.semaphore._waiters)
+                self.limit_worker_concurrency - self.semaphore._value + len(self.semaphore._waiters)
             )
 
     def get_status(self):
