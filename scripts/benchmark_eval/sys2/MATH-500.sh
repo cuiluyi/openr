@@ -17,7 +17,7 @@ mkdir -p "$(dirname "$OUTPUT_NAME")"
 SYSTEM_PROMPT="Please reason step by step, and put your final answer within \\boxed{}."
 
 # Run benchmark
-python /data/cuiluyi/openr/train/eval/benchmark_slow.py \
+python /data/cuiluyi/openr/scripts/benchmark_slow.py \
     --model_name="$MODEL_PATH" \
     --dtype='bfloat16' \
     --num_gpus=1 \

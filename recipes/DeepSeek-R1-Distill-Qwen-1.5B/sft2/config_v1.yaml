@@ -4,10 +4,10 @@
 #   --num_processes 4 \
 #   train/sft.py \
 #   --config recipes/DeepSeek-R1-Distill-Qwen-1.5B/sft2/config_v1.yaml \
-#   > ckpts/DeepSeek-R1-Distill-Qwen-1.5B/sft2-filtered_aimmeamc_aime_distilled_batchsize32/output.log 2>&1
+#   > ckpts/DeepSeek-R1-Distill-Qwen-1.5B/sft2-wrong_data_amc_aime_batchsize32/output.log 2>&1
 
 # Model arguments
-model_name_or_path: /data/cuiluyi/open-r1/ckpts/DeepSeek-R1-Distill-Qwen-1.5B/slow_fast_reason-sft-s1k-1.1_full/checkpoint-400
+model_name_or_path: /data/cuiluyi/openr/ckpts/DeepSeek-R1-Distill-Qwen-1.5B/slow_fast_reason-sft-s1k-1.1_full/checkpoint-400
 model_revision: main
 torch_dtype: bfloat16
 attn_implementation: flash_attention_2
@@ -16,14 +16,12 @@ attn_implementation: flash_attention_2
 chat_template: "{% if not add_generation_prompt is defined %}{% set add_generation_prompt = false %}{% endif %}{% set ns = namespace(is_first=false, is_tool=false, is_output_first=true, system_prompt='') %}{%- for message in messages %}{%- if message['role'] == 'system' %}{% set ns.system_prompt = message['content'] %}{%- endif %}{%- endfor %}{{bos_token}}{{ns.system_prompt}}{%- for message in messages %}{%- if message['role'] == 'user' %}{%- set ns.is_tool = false -%}{{'<｜User｜>' + message['content']}}{%- endif %}{%- if message['role'] == 'assistant' and message['content'] is none %}{%- set ns.is_tool = false -%}{%- for tool in message['tool_calls']%}{%- if not ns.is_first %}{{'<｜Assistant｜><｜tool▁calls▁begin｜><｜tool▁call▁begin｜>' + tool['type'] + '<｜tool▁sep｜>' + tool['function']['name'] + '\\n' + '```json' + '\\n' + tool['function']['arguments'] + '\\n' + '```' + '<｜tool▁call▁end｜>'}}{%- set ns.is_first = true -%}{%- else %}{{'\\n' + '<｜tool▁call▁begin｜>' + tool['type'] + '<｜tool▁sep｜>' + tool['function']['name'] + '\\n' + '```json' + '\\n' + tool['function']['arguments'] + '\\n' + '```' + '<｜tool▁call▁end｜>'}}{{'<｜tool▁calls▁end｜><｜end▁of▁sentence｜>'}}{%- endif %}{%- endfor %}{%- endif %}{%- if message['role'] == 'assistant' and message['content'] is not none %}{%- if ns.is_tool %}{{'<｜tool▁outputs▁end｜>' + message['content'] + '<｜end▁of▁sentence｜>'}}{%- set ns.is_tool = false -%}{%- else %}{% set content = message['content'] %}{{'<｜Assistant｜>' + content + '<｜end▁of▁sentence｜>'}}{%- endif %}{%- endif %}{%- if message['role'] == 'tool' %}{%- set ns.is_tool = true -%}{%- if ns.is_output_first %}{{'<｜tool▁outputs▁begin｜><｜tool▁output▁begin｜>' + message['content'] + '<｜tool▁output▁end｜>'}}{%- set ns.is_output_first = false %}{%- else %}{{'\\n<｜tool▁output▁begin｜>' + message['content'] + '<｜tool▁output▁end｜>'}}{%- endif %}{%- endif %}{%- endfor -%}{% if ns.is_tool %}{{'<｜tool▁outputs▁end｜>'}}{% endif %}{% if add_generation_prompt and not ns.is_tool %}{{'<｜Assistant｜>'}}{% endif %}"
 system_prompt: "Please reason step by step, and put your final answer within \\boxed{}."
 dataset_name:
-  - "/data/cuiluyi/openr/results/vanilla_mcts/wrong_data_amc_aime_distilled/20250811_161841/sft_optim_trajectory.jsonl"
-  # - "/data/cuiluyi/openr/results/vanilla_mcts/wrong_data_amc_aime_distilled/20250811_161841/sft_right_trajectory.jsonl"
+  - "/data/cuiluyi/openr/results/vanilla_mcts/wrong_data_amc_aime_distilled/20250812_161221/sft_optim_trajectory.jsonl"
+  # - "/data/cuiluyi/openr/results/vanilla_mcts/wrong_data_amc_aime_distilled/20250812_161221/sft_right_trajectory.jsonl"
+
 dataset_num_proc: 48
 dataset_config: all
-response_template:
-  "<｜Assistant｜>"
-  # - "<｜begin▁of▁system1｜>"
-  # - "<｜begin▁of▁system2｜>"
+response_template: "<｜Assistant｜>"
 
 # SFT trainer config
 bf16: true
@@ -33,7 +31,7 @@ gradient_accumulation_steps: 1
 gradient_checkpointing: true
 gradient_checkpointing_kwargs:
   use_reentrant: false
-hub_model_id: open-r1/DeepSeek-R1-Distill-Qwen-1.5B-sft2-filtered_aimmeamc_aime_distilled_batchsize32
+hub_model_id: open-r1/DeepSeek-R1-Distill-Qwen-1.5B-sft2-wrong_data_amc_aime_batchsize32
 hub_strategy: every_save
 learning_rate: 1.0e-05
 log_level: info
@@ -48,8 +46,7 @@ max_length: 32768
 max_steps: -1
 
 num_train_epochs: 3
-
-output_dir: ckpts/DeepSeek-R1-Distill-Qwen-1.5B/sft2-filtered_aimmeamc_aime_distilled_batchsize32
+output_dir: ckpts/DeepSeek-R1-Distill-Qwen-1.5B/sft2-wrong_data_amc_aime_batchsize32
 overwrite_output_dir: true
 per_device_eval_batch_size: 1
 per_device_train_batch_size: 8
