@@ -72,17 +72,11 @@ class MathEvaluator:
         try:
             solution, tree_step_data = solver_fn(input_inst, self.lm_call, self.rm_call)
             solution: SolutionOutput
-
             result, output = self.analyze_output(input_inst, solution)
 
-            total_completion_token = 0
             for i, o in enumerate(output):
                 o["completion_tokens"] = solution.completion_tokens[i]
                 o["tree_completion_tokens"] = solution.tree_completion_tokens[i]
-                # We define the completion_tokens as the tokens comsumed between two generated
-                #  answers, therefore we need to take sum here.
-                total_completion_token += solution.completion_tokens[i]
-            # result["total_completion_tokens"] = total_completion_token
             return input_inst, result, output, tree_step_data
         except Exception as e:
             print(f"Error evaluating problem {input_inst.question}: {e}")
