@@ -8,7 +8,6 @@ from datasets import load_dataset, DatasetDict
 from transformers import set_seed
 from transformers.trainer_utils import get_last_checkpoint
 from trl import (
-    DataCollatorForCompletionOnlyLM,
     ModelConfig,
     ScriptArguments,
     SFTTrainer,
@@ -18,11 +17,8 @@ from trl import (
 )
 
 from train.configs import SFTConfig
-from utils import (
-    get_model,
-    get_tokenizer,
-    initialize_token_embeddings_from_descriptions,
-)
+from train.collator import DataCollatorWithoutTag
+from utils import get_model, get_tokenizer
 from utils.callbacks import get_callbacks
 from utils.wandb_logging import init_wandb_training
 
@@ -77,6 +73,7 @@ def main(script_args, training_args, model_args):
         return item
 
     dataset = DatasetDict({split: ds.map(func) for split, ds in dataset.items()})
+
     dataset.remove_columns(["prompt", "completion"])
 
     ################
@@ -110,22 +107,14 @@ def main(script_args, training_args, model_args):
     model.resize_token_embeddings(len(tokenizer))
     logger.info(f"Resized model embedding from {model.config.vocab_size} to {len(tokenizer)}")
 
-    if training_args.desc_for_init_token_embed:
-        initialize_token_embeddings_from_descriptions(
-            model,
-            tokenizer,
-            added_tokens=training_args.added_special_tokens,
-            descriptions=training_args.desc_for_init_token_embed,
-        )
-
     ################
     # Load collator
     ################
     data_collator = None
-    if training_args.response_template:
-        data_collator = DataCollatorForCompletionOnlyLM(
+    if training_args.response_template and training_args.tag_template:
+        data_collator = DataCollatorWithoutTag(
             response_template=training_args.response_template,
-            instruction_template=training_args.instruction_template,
+            tag_template=training_args.tag_template,
             tokenizer=tokenizer,
         )
 

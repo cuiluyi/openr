@@ -7,10 +7,11 @@ from trl import DataCollatorForCompletionOnlyLM
 from transformers import DataCollatorForLanguageModeling
 
 
-class DataCollatorForTagOnly(DataCollatorForLanguageModeling):
+class DataCollatorWithoutTag(DataCollatorForLanguageModeling):
     def __init__(
         self,
-        tag_tokens: Tuple[str, ...],
+        response_template: Union[str, list[int]],
+        tag_template: Tuple[str, ...],
         *args,
         mlm: bool = False,
         ignore_index: int = -100,
@@ -19,9 +20,16 @@ class DataCollatorForTagOnly(DataCollatorForLanguageModeling):
     ):
         super().__init__(*args, mlm=mlm, **kwargs)
 
-        self.tag_tokens = tag_tokens
+        self.tag_template = tag_template
+        self.tag_token_ids: list[int] = self.tokenizer.convert_tokens_to_ids(self.tag_template)
 
-        self.tag_token_ids: list[int] = self.tokenizer.convert_tokens_to_ids(self.tag_tokens)
+        self.response_template = response_template
+        if isinstance(response_template, str):
+            # The user provides a string, must tokenize
+            self.response_token_ids = self.tokenizer.encode(self.response_template, add_special_tokens=False)
+        else:
+            # The user already provides the token ids
+            self.response_token_ids = response_template
 
         if not self.mlm and self.tokenizer.pad_token_id == self.tokenizer.eos_token_id:
             warnings.warn(
@@ -38,7 +46,109 @@ class DataCollatorForTagOnly(DataCollatorForLanguageModeling):
     def torch_call(self, examples: list[Union[list[int], Any, dict[str, Any]]]) -> dict[str, Any]:
         batch = super().torch_call(examples)
 
-        # convert tag_tokens to tensor
+        # convert tag_template to tensor
+        tag_token_ids_tensor = torch.tensor(self.tag_token_ids, device=batch["labels"].device)
+
+        for i in range(len(examples)):
+            response_token_ids_start_idx = None
+
+            for idx in np.where(batch["labels"][i] == self.response_token_ids[0])[0]:
+                # `response_token_ids` is `'### Response:\n'`, here we are just making sure that the token IDs match
+                if (
+                    self.response_token_ids
+                    == batch["labels"][i][idx : idx + len(self.response_token_ids)].tolist()
+                ):
+                    response_token_ids_start_idx = idx
+
+            if response_token_ids_start_idx is None:
+                warnings.warn(
+                    f"Could not find response key `{self.response_template}` in the following instance: "
+                    f"{self.tokenizer.decode(batch['input_ids'][i])}. This instance will be ignored in loss "
+                    "calculation. Note, if this happens often, consider increasing the `max_length`.",
+                    UserWarning,
+                )
+                batch["labels"][i, :] = self.ignore_index
+            else:
+                response_token_ids_end_idx = response_token_ids_start_idx + len(self.response_token_ids)
+
+                # Make pytorch loss function ignore all tokens up through the end of the response key
+                batch["labels"][i, :response_token_ids_end_idx] = self.ignore_index
+
+            labels = batch["labels"][i]
+            # mask=True means we want to keep the tag tokens
+            mask = torch.isin(labels, tag_token_ids_tensor)
+
+            # Set positions not in tag_token_ids to ignore_index
+            labels[mask] = self.ignore_index
+
+            batch["labels"][i] = labels
+
+        if self.padding_free:
+            # remove padding, `attention_mask` and add `position_ids`
+            attn_mask = batch.pop("attention_mask")
+            batch["input_ids"] = batch["input_ids"][attn_mask.bool()].unsqueeze(0)
+            batch["position_ids"] = attn_mask.cumsum(1)[attn_mask.bool()].unsqueeze(0) - 1
+            batch["labels"] = batch["labels"][attn_mask.bool()].unsqueeze(0)
+            batch["labels"][batch["position_ids"] == 0] = self.ignore_index
+
+            # Calculate cumulative sequence lengths for queries and keys to prevent graph breaks during further computations.
+            flattened_position_ids = batch["position_ids"].flatten()
+            indices_q = torch.arange(
+                flattened_position_ids.size(0),
+                device=flattened_position_ids.device,
+                dtype=torch.int32,
+            )
+            batch["cu_seq_lens_q"] = torch.cat(
+                (
+                    indices_q[flattened_position_ids == 0],
+                    torch.tensor(
+                        flattened_position_ids.size(),
+                        device=flattened_position_ids.device,
+                        dtype=torch.int32,
+                    ),
+                )
+            ).unsqueeze(0)
+            batch["cu_seq_lens_k"] = batch["cu_seq_lens_q"]
+
+            # Determine maximum sequence lengths to prevent graph breaks during further computations.
+            batch["max_length_k"] = torch.tensor([flattened_position_ids.max().item() + 1])
+            batch["max_length_q"] = batch["max_length_k"]
+
+        return batch
+
+
+class DataCollatorForTagOnly(DataCollatorForLanguageModeling):
+    def __init__(
+        self,
+        tag_template: Tuple[str, ...],
+        *args,
+        mlm: bool = False,
+        ignore_index: int = -100,
+        padding_free: bool = False,
+        **kwargs,
+    ):
+        super().__init__(*args, mlm=mlm, **kwargs)
+
+        self.tag_template = tag_template
+
+        self.tag_token_ids: list[int] = self.tokenizer.convert_tokens_to_ids(self.tag_template)
+
+        if not self.mlm and self.tokenizer.pad_token_id == self.tokenizer.eos_token_id:
+            warnings.warn(
+                "The pad_token_id and eos_token_id values of this tokenizer are identical. "
+                "If you are planning for multi-turn training, "
+                "it can result in the model continuously generating questions and answers without eos token. "
+                "To avoid this, set the pad_token_id to a different value.",
+                UserWarning,
+            )
+
+        self.ignore_index = ignore_index
+        self.padding_free = padding_free
+
+    def torch_call(self, examples: list[Union[list[int], Any, dict[str, Any]]]) -> dict[str, Any]:
+        batch = super().torch_call(examples)
+
+        # convert tag_template to tensor
         tag_token_ids_tensor = torch.tensor(self.tag_token_ids, device=batch["labels"].device)
 
         for i in range(len(examples)):
@@ -63,13 +173,17 @@ class DataCollatorForTagOnly(DataCollatorForLanguageModeling):
             # Calculate cumulative sequence lengths for queries and keys to prevent graph breaks during further computations.
             flattened_position_ids = batch["position_ids"].flatten()
             indices_q = torch.arange(
-                flattened_position_ids.size(0), device=flattened_position_ids.device, dtype=torch.int32
+                flattened_position_ids.size(0),
+                device=flattened_position_ids.device,
+                dtype=torch.int32,
             )
             batch["cu_seq_lens_q"] = torch.cat(
                 (
                     indices_q[flattened_position_ids == 0],
                     torch.tensor(
-                        flattened_position_ids.size(), device=flattened_position_ids.device, dtype=torch.int32
+                        flattened_position_ids.size(),
+                        device=flattened_position_ids.device,
+                        dtype=torch.int32,
                     ),
                 )
             ).unsqueeze(0)
@@ -212,7 +326,7 @@ if __name__ == "__main__":
 
     collator = DataCollatorForTagOnly(
         tokenizer=tokenizer,
-        tag_tokens="<｜Assistant｜>",
+        tag_template="<｜Assistant｜>",
     )
 
     text = (

@@ -19,7 +19,7 @@ dataset_name:
   - "/data/cuiluyi/openr/data/s1k-1.1/s1k-1.1_system_sft.jsonl"
 dataset_num_proc: 48
 dataset_config: all
-additional_special_tokens:
+added_special_tokens:
   - "<｜begin▁of▁system1｜>"
   - "<｜end▁of▁system1｜>"
   - "<｜begin▁of▁system2｜>"

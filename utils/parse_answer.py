@@ -1,10 +1,11 @@
 import time
-
 from functools import wraps
 from typing import Callable, TypeVar, ParamSpec
+
 from openai import OpenAI
 from latex2sympy2_extended import NormalizationConfig
 from math_verify import LatexExtractionConfig, parse, verify
+
 from constants import BASE_URL, API_KEY, TEMPLATE, MODEL_NAME, RIGHT_TAG
 
 P = ParamSpec("P")
@@ -51,8 +52,8 @@ def extract_answer(completion: str):
 @timing_decorator
 def verify_answer(answer: str, gold: str) -> bool:
     try:
-        gold_parsed = parse(gold, timeout_seconds=None)
-        answer_parsed = parse(answer, timeout_seconds=None)
+        gold_parsed = parse(gold, parsing_timeout=None)
+        answer_parsed = parse(answer, parsing_timeout=None)
         flag = verify(gold_parsed, answer_parsed, timeout_seconds=None)
     except Exception as e:
         flag = False

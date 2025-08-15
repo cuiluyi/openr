@@ -7,7 +7,7 @@ from transformers import AutoTokenizer
 from datasets import load_dataset
 from vllm import LLM, SamplingParams
 
-from utils import parser_llm_verify
+from utils import parser_llm_verify, verify_answer
 
 
 def create_dataset(args, tokenizer):
@@ -15,7 +15,7 @@ def create_dataset(args, tokenizer):
         args.dataset_name,
         name=args.dataset_subset,
         split=args.dataset_split,
-    )
+    ).select(range(4))
 
     def make_conversation(example):
         messages = [
@@ -44,12 +44,14 @@ def process_one(item):
     output, gold = item
     question = output.prompt
     answer = output.outputs[0].text
-    acc_score = int(parser_llm_verify(question, answer, gold))
+    # acc_score = int(parser_llm_verify(question, answer, gold))
+    acc_score = verify_answer(answer, gold)
     return {
         "prompt": question,
         "completion": answer,
         "gold answer": gold,
         "acc scores": acc_score,
+        "tokens_num": len(output.outputs[0].token_ids),
     }
 
 

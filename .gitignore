@@ -1,13 +1,12 @@
-.env/
-.github/
-.vscode/
-logs/
-ckpts/
-results/
-data/
-evals/
-test/*.*
-wandb/
+/.env
+/.github/
+/.vscode/
+/ckpts/
+/data/
+/logs/
+/results/
+/test/*.*
+/wandb/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

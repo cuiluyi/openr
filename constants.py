@@ -8,6 +8,7 @@ load_dotenv()
 # BASE_URL = "https://integrate.api.nvidia.com/v1"
 # MODEL_NAME = "meta/llama-3.3-70b-instruct"
 
+
 API_KEY = os.getenv("PAID_API_KEY")
 BASE_URL = "https://openrouter.ai/api/v1"
 MODEL_NAME = "meta-llama/llama-3.3-70b-instruct"

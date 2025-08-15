@@ -16,7 +16,7 @@ chat_template: "{% if not add_generation_prompt is defined %}{% set add_generati
 dataset_name: /data/cuiluyi/openr/data/format_data/OpenR1-Math-220k/OpenR1-Math-220k-processed.jsonl
 dataset_num_proc: 48
 dataset_config: all
-additional_special_tokens:
+added_special_tokens:
   - "<step>"
   - "</step>"
 

@@ -6,17 +6,26 @@ import datasets
 import transformers
 from datasets import load_dataset
 from transformers import set_seed
-from transformers.trainer_utils import (
-    get_last_checkpoint,
+from transformers.trainer_utils import get_last_checkpoint
+from trl import (
+    ScriptArguments,
+    DPOTrainer,
+    ModelConfig,
+    TrlParser,
+    get_peft_config,
+    setup_chat_format,
 )
 
 from train.configs import DPOConfig
-from trl import ScriptArguments
-from train.rewards import get_reward_funcs
-from utils import get_model, get_tokenizer
+
+# from train.collator import DataCollatorForTagOnly
+from utils import (
+    get_model,
+    get_tokenizer,
+    initialize_token_embeddings_from_descriptions,
+)
 from utils.callbacks import get_callbacks
 from utils.wandb_logging import init_wandb_training
-from trl import DPOTrainer, ModelConfig, TrlParser, get_peft_config
 
 
 logger = logging.getLogger(__name__)
@@ -41,11 +50,6 @@ def main(script_args, training_args, model_args):
     transformers.utils.logging.enable_default_handler()
     transformers.utils.logging.enable_explicit_format()
 
-    # Log on each process a small summary
-    logger.warning(
-        f"Process rank: {training_args.local_rank}, device: {training_args.device}, n_gpu: {training_args.n_gpu}"
-        + f" distributed training: {bool(training_args.local_rank != -1)}, 16-bits training: {training_args.fp16}"
-    )
     logger.info(f"Model parameters {model_args}")
     logger.info(f"Script parameters {script_args}")
     logger.info(f"Training parameters {training_args}")
@@ -60,17 +64,13 @@ def main(script_args, training_args, model_args):
     if "wandb" in training_args.report_to:
         init_wandb_training(training_args)
 
-    # Load the dataset
+    ################
+    # Load datasets
+    ################
     if isinstance(script_args.dataset_name, list):
-        dataset = load_dataset(
-            "json",
-            data_files=script_args.dataset_name,
-        )
+        dataset = load_dataset("json", data_files=script_args.dataset_name)
     else:
-        dataset = load_dataset(
-            script_args.dataset_name,
-            name=script_args.dataset_config,
-        )
+        dataset = load_dataset(script_args.dataset_name, name=script_args.dataset_config)
     dataset = {split: ds.shuffle(seed=42) for split, ds in dataset.items()}
 
     ################
@@ -78,11 +78,39 @@ def main(script_args, training_args, model_args):
     ################
     tokenizer = get_tokenizer(model_args, training_args)
 
+    if training_args.padding_side:
+        tokenizer.padding_side = training_args.padding_side
+
+    # add special tokens if provided
+    if training_args.added_special_tokens:
+        tokenizer.add_special_tokens({"added_special_tokens": training_args.added_special_tokens})
+
     ##############
     # Load model #
     ##############
     logger.info("*** Loading model ***")
     model = get_model(model_args, training_args)
+
+    if tokenizer.chat_template is None:
+        logger.info("No chat template provided, using ChatML.")
+        model, tokenizer = setup_chat_format(model, tokenizer, format="chatml")
+
+    # set pad token if not set
+    if not tokenizer.pad_token or tokenizer.pad_token == tokenizer.eos_token:
+        tokenizer.add_special_tokens({"pad_token": "[PAD]"})
+        model.config.pad_token_id = tokenizer.pad_token_id
+
+    # adjust the embedding size
+    model.resize_token_embeddings(len(tokenizer))
+    logger.info(f"Resized model embedding from {model.config.vocab_size} to {len(tokenizer)}")
+
+    if training_args.desc_for_init_token_embed:
+        initialize_token_embeddings_from_descriptions(
+            model,
+            tokenizer,
+            added_tokens=training_args.added_special_tokens,
+            descriptions=training_args.desc_for_init_token_embed,
+        )
 
     #############################
     # Initialize the DPO trainer
@@ -94,9 +122,10 @@ def main(script_args, training_args, model_args):
         eval_dataset=(
             dataset[script_args.dataset_test_split] if training_args.eval_strategy != "no" else None
         ),
+        processing_class=tokenizer,
         peft_config=get_peft_config(model_args),
         callbacks=get_callbacks(training_args, model_args),
-        processing_class=tokenizer,
+        data_collator=None,
     )
 
     ###############

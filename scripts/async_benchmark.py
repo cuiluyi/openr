@@ -50,6 +50,7 @@ async def process_one(item):
         "completion": answer,
         "gold answer": gold,
         "acc scores": acc_score,
+        "tokens_num": len(output.outputs[0].token_ids),
     }
 
 

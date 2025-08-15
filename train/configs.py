@@ -19,9 +19,7 @@ class GRPOConfig(trl.GRPOConfig):
         default_factory=lambda: [],
         metadata={"help": "The callbacks to run during training."},
     )
-    chat_template: Optional[str] = field(
-        default=None, metadata={"help": "The chat template to use."}
-    )
+    chat_template: Optional[str] = field(default=None, metadata={"help": "The chat template to use."})
     system_prompt: Optional[str] = field(
         default=None,
         metadata={"help": "The optional system prompt to use."},
@@ -47,7 +45,7 @@ class GRPOConfig(trl.GRPOConfig):
         default=None,
         metadata={"help": ("The group to store runs under.")},
     )
-    additional_special_tokens: Optional[list[str]] = field(
+    added_special_tokens: Optional[list[str]] = field(
         default_factory=lambda: [],
         metadata={"help": ("The added special tokens to use for training.")},
     )
@@ -67,9 +65,7 @@ class DPOConfig(trl.DPOConfig):
         default_factory=lambda: [],
         metadata={"help": "The callbacks to run during training."},
     )
-    chat_template: Optional[str] = field(
-        default=None, metadata={"help": "The chat template to use."}
-    )
+    chat_template: Optional[str] = field(default=None, metadata={"help": "The chat template to use."})
     system_prompt: Optional[str] = field(
         default=None,
         metadata={"help": "The optional system prompt to use."},
@@ -111,9 +107,7 @@ class SFTConfig(trl.SFTConfig):
         default_factory=lambda: [],
         metadata={"help": "The callbacks to run during training."},
     )
-    chat_template: Optional[str] = field(
-        default=None, metadata={"help": "The chat template to use."}
-    )
+    chat_template: Optional[str] = field(default=None, metadata={"help": "The chat template to use."})
     system_prompt: Optional[str] = field(
         default=None,
         metadata={"help": "The optional system prompt to use for benchmarking."},
@@ -142,7 +136,7 @@ class SFTConfig(trl.SFTConfig):
         default=None,
         metadata={"help": ("The group to store runs under.")},
     )
-    additional_special_tokens: Optional[list[str]] = field(
+    added_special_tokens: Optional[list[str]] = field(
         default_factory=lambda: [],
         metadata={"help": ("The added special tokens to use for training.")},
     )
@@ -230,9 +224,7 @@ class GRPOScriptArguments(trl.ScriptArguments):
     )
     repetition_max_penalty: float = field(
         default=-1.0,
-        metadata={
-            "help": "Maximum (negative) penalty for for repetition penalty reward"
-        },
+        metadata={"help": "Maximum (negative) penalty for for repetition penalty reward"},
     )
     code_language: str = field(
         default="python",
