@@ -1,7 +1,7 @@
-# export CUDA_VISIBLE_DEVICES="4, 5, 6, 7"
+# export CUDA_VISIBLE_DEVICES="0, 1, 2, 3, 4, 5, 6, 7"
 # accelerate launch \
 #   --config_file recipes/accelerate_configs/zero3.yaml \
-#   --num_processes 4 \
+#   --num_processes 8 \
 #   train/sft_right_paths.py \
 #   --config recipes/DeepSeek-R1-Distill-Qwen-1.5B/sft2/config_right_paths.yaml \
 #   > ckpts/DeepSeek-R1-Distill-Qwen-1.5B/sft2-right_paths-wrong_data_amc_aime_batchsize32/output.log 2>&1
@@ -51,7 +51,7 @@ num_train_epochs: 8
 output_dir: ckpts/DeepSeek-R1-Distill-Qwen-1.5B/sft2-right_paths-wrong_data_amc_aime_batchsize32
 overwrite_output_dir: true
 per_device_eval_batch_size: 1
-per_device_train_batch_size: 8
+per_device_train_batch_size: 4
 push_to_hub: false
 report_to:
   - wandb

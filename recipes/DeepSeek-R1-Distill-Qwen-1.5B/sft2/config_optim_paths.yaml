@@ -1,8 +1,8 @@
-# export CUDA_VISIBLE_DEVICES="4, 5, 6, 7"
+# export CUDA_VISIBLE_DEVICES="0,1,2,3,4,5,6,7"
 # accelerate launch \
 #   --config_file recipes/accelerate_configs/zero3.yaml \
-#   --num_processes 4 \
-#   train/sft_optim_paths.py \
+#   --num_processes 8 \
+#   train/sft.py \
 #   --config recipes/DeepSeek-R1-Distill-Qwen-1.5B/sft2/config_optim_paths.yaml \
 #   > ckpts/DeepSeek-R1-Distill-Qwen-1.5B/sft2-optim_paths-wrong_data_amc_aime_batchsize32/output.log 2>&1
 
@@ -17,18 +17,14 @@ chat_template: "{% if not add_generation_prompt is defined %}{% set add_generati
 system_prompt: "Please reason step by step, and put your final answer within \\boxed{}."
 dataset_name:
     - "/data/cuiluyi/openr/results/vanilla_mcts/wrong_data_amc_aime_distilled/20250812_161221/sft_optim_trajectory.jsonl"
-
 dataset_num_proc: 48
 dataset_config: all
-tag_template:
-  - "<｜begin▁of▁system1｜>"
-  - "<｜begin▁of▁system2｜>"
 
 # SFT trainer config
 bf16: true
 do_eval: false
 eval_strategy: "no"
-gradient_accumulation_steps: 1
+gradient_accumulation_steps: 2
 gradient_checkpointing: true
 gradient_checkpointing_kwargs:
   use_reentrant: false
@@ -50,7 +46,7 @@ num_train_epochs: 8
 output_dir: ckpts/DeepSeek-R1-Distill-Qwen-1.5B/sft2-optim_paths-wrong_data_amc_aime_batchsize32
 overwrite_output_dir: true
 per_device_eval_batch_size: 1
-per_device_train_batch_size: 8
+per_device_train_batch_size: 2
 push_to_hub: false
 report_to:
   - wandb

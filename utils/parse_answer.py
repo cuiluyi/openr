@@ -49,21 +49,22 @@ def extract_answer(completion: str):
     return answer_parsed
 
 
-@timing_decorator
-def verify_answer(answer: str, gold: str) -> bool:
+# @timing_decorator
+def verify_answer(answer: str, gold: str) -> bool:    
     try:
         gold_parsed = parse(gold, parsing_timeout=None)
         answer_parsed = parse(answer, parsing_timeout=None)
         flag = verify(gold_parsed, answer_parsed, timeout_seconds=None)
     except Exception as e:
         flag = False
+        print(f"Verification failed: {e}")
     return flag
 
 
 client = OpenAI(base_url=BASE_URL, api_key=API_KEY)
 
 
-@timing_decorator
+# @timing_decorator
 def llm_verify_answer(problem: str, answer: str, gold: str) -> bool:
     prompt = TEMPLATE.format(problem=problem, answer=gold, generation=answer)
 

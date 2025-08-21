@@ -18,7 +18,7 @@ system_prompt: "You are a helpful AI Assistant that solves problems using a step
 dataset_name: /data/cuiluyi/openr/data/format_data/OpenR1-Math-220k/OpenR1-Math-220k-processed.jsonl
 dataset_num_proc: 48
 dataset_config: all
-added_special_tokens:
+additional_special_tokens:
   - "<step>"
   - "</step>"
 response_template: <｜Assistant｜>

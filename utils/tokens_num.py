@@ -1,6 +1,6 @@
 from transformers import AutoTokenizer
 
-tokenizer_path = "/data/cuiluyi/openr/ckpts/DeepSeek-R1-Distill-Qwen-1.5B/slow_fast_reason-sft-s1k-1.1_full/checkpoint-400"
+tokenizer_path = "/data/cuiluyi/openr/ckpts/DeepSeek-R1-Distill-Qwen-1.5B/sft2-optim_paths-wrong_data_amc_aime_batchsize32/checkpoint-640"
 
 tokenizer = AutoTokenizer.from_pretrained(tokenizer_path, trust_remote_code=True)
 

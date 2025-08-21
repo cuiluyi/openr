@@ -19,7 +19,7 @@ chat_template: "{% if not add_generation_prompt is defined %}{% set add_generati
 dataset_name: /data/cuiluyi/openr/data/format_data/r1_distill_data.jsonl
 dataset_num_proc: 48
 dataset_config: all
-added_special_tokens:
+additional_special_tokens:
   - "<step>"
   - "</step>"
 desc_for_init_token_embed:

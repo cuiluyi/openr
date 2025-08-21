@@ -45,7 +45,7 @@ class GRPOConfig(trl.GRPOConfig):
         default=None,
         metadata={"help": ("The group to store runs under.")},
     )
-    added_special_tokens: Optional[list[str]] = field(
+    additional_special_tokens: Optional[list[str]] = field(
         default_factory=lambda: [],
         metadata={"help": ("The added special tokens to use for training.")},
     )
@@ -136,7 +136,7 @@ class SFTConfig(trl.SFTConfig):
         default=None,
         metadata={"help": ("The group to store runs under.")},
     )
-    added_special_tokens: Optional[list[str]] = field(
+    additional_special_tokens: Optional[list[str]] = field(
         default_factory=lambda: [],
         metadata={"help": ("The added special tokens to use for training.")},
     )
@@ -166,6 +166,12 @@ class SFTConfig(trl.SFTConfig):
         default=None,
         metadata={
             "help": "The instruction template to use for the data collator. If not set, the default will be used.",
+        },
+    )
+    tag_template: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": "The tag template to use for the data collator. If not set, the default will be used.",
         },
     )
 

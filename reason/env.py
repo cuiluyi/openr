@@ -4,10 +4,8 @@ from typing import Optional, Callable, Dict, Any
 from reason.infer.lm_call import LMCallingConfig
 from reason.infer.lm_call import ConcatedLMGenResult, merge_concated_results
 from utils import softmax, DataItem
-from utils.parse_answer import extract_answer, verify_answer
-from utils.distributed import print_with_rank
 from utils.prompt import build_query_str
-from utils.text_processe import (
+from utils.text_process import (
     has_valid_content,
     split_string,
     SYSTEM1_BEGIN_TAG,
@@ -99,35 +97,46 @@ class Env:
         return ret
 
     def update_legal_actions(self):
-        fast_try_num = self.config["max_width"] // 2
-        slow_try_num = self.config["max_width"] - fast_try_num
-        # fast generation
-        fast_result: ConcatedLMGenResult = self.lm_call(
-            input_str=self.get_state() + SYSTEM1_BEGIN_TAG,
+        # fast_try_num = self.config["max_width"] // 2
+        # slow_try_num = self.config["max_width"] - fast_try_num
+        # # fast generation
+        # fast_result: ConcatedLMGenResult = self.lm_call(
+        #     input_str=self.get_state() + SYSTEM1_BEGIN_TAG,
+        #     config=LMCallingConfig(
+        #         n=fast_try_num,
+        #         stop_str=[SYSTEM1_BEGIN_TAG, SYSTEM2_BEGIN_TAG],
+        #         # stop_str=self.stop_str,
+        #         include_stop_str_in_output=True,
+        #         **self.config["generation_config"]
+        #     ),
+        # )
+        # fast_result.text = [SYSTEM1_BEGIN_TAG + text for text in fast_result.text]
+
+        # # slow generation
+        # slow_result: ConcatedLMGenResult = self.lm_call(
+        #     input_str=self.get_state() + SYSTEM2_BEGIN_TAG,
+        #     config=LMCallingConfig(
+        #         n=slow_try_num,
+        #         stop_str=[SYSTEM1_BEGIN_TAG, SYSTEM2_BEGIN_TAG],
+        #         # stop_str=self.stop_str,
+        #         include_stop_str_in_output=True,
+        #         **self.config["generation_config"]
+        #     ),
+        # )
+        # slow_result.text = [SYSTEM2_BEGIN_TAG + text for text in slow_result.text]
+
+        # result = merge_concated_results([fast_result, slow_result])
+
+        # random generation
+        result = self.lm_call(
+            input_str=self.get_state(),
             config=LMCallingConfig(
-                n=fast_try_num,
-                stop_str=[SYSTEM1_BEGIN_TAG, SYSTEM2_BEGIN_TAG],
-                # stop_str=self.stop_str,
+                n=self.config["max_width"],
+                stop_str=[SYSTEM1_END_TAG, SYSTEM2_END_TAG],
                 include_stop_str_in_output=True,
                 **self.config["generation_config"]
             ),
         )
-        fast_result.text = [SYSTEM1_BEGIN_TAG + text for text in fast_result.text]
-
-        # slow generation
-        slow_result: ConcatedLMGenResult = self.lm_call(
-            input_str=self.get_state() + SYSTEM2_BEGIN_TAG,
-            config=LMCallingConfig(
-                n=slow_try_num,
-                stop_str=[SYSTEM1_BEGIN_TAG, SYSTEM2_BEGIN_TAG],
-                # stop_str=self.stop_str,
-                include_stop_str_in_output=True,
-                **self.config["generation_config"]
-            ),
-        )
-        slow_result.text = [SYSTEM2_BEGIN_TAG + text for text in slow_result.text]
-
-        result = merge_concated_results([fast_result, slow_result])
 
         # process the result
         text_list, logprob_list, num_token_list, finish_reason_list = [], [], [], []
@@ -140,7 +149,8 @@ class Env:
             if result.finish_reason[i] != "stop" or len(result.text[i]) == 0:
                 continue
 
-            processed_text = self.post_process_act(result.text[i])
+            # processed_text = self.post_process_act(result.text[i])
+            processed_text = result.text[i]
             if not has_valid_content(processed_text):
                 continue
 

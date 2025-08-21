@@ -1,6 +1,6 @@
 python -m debugpy --listen 63655 --wait-for-client \
     reason/main.py \
-    --LM checkpoint-400 \
+    --LM checkpoint-640 \
     --RM Qwen2.5-Math-PRM-7B \
     --dataset HuggingFaceH4/MATH-500 \
     --temperature 0.8 \

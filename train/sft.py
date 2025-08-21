@@ -88,8 +88,8 @@ def main(script_args, training_args, model_args):
         tokenizer.padding_side = training_args.padding_side
 
     # add special tokens if provided
-    if training_args.added_special_tokens:
-        tokenizer.add_special_tokens({"added_special_tokens": training_args.added_special_tokens})
+    if training_args.additional_special_tokens:
+        tokenizer.add_special_tokens({"additional_special_tokens": training_args.additional_special_tokens})
 
     ###################
     # Load model
@@ -114,7 +114,7 @@ def main(script_args, training_args, model_args):
         initialize_token_embeddings_from_descriptions(
             model,
             tokenizer,
-            added_tokens=training_args.added_special_tokens,
+            added_tokens=training_args.additional_special_tokens,
             descriptions=training_args.desc_for_init_token_embed,
         )
 

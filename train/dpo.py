@@ -78,12 +78,9 @@ def main(script_args, training_args, model_args):
     ################
     tokenizer = get_tokenizer(model_args, training_args)
 
-    if training_args.padding_side:
-        tokenizer.padding_side = training_args.padding_side
-
     # add special tokens if provided
-    if training_args.added_special_tokens:
-        tokenizer.add_special_tokens({"added_special_tokens": training_args.added_special_tokens})
+    if training_args.additional_special_tokens:
+        tokenizer.add_special_tokens({"additional_special_tokens": training_args.additional_special_tokens})
 
     ##############
     # Load model #
@@ -103,14 +100,6 @@ def main(script_args, training_args, model_args):
     # adjust the embedding size
     model.resize_token_embeddings(len(tokenizer))
     logger.info(f"Resized model embedding from {model.config.vocab_size} to {len(tokenizer)}")
-
-    if training_args.desc_for_init_token_embed:
-        initialize_token_embeddings_from_descriptions(
-            model,
-            tokenizer,
-            added_tokens=training_args.added_special_tokens,
-            descriptions=training_args.desc_for_init_token_embed,
-        )
 
     #############################
     # Initialize the DPO trainer

@@ -1,17 +1,10 @@
 from openai import OpenAI
+from constants import API_KEY, BASE_URL, MODEL_NAME
 
-client = OpenAI(
-  base_url="https://openrouter.ai/api/v1",
-  api_key="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",
-)
+client = OpenAI(base_url=BASE_URL, api_key=API_KEY)
 
 completion = client.chat.completions.create(
-  model="meta-llama/llama-3.3-70b-instruct:free",
-  messages=[
-    {
-      "role": "user",
-      "content": "What is the meaning of life?"
-    }
-  ]
+    model=MODEL_NAME,
+    messages=[{"role": "user", "content": "What is the meaning of life?"}],
 )
 print(completion.choices[0].message.content)

@@ -10,6 +10,8 @@ from typing import List, Dict, Any, Optional, Tuple, Union, Callable, Type
 from loguru import logger
 from reason.env import Env
 from reason.node import Node
+from reason.rewards import get_final_reward
+
 from utils import verify_answer, llm_verify_answer, parser_llm_verify
 from utils.distributed import print_rank_0, print_with_rank
 
@@ -50,6 +52,7 @@ class SearchTree:
             self.root = root
 
         traj_list = []
+        generated_texts = set()
 
         # TODO(ziyu): split with 1. select 2. expand 3. rollout 4. backprop
         #  for here is split the for loop with select and rollout
@@ -80,8 +83,15 @@ class SearchTree:
             question = env_copy.question
             answer = env_copy.answer
             gold = env_copy.gold
-            
-            leaf_value = 1.0 if parser_llm_verify(question, answer, gold) else -1.0
+
+            acc = float(parser_llm_verify(question, answer, gold))
+
+            leaf_value = get_final_reward(
+                reward_func_names=["accuracy", "format", "reasoning_steps", "length"],
+                problem=question,
+                answer=answer,
+                gold=gold,
+            )
 
             node.update_recursive(leaf_value)
 
@@ -89,11 +99,14 @@ class SearchTree:
                 "path_idx": i_path,
                 "text": env_copy.answer,
                 "values": node.get_values(),
-                "api_completion_tokens": api_call_completion_tokens,
-                "tree_completion_tokens": self._completion_tokens,
-                "acc": leaf_value,
+                "completion_tokens": api_call_completion_tokens,
+                "acc": acc,
+                "score": leaf_value,
             }
-            traj_list.append(traj_data)
+
+            if traj_data["text"] not in generated_texts:
+                generated_texts.add(traj_data["text"])
+                traj_list.append(traj_data)
 
             # reset api_call_completion_tokens
             api_call_completion_tokens = 0
@@ -180,12 +193,12 @@ class SearchTree:
                     "path_idx": i,
                     "text": endnode_env.answer,
                     "values": endnode_env.values,
-                    "api_completion_tokens": 0,
+                    "completion_tokens": 0,
                     "tree_completion_tokens": 0,
                 }
             )
         traj_list[-1]["tree_completion_tokens"] = self._completion_tokens
-        traj_list[-1]["api_completion_tokens"] = api_call_completion_tokens
+        traj_list[-1]["completion_tokens"] = api_call_completion_tokens
 
         # collect step data
         tree_step_data = self.dfs_non_leaf_nodes(self.root)
@@ -212,7 +225,7 @@ class SearchTree:
                         "prob": child.prob,
                         "num_tokens": child.num_generated_token,
                         "value": child.value,
-                        "visit_count": child.visit_count
+                        "visit_count": child.visit_count,
                     }
                 )
                 dfs(child)

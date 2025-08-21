@@ -1,38 +1,47 @@
-# export CUDA_VISIBLE_DEVICES="4, 5, 6, 7"
+# export CUDA_VISIBLE_DEVICES="0, 1, 2, 3, 4, 5, 6, 7"
 # accelerate launch \
 #   --config_file recipes/accelerate_configs/zero3.yaml \
-#   --num_processes 4 \
+#   --num_processes 8 \
 #   train/sft.py \
-#   --config recipes/DeepSeek-R1-Distill-Qwen-1.5B/sft/config_v00.00.yaml
+#   --config recipes/Qwen2.5-1.5B-Instruct/sft/config_optim_paths.yaml \
+#   > ckpts/Qwen2.5-1.5B-Instruct/sft-optim_paths-wrong_data_amc_aime/output.log 2>&1
 
-# Config for 1 node of 8 H100s with DeepSpeed ZeRO-3
 # Model arguments
-model_name_or_path: /data/cuiluyi/resources/models/deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B/
+model_name_or_path: /data/cuiluyi/resources/models/Qwen/Qwen2.5-1.5B-Instruct
 model_revision: main
 torch_dtype: bfloat16
 attn_implementation: flash_attention_2
 
 # Data training arguments
 chat_template: "{% if not add_generation_prompt is defined %}{% set add_generation_prompt = false %}{% endif %}{% set ns = namespace(is_first=false, is_tool=false, is_output_first=true, system_prompt='') %}{%- for message in messages %}{%- if message['role'] == 'system' %}{% set ns.system_prompt = message['content'] %}{%- endif %}{%- endfor %}{{bos_token}}{{ns.system_prompt}}{%- for message in messages %}{%- if message['role'] == 'user' %}{%- set ns.is_tool = false -%}{{'<｜User｜>' + message['content']}}{%- endif %}{%- if message['role'] == 'assistant' and message['content'] is none %}{%- set ns.is_tool = false -%}{%- for tool in message['tool_calls']%}{%- if not ns.is_first %}{{'<｜Assistant｜><｜tool▁calls▁begin｜><｜tool▁call▁begin｜>' + tool['type'] + '<｜tool▁sep｜>' + tool['function']['name'] + '\\n' + '```json' + '\\n' + tool['function']['arguments'] + '\\n' + '```' + '<｜tool▁call▁end｜>'}}{%- set ns.is_first = true -%}{%- else %}{{'\\n' + '<｜tool▁call▁begin｜>' + tool['type'] + '<｜tool▁sep｜>' + tool['function']['name'] + '\\n' + '```json' + '\\n' + tool['function']['arguments'] + '\\n' + '```' + '<｜tool▁call▁end｜>'}}{{'<｜tool▁calls▁end｜><｜end▁of▁sentence｜>'}}{%- endif %}{%- endfor %}{%- endif %}{%- if message['role'] == 'assistant' and message['content'] is not none %}{%- if ns.is_tool %}{{'<｜tool▁outputs▁end｜>' + message['content'] + '<｜end▁of▁sentence｜>'}}{%- set ns.is_tool = false -%}{%- else %}{% set content = message['content'] %}{{'<｜Assistant｜>' + content + '<｜end▁of▁sentence｜>'}}{%- endif %}{%- endif %}{%- if message['role'] == 'tool' %}{%- set ns.is_tool = true -%}{%- if ns.is_output_first %}{{'<｜tool▁outputs▁begin｜><｜tool▁output▁begin｜>' + message['content'] + '<｜tool▁output▁end｜>'}}{%- set ns.is_output_first = false %}{%- else %}{{'\\n<｜tool▁output▁begin｜>' + message['content'] + '<｜tool▁output▁end｜>'}}{%- endif %}{%- endif %}{%- endfor -%}{% if ns.is_tool %}{{'<｜tool▁outputs▁end｜>'}}{% endif %}{% if add_generation_prompt and not ns.is_tool %}{{'<｜Assistant｜>'}}{% endif %}"
-system_prompt: "You are a helpful AI Assistant that solves problems using a step-by-step reasoning process. For each problem, you alternate between two stages:\n\n1. <think>: You explain your internal thoughts and planning, like you're thinking to yourself.\n2. <step>: You write down the actual result of the reasoning step, as if solving the problem step by step.\n\nRepeat this <think>/<step> pair until the final answer is reached.\n\nRespond in the following format:\n<think>\n...\n</think>\n<step>\n...\n</step>\n\n<think>\n...\n</think>\n<step>\n...\n</step>\n...\n\nHere is an example of response:\n\n---\n\n<think>\nThe regular hexagon is made up of six equilateral triangles. Each triangle has 3 equal sides.\n</think>\n<step>\nSo one triangle has 3 equal sides that sum to 21 inches, meaning each side is 21 ÷ 3 = 7 inches.\n</step>\n\n<think>\nAll sides of the hexagon are equal to the side of the equilateral triangle.\n</think>\n<step>\nSo the hexagon has 6 sides, each 7 inches long. The perimeter is 6 × 7 = 42 inches.\n</step>\n\n<think>\nFinal answer.\n</think>\n<step>\nThe perimeter of the regular hexagon is \\boxed{42} inches.\n</step>"
-dataset_name: /data/cuiluyi/openr/data/format_data/Mixture-of-Thoughts/Mixture-of-Thoughts-exclude_code.jsonl
+system_prompt: "Please reason step by step, and put your final answer within \\boxed{}."
+dataset_name:
+    - "/data/cuiluyi/openr/results/vanilla_mcts/wrong_data_amc_aime_distilled/20250812_161221/sft_optim_trajectory.jsonl"
+
 dataset_num_proc: 48
 dataset_config: all
 additional_special_tokens:
-  - "<step>"
-  - "</step>"
-response_template: <｜Assistant｜>
-instruction_template: <｜User｜>
+  - "<｜begin▁of▁system1｜>"
+  - "<｜end▁of▁system1｜>"
+  - "<｜begin▁of▁system2｜>"
+  - "<｜end▁of▁system2｜>"
+desc_for_init_token_embed:
+  - "The begin of one reasoning step"
+  - "The end of one reasoning step"
+  - "The begin of one reasoning thought and step"
+  - "The end of one reasoning thought and step"
+response_template: "<｜Assistant｜>"
+
 
 # SFT trainer config
 bf16: true
 do_eval: false
 eval_strategy: "no"
-gradient_accumulation_steps: 8
+gradient_accumulation_steps: 2
 gradient_checkpointing: true
 gradient_checkpointing_kwargs:
   use_reentrant: false
-hub_model_id: open-r1/DeepSeek-R1-Distill-Qwen-1.5B-format-sft-Mixture-of-Thoughts
+hub_model_id: open-r1/Qwen2.5-1.5B-Instruct-sft-optim_paths-wrong_data_amc_aime
 hub_strategy: every_save
 learning_rate: 1.0e-05
 log_level: info
@@ -40,21 +49,23 @@ logging_steps: 1
 logging_strategy: steps
 lr_scheduler_type: cosine_with_min_lr
 lr_scheduler_kwargs:
-  min_lr_rate: 0.1
+  min_lr_rate: 0
 packing: false
 max_grad_norm: 0.2
 max_length: 32768
 max_steps: -1
-num_train_epochs: 5
-output_dir: ckpts/DeepSeek-R1-Distill-Qwen-1.5B/format-sft-Mixture-of-Thoughts
+
+num_train_epochs: 4
+output_dir: ckpts/Qwen2.5-1.5B-Instruct/sft-optim_paths-wrong_data_amc_aime
 overwrite_output_dir: true
 per_device_eval_batch_size: 1
-per_device_train_batch_size: 6
+per_device_train_batch_size: 2
 push_to_hub: false
 report_to:
   - wandb
-save_strategy: "steps"
-save_steps: 500
+
+save_strategy: "epoch"
+
 seed: 42
 use_liger_kernel: true
-warmup_ratio: 0.03
+warmup_ratio: 0.05

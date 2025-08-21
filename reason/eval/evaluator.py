@@ -42,16 +42,12 @@ def judge_ans(
 
 
 @dataclass
-class SolutionOutput:
+class TreeSearchSolutionOutput:
     solutions: List[str]
     completion_tokens: List[int]
     values: List[List[float]]
     accs: List[float]
-
-
-@dataclass
-class TreeSearchSolutionOutput(SolutionOutput):
-    tree_completion_tokens: List[int]
+    scores: List[float]
 
 
 @ray.remote
@@ -69,27 +65,28 @@ class MathEvaluator:
         input_inst: DataItem,
         solver_fn: Callable,
     ) -> List[str]:
-        try:
-            solution, tree_step_data = solver_fn(input_inst, self.lm_call, self.rm_call)
-            solution: SolutionOutput
-            result, output = self.analyze_output(input_inst, solution)
+        # try:
+        solution, tree_step_data = solver_fn(input_inst, self.lm_call, self.rm_call)
+        solution: TreeSearchSolutionOutput
+        result, output = self.analyze_output(input_inst, solution)
 
-            for i, o in enumerate(output):
-                o["completion_tokens"] = solution.completion_tokens[i]
-                o["tree_completion_tokens"] = solution.tree_completion_tokens[i]
-            return input_inst, result, output, tree_step_data
-        except Exception as e:
-            print(f"Error evaluating problem {input_inst.question}: {e}")
-            return input_inst, None, None, None
+        for i, o in enumerate(output):
+            o["completion_tokens"] = solution.completion_tokens[i]
+        return input_inst, result, output, tree_step_data
+        # except Exception as e:
+        #     print(f"Error evaluating problem {input_inst.question}: {e}")
+        #     return input_inst, None, None, None
 
     def analyze_output(
         self,
         input_inst: DataItem,
-        solution: SolutionOutput,
+        solution: TreeSearchSolutionOutput,
     ) -> Tuple[Dict[str, int], List[Dict[str, Any]]]:
         parsed_gold = parse(input_inst.gold)
         output_list, parsed_ans_list = [], []
-        for i, (output, values, acc) in enumerate(zip(solution.solutions, solution.values, solution.accs)):
+        for i, (output, values, acc, score) in enumerate(
+            zip(solution.solutions, solution.values, solution.accs, solution.scores)
+        ):
             parsed_answer = parse(output)
             parsed_ans_list.append(parsed_answer)
             output_list.append(
@@ -98,6 +95,7 @@ class MathEvaluator:
                     "text": output,
                     "value": values,
                     "acc": acc,
+                    "score": score,
                 }
             )
 
