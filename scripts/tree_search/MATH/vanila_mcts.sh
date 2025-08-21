@@ -12,7 +12,7 @@ python reason/main.py \
     --max_steps 20 \
     --save_dir results \
     --method vanilla_mcts \
-    --num_worker 100 \
+    --num_worker 128 \
     --controller_addr http://0.0.0.0:28777 \
-    --resume_dir /data/cuiluyi/openr/results/vanilla_mcts/wrong_data_MATH-openai-split/20250821_091240
+    --resume_dir /data/cuiluyi/openr/results/vanilla_mcts/wrong_data_MATH-openai-split/20250821_110140
 # --LM "Qwen2.5-Math-1.5B-Instruct&s1-20250312_213742&s1-20250314_003214" \

@@ -49,7 +49,7 @@ def extract_answer(completion: str):
     return answer_parsed
 
 
-# @timing_decorator
+@timing_decorator
 def verify_answer(answer: str, gold: str) -> bool:    
     try:
         gold_parsed = parse(gold, parsing_timeout=None)
@@ -64,7 +64,7 @@ def verify_answer(answer: str, gold: str) -> bool:
 client = OpenAI(base_url=BASE_URL, api_key=API_KEY)
 
 
-# @timing_decorator
+@timing_decorator
 def llm_verify_answer(problem: str, answer: str, gold: str) -> bool:
     prompt = TEMPLATE.format(problem=problem, answer=gold, generation=answer)
 

@@ -1,7 +1,8 @@
-import ray
-
+import gc
 from typing import Any, Callable, Dict, Optional, List, Tuple, TypeVar
 from dataclasses import dataclass
+
+import ray
 from math_verify import parse, verify
 
 from reason.infer.lm_call import LanguageModelCallingFunction
@@ -65,17 +66,22 @@ class MathEvaluator:
         input_inst: DataItem,
         solver_fn: Callable,
     ) -> List[str]:
-        # try:
-        solution, tree_step_data = solver_fn(input_inst, self.lm_call, self.rm_call)
-        solution: TreeSearchSolutionOutput
-        result, output = self.analyze_output(input_inst, solution)
-
-        for i, o in enumerate(output):
-            o["completion_tokens"] = solution.completion_tokens[i]
-        return input_inst, result, output, tree_step_data
-        # except Exception as e:
-        #     print(f"Error evaluating problem {input_inst.question}: {e}")
-        #     return input_inst, None, None, None
+        try:
+            solution, tree_step_data = solver_fn(input_inst, self.lm_call, self.rm_call)
+            solution: TreeSearchSolutionOutput
+            result, output = self.analyze_output(input_inst, solution)
+            for i, o in enumerate(output):
+                o["completion_tokens"] = solution.completion_tokens[i]
+            return input_inst, result, output, tree_step_data
+        except Exception as e:
+            print(f"Error evaluating problem {input_inst.question}: {e}")
+            return input_inst, None, None, None
+        finally:
+            if "solution" in locals():
+                del solution
+            if "tree_step_data" in locals():
+                del tree_step_data
+            gc.collect()
 
     def analyze_output(
         self,
