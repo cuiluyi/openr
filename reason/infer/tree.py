@@ -52,7 +52,7 @@ class SearchTree:
             self.root = root
 
         traj_list = []
-        generated_texts = set()
+        # generated_texts = set()
 
         # TODO(ziyu): split with 1. select 2. expand 3. rollout 4. backprop
         #  for here is split the for loop with select and rollout
@@ -104,9 +104,11 @@ class SearchTree:
                 "score": leaf_value,
             }
 
-            if traj_data["text"] not in generated_texts:
-                generated_texts.add(traj_data["text"])
-                traj_list.append(traj_data)
+            # if traj_data["text"] not in generated_texts:
+            #     generated_texts.add(traj_data["text"])
+            #     traj_list.append(traj_data)
+
+            traj_list.append(traj_data)
 
             # reset api_call_completion_tokens
             api_call_completion_tokens = 0

@@ -42,7 +42,7 @@ def read_jsonl(file_path):
 def write_jsonl(data, output_file, mode="w"):
     with open(output_file, mode) as outfile:
         for item in data:
-            outfile.write(json.dumps(item) + "\n")
+            outfile.write(json.dumps(item, ensure_ascii=False) + "\n")
 
 
 def jsonl_to_json(jsonl_file, json_file):
